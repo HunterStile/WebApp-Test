@@ -1,0 +1,17 @@
+.dashboard {
+    padding: 20px;
+  }
+  
+  .stats {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .stat-item {
+    background: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    width: 30%;
+    text-align: center;
+  }
+  

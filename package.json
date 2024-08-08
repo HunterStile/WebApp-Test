@@ -1,0 +1,26 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "description": "A web application with a React frontend and Express backend.",
+  "main": "index.js",
+  "scripts": {
+    "start:server": "node server/app.js",
+    "start:client": "cd client && npm start",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "build:client": "cd client && npm run build && cp -r client/build/* ../public/",
+    "build": "npm run build:client",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

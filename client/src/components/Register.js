@@ -1,16 +1,19 @@
 // client/src/components/Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // Aggiungi useNavigate
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/api/auth/register', { username, password });
       alert(response.data);
+      navigate('/login'); // Reindirizza alla pagina di login
     } catch (error) {
       alert('Registration failed');
     }

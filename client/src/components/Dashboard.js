@@ -1,26 +1,37 @@
-import React from 'react';
-import './Dashboard.css';
+// client/src/components/Dashboard.js
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
-const Dashboard = () => {
+function Dashboard() {
+  const { user } = useContext(AuthContext);
+  const [tcBalance, setTcBalance] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      axios.get(`http://localhost:3000/api/tc/balance?username=${user}`)
+        .then(response => setTcBalance(response.data.tcBalance))
+        .catch(error => console.error('Error fetching TC balance:', error));
+    }
+  }, [user]);
+
+  const earnTc = async (amount) => {
+    try {
+      await axios.post('http://localhost:3000/api/tc/earn', { username: user, amount, action: 'completeTask' });
+      setTcBalance(tcBalance + amount);
+    } catch (error) {
+      console.error('Error earning TC:', error);
+    }
+  };
+
   return (
-    <div className="dashboard">
-      <h1>Dashboard</h1>
-      <div className="stats">
-        <div className="stat-item">
-          <h2>Statistic 1</h2>
-          <p>Details about statistic 1</p>
-        </div>
-        <div className="stat-item">
-          <h2>Statistic 2</h2>
-          <p>Details about statistic 2</p>
-        </div>
-        <div className="stat-item">
-          <h2>Statistic 3</h2>
-          <p>Details about statistic 3</p>
-        </div>
-      </div>
+    <div>
+      <h2>Dashboard</h2>
+      <p>Your TC Balance: {tcBalance}</p>
+      <button onClick={() => earnTc(50)}>Earn 50 TC</button>
     </div>
   );
-};
+}
 
 export default Dashboard;
+

@@ -9,12 +9,15 @@ router.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
   try {
+    // Hash della password
     const hashedPassword = await bcrypt.hash(password, 10);
+    // Creazione di un nuovo utente con 10 TC iniziali
     const user = new User({
       username,
-      password: hashedPassword
+      password: hashedPassword,
+      tcBalance: 10 // Assegna 10 TC all'utente durante la registrazione
     });
-
+    // Salva l'utente nel database
     await user.save();
     res.status(201).send('User registered successfully');
   } catch (error) {

@@ -6,6 +6,7 @@ import Home from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
 import About from './components/About';
+import Marketplace from './components/Marketplace';
 import { AuthProvider } from './context/AuthContext'; // Importa il provider
 
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/about" element={<About />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/" element={<Home />} />
           </Routes>
         </div>

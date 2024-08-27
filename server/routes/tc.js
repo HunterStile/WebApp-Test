@@ -31,9 +31,10 @@ router.post('/earn', async (req, res) => {
       // Aggiungi logica per il guadagno in base all'azione
       if (action === 'completeTask') {
         user.tcBalance += amount;
-      } else if (action === 'altretask') {
+      } else if (action === 'purchaseMysteryBox') {
         user.tcBalance += amount;
       } // Aggiungi altre azioni se necessario
+      
   
       await user.save();
       res.send('TC earned successfully');

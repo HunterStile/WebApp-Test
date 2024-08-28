@@ -5,12 +5,14 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [tcBalance, setTcBalance] = useState(0);
 
   // Funzione per il login dell'utente
   const login = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', { username, password });
-      setUser(username); // Setta il nome utente dopo il login
+      await axios.post('http://localhost:3000/api/auth/login', { username, password });
+      setUser(username);
+      fetchTcBalance(username);
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -19,15 +21,38 @@ export const AuthProvider = ({ children }) => {
   // Funzione per il logout dell'utente
   const logout = () => {
     setUser(null);
+    setTcBalance(0);
   };
 
-  // Funzione per verificare se l'utente è autenticato
+  // Funzione per spendere TC
+  const spendTc = (amount) => {
+    if (tcBalance >= amount) {
+      setTcBalance(prevBalance => prevBalance - amount);
+    } else {
+      console.error('Insufficient TC balance');
+    }
+  };
+
+  // Funzione per aggiornare il bilancio TC dal server
+  const fetchTcBalance = async (username = user) => {
+    if (username) {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/tc/balance?username=${username}`);
+        setTcBalance(response.data.tcBalance);
+      } catch (error) {
+        console.error('Error fetching TC balance:', error);
+      }
+    }
+  };
+
   useEffect(() => {
-    // Potresti aggiungere un controllo qui se vuoi verificare la sessione dell'utente
-  }, []);
+    if (user) {
+      fetchTcBalance();
+    }
+  }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, tcBalance, setTcBalance, login, logout, spendTc, fetchTcBalance }}>
       {children}
     </AuthContext.Provider>
   );

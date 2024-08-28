@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 function Navbar() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, tcBalance, logout } = useContext(AuthContext);
 
   return (
     <nav>
@@ -15,6 +15,7 @@ function Navbar() {
         {user ? (
           <>
             <li>Welcome, {user}</li>
+            <li>Your TC Balance: {tcBalance}</li>
             <li><button onClick={logout}>Logout</button></li>
           </>
         ) : (

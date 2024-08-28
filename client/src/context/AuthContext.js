@@ -25,9 +25,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Funzione per spendere TC
-  const spendTc = (amount) => {
+  const spendTc = async (amount) => {
     if (tcBalance >= amount) {
-      setTcBalance(prevBalance => prevBalance - amount);
+      try {
+        await axios.post('http://localhost:3000/api/tc/spend', { username: user, amount });
+        setTcBalance(prevBalance => prevBalance - amount);
+      } catch (error) {
+        console.error('Error spending TC:', error);
+      }
     } else {
       console.error('Insufficient TC balance');
     }

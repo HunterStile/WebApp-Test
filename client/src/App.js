@@ -9,6 +9,7 @@ import Login from './components/Login';
 import About from './components/About';
 import Marketplace from './components/Marketplace';
 import Inventory from './components/Inventory';
+import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext'; // Importa il provider
 
 import './App.css';
@@ -20,13 +21,18 @@ function App() {
         <div className="App">
           <Navbar />
           <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/inventory" element={<Inventory />} />
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Rotte protette */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/inventory" element={<Inventory />} />
+            </Route>
+            
           </Routes>
         </div>
       </Router>

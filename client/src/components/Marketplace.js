@@ -1,66 +1,38 @@
-// client/src/components/Marketplace.js
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import mysteryBoxImage from '../assets/images/mystery-box.png'; // Importa l'immagine
 
 function Marketplace() {
-  const { user } = useContext(AuthContext);
-  const [tcBalance, setTcBalance] = useState(0);
-  const [boxType, setBoxType] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const boxCost = 10; // Costo per aprire una mistery box
+  const { user, tcBalance, spendTc } = useContext(AuthContext);
+  const [result, setResult] = useState('');
 
-  // Funzione per aprire una mistery box
-  const openMysteryBox = async () => {
-    if (tcBalance < boxCost) {
-      alert('Insufficient TC');
-      return;
+  const openMysteryBox = () => {
+    const randomValue = Math.random() * 100;
+    let eggType = '';
+
+    if (randomValue < 60) {
+      eggType = 'Common Egg';
+    } else if (randomValue < 86) {
+      eggType = 'Uncommon Egg';
+    } else if (randomValue < 95) {
+      eggType = 'Rare Egg';
+    } else if (randomValue < 99) {
+      eggType = 'Epic Egg';
+    } else {
+      eggType = 'Legendary Egg';
     }
 
-    setLoading(true);
-
-    try {
-      // Deduct TC and get the result
-      await axios.post('http://localhost:3000/api/tc/earn', { username: user, amount: -boxCost, action: 'purchaseMysteryBox' });
-      setTcBalance(tcBalance - boxCost);
-
-      // Determine the type of box received
-      const result = getRandomBoxType();
-      setBoxType(result);
-    } catch (error) {
-      console.error('Error opening mystery box:', error);
-    }
-
-    setLoading(false);
+    setResult(eggType);
+    spendTc(50); // Deduct 50 TC
   };
-
-  // Funzione per ottenere un tipo di box casuale
-  const getRandomBoxType = () => {
-    const random = Math.random() * 100;
-    if (random < 1) return 'legendary';
-    if (random < 5) return 'epic';
-    if (random < 14) return 'rare';
-    if (random < 40) return 'uncommon';
-    return 'common';
-  };
-
-  // Fetch user TC balance on component mount
-  useState(() => {
-    if (user) {
-      axios.get(`http://localhost:3000/api/tc/balance?username=${user}`)
-        .then(response => setTcBalance(response.data.tcBalance))
-        .catch(error => console.error('Error fetching TC balance:', error));
-    }
-  }, [user]);
 
   return (
     <div>
       <h2>Marketplace</h2>
       <p>Your TC Balance: {tcBalance}</p>
-      <button onClick={openMysteryBox} disabled={loading}>
-        {loading ? 'Opening...' : `Open Mystery Box (${boxCost} TC)`}
-      </button>
-      {boxType && <p>You received a {boxType} box!</p>}
+      <img src={mysteryBoxImage} alt="Mystery Box" style={{ width: '200px', height: '200px' }} />
+      <button onClick={openMysteryBox}>Open Mystery Box (50 TC)</button>
+      <p>{result && `You got a ${result}!`}</p>
     </div>
   );
 }

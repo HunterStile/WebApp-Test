@@ -2,20 +2,10 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  tcBalance: {
-    type: Number,
-    default: 0 // Saldo iniziale di TC per ogni nuovo utente
-  }
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  tcBalance: { type: Number, default: 0 },
+  eggs: { type: Map, of: Number, default: {} }  // Aggiungi questa riga per memorizzare le uova
 });
 
-const User = mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

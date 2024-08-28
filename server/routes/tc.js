@@ -65,4 +65,43 @@ router.post('/spend', async (req, res) => {
   }
 });
 
+// Salva l'apertura di una mystery box e memorizza l'uovo
+router.post('/open-box', async (req, res) => {
+  const { username, eggType } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    // Aggiungi o aggiorna il conteggio dell'uovo nel database
+    if (user.eggs.has(eggType)) {
+      user.eggs.set(eggType, user.eggs.get(eggType) + 1);
+    } else {
+      user.eggs.set(eggType, 1);
+    }
+
+    await user.save();
+    res.send('Mystery box opened and egg saved successfully');
+  } catch (error) {
+    res.status(500).send('Error opening mystery box');
+  }
+});
+
+// Ottieni l'inventario delle uova dell'utente
+router.get('/eggs', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.json({ eggs: user.eggs });
+  } catch (error) {
+    res.status(500).send('Error fetching eggs');
+  }
+});
+
 module.exports = router;

@@ -6,14 +6,15 @@ import uncommonEggImage from '../assets/images/uncommon-egg.png';
 import rareEggImage from '../assets/images/rare-egg.png';
 import epicEggImage from '../assets/images/epic-egg.png';
 import legendaryEggImage from '../assets/images/legendary-egg.png';
+import axios from 'axios';
 
 function Marketplace() {
-  const { tcBalance, spendTc } = useContext(AuthContext);  
+  const { user, tcBalance, spendTc } = useContext(AuthContext);
   const [result, setResult] = useState('');
   const [eggImage, setEggImage] = useState(null);
   const [boxOpened, setBoxOpened] = useState(false);
 
-  const openMysteryBox = () => {
+  const openMysteryBox = async () => {
     if (tcBalance < 50) {
       alert('Insufficient TC balance');
       return;
@@ -43,6 +44,14 @@ function Marketplace() {
     setResult(eggType);
     setEggImage(image);
     spendTc(50); // Deduct 50 TC using the context function
+
+    // Salva l'uovo ottenuto sul server
+    try {
+      await axios.post('http://localhost:3000/api/tc/open-box', { username: user, eggType });
+    } catch (error) {
+      console.error('Error saving egg:', error);
+    }
+
     setBoxOpened(true);
   };
 

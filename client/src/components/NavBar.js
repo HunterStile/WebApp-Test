@@ -1,3 +1,4 @@
+// client/src/components/Navbar.js
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -9,11 +10,12 @@ function Navbar() {
     <nav>
       <ul>
         <li><Link to="/">Home</Link></li>
-        <li><Link to="/dashboard">Dashboard</Link></li>
         <li><Link to="/about">About</Link></li>
-        <li><Link to="/marketplace">Marketplace</Link></li>
         {user ? (
           <>
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/marketplace">Marketplace</Link></li>
+            <li><Link to="/inventory">Inventory</Link></li>
             <li>Welcome, {user}</li>
             <li>Your TC Balance: {tcBalance}</li>
             <li><button onClick={logout}>Logout</button></li>

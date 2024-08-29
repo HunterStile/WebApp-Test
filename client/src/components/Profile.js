@@ -1,5 +1,5 @@
 // client/src/components/Profile.js
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -8,11 +8,13 @@ function Profile() {
   const [btcAddress, setBtcAddress] = useState('');
   const [btcBalance, setBtcBalance] = useState(0);
 
-  const generateAddress = () => {
-    axios.post('http://localhost:3000/api/crypto/create-address', { username: user })
-      .then(response => setBtcAddress(response.data.btcAddress))
-      .catch(error => console.error('Error creating BTC address:', error));
-  };
+  useEffect(() => {
+    if (user) {
+      axios.post('http://localhost:3000/api/crypto/create-address', { username: user })
+        .then(response => setBtcAddress(response.data.btcAddress))
+        .catch(error => console.error('Error fetching or creating BTC address:', error));
+    }
+  }, [user]);
 
   return (
     <div>
@@ -22,7 +24,7 @@ function Profile() {
           <p>Your BTC Address: {btcAddress}</p>
         </>
       ) : (
-        <button onClick={generateAddress}>Generate BTC Address</button>
+        <p>Generating your BTC address...</p>
       )}
       <p>Your BTC Balance: {btcBalance} BTC</p>
     </div>

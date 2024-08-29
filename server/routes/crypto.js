@@ -6,11 +6,12 @@ const crypto = require('crypto');
 const axios = require('axios');
 const bitcoin = require('bitcoinjs-lib'); // Aggiungi la libreria bitcoinjs-lib
 
-// Configura gli endpoint per BlockCypher
-const BASE_URL = 'https://api.blockcypher.com/v1/btc/main';
-const CREATE_ADDRESS_URL = `${BASE_URL}/addrs`;
-const SEND_TX_URL = `${BASE_URL}/txs/send`;
-const WEBHOOK_URL = `${BASE_URL}/hooks?token=cdd434bbb074468ab1fa2bc2956ac0e4`; // Modifica il token se necessario
+// Configura gli endpoint per BlockCypher Testnet
+const BASE_URL = 'https://api.blockcypher.com/v1/bcy/test';
+const CREATE_ADDRESS_URL = `${BASE_URL}/addrs?token=cdd434bbb074468ab1fa2bc2956ac0e4`;
+const SEND_TX_URL = `${BASE_URL}/txs/send?token=cdd434bbb074468ab1fa2bc2956ac0e4`;
+const WEBHOOK_URL = `${BASE_URL}/hooks?token=cdd434bbb074468ab1fa2bc2956ac0e4`;
+const FAUCET_URL = `${BASE_URL}/faucet?token=cdd434bbb074468ab1fa2bc2956ac0e4`;
 
 // Funzione per crittografare la chiave privata
 function encryptPrivateKey(privateKey, secret) {
@@ -116,6 +117,25 @@ router.post('/webhook', async (req, res) => {
     }
   } else {
     res.sendStatus(200);
+  }
+});
+
+router.post('/request-faucet', async (req, res) => {
+  const { address, amount } = req.body;
+
+  try {
+    const response = await axios.post(FAUCET_URL, {
+      address: address,
+      amount: amount,
+    });
+
+    res.json({
+      message: 'Fondi richiesti dal faucet con successo',
+      tx: response.data.tx_ref,
+    });
+  } catch (error) {
+    console.error('Error requesting funds from faucet:', error.message);
+    res.status(500).send('Error requesting funds from faucet');
   }
 });
 

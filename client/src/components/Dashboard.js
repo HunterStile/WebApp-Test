@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
@@ -14,10 +14,33 @@ function Dashboard() {
     }
   };
 
+  const requestSatoshis = async (address) => {
+    try {
+      if (!address) {
+        console.error('BTC address is required.');
+        return;
+      }
+
+      // Richiede 100000 satoshi dal faucet
+      const faucetResponse = await axios.post('http://localhost:3000/api/crypto/request-faucet', {
+        address: address,
+        amount: 100000, // 100,000 satoshi
+      });
+
+      console.log('Faucet request successful:', faucetResponse.data.message);
+    } catch (error) {
+      console.error('Error requesting satoshis:', error);
+    }
+  };
+
+  // Questo valore deve essere preso da un input dell'utente o dallo stato dell'applicazione
+  const btcAddress = 'CEyGsaXsjji1ZFvkvXVwDhxkM2hNavmJZt'; // Sostituisci con il valore reale
+
   return (
     <div>
       <h2>Dashboard</h2>
       <button onClick={() => earnTc(50)}>Earn 50 TC</button>
+      <button onClick={() => requestSatoshis(btcAddress)}>Request 100,000 Satoshis</button>
     </div>
   );
 }

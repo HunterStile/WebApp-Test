@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth'); // Importa le route di autenticazione
 const tcRoutes = require('./routes/tc'); // Importa le rotte per TC
+const cryptoRoutes = require('./routes/crypto'); // Importa le rotte per le criptovalute
 
 const app = express();
 const port = process.env.PORT || 3000; // Utilizza una variabile d'ambiente per la porta
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // Usa le route di autenticazione
 app.use('/api/auth', authRoutes);
 app.use('/api/tc', tcRoutes);
+app.use('/api/crypto', cryptoRoutes); // Aggiungi le rotte per le criptovalute
 
 // Serve index.html sulla root route e per tutte le altre rotte
 app.get('*', (req, res) => {

@@ -2,13 +2,17 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import './NavBar.css'; // Assicurati di importare il CSS
 
 function Navbar() {
   const { user, tcBalance, logout } = useContext(AuthContext);
 
   return (
-    <nav>
-      <ul>
+    <nav className="navbar">
+      <div className="navbar-logo">
+        <Link to="/">MyApp</Link>
+      </div>
+      <ul className="navbar-links">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/about">About</Link></li>
         {user ? (
@@ -18,7 +22,7 @@ function Navbar() {
             <li><Link to="/inventory">Inventory</Link></li>
             <li>Welcome, {user}</li>
             <li>Your TC Balance: {tcBalance}</li>
-            <li><button onClick={logout}>Logout</button></li>
+            <li><button className="logout-button" onClick={logout}>Logout</button></li>
           </>
         ) : (
           <>

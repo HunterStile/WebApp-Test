@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   tcBalance: { type: Number, default: 0 },
   eggs: { type: Map, of: Number, default: {} },  // Aggiungi questa riga per memorizzare le uova
   btcAddress: { type: String },
+  encryptedPrivateKey: { type: String },
   btcBalance: { type: Number, default: 0 }, // Saldo in BTC
 });
 

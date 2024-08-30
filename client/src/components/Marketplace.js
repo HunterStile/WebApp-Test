@@ -7,6 +7,7 @@ import rareEggImage from '../assets/images/rare-egg.png';
 import epicEggImage from '../assets/images/epic-egg.png';
 import legendaryEggImage from '../assets/images/legendary-egg.png';
 import axios from 'axios';
+import API_BASE_URL from '../config'; // Importa l'URL di base
 
 function Marketplace() {
   const { user, tcBalance, spendTc } = useContext(AuthContext);
@@ -47,7 +48,7 @@ function Marketplace() {
 
     // Salva l'uovo ottenuto sul server
     try {
-      await axios.post('http://localhost:3000/api/tc/open-box', { username: user, eggType });
+      await axios.post(`${API_BASE_URL}/tc/open-box`, { username: user, eggType });
     } catch (error) {
       console.error('Error saving egg:', error);
     }

@@ -2,6 +2,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import API_BASE_URL from '../config';  // Importa la base URL
 
 function Profile() {
   const { user } = useContext(AuthContext);
@@ -10,7 +11,7 @@ function Profile() {
 
   useEffect(() => {
     if (user) {
-      axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/crypto/create-address', { username: user })
+      axios.post(`${API_BASE_URL}/crypto/create-address`, { username: user })  // Usa la base URL
         .then(response => setBtcAddress(response.data.btcAddress))
         .catch(error => console.error('Error fetching or creating BTC address:', error));
     }

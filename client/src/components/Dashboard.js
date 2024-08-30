@@ -1,13 +1,15 @@
+// client/src/components/Dashboard.js
 import React, { useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import API_BASE_URL from '../config';  // Importa la base URL
 
 function Dashboard() {
   const { user, setTcBalance } = useContext(AuthContext);
 
   const earnTc = async (amount) => {
     try {
-      await axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/tc/earn', { username: user, amount, action: 'completeTask' });
+      await axios.post(`${API_BASE_URL}/tc/earn`, { username: user, amount, action: 'completeTask' });  // Usa la base URL
       setTcBalance(prevBalance => prevBalance + amount);
     } catch (error) {
       console.error('Error earning TC:', error);
@@ -22,7 +24,7 @@ function Dashboard() {
       }
 
       // Richiede 100000 satoshi dal faucet
-      const faucetResponse = await axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/crypto/request-faucet', {
+      const faucetResponse = await axios.post(`${API_BASE_URL}/crypto/request-faucet`, {
         address: address,
         amount: 100000, // 100,000 satoshi
       });

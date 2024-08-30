@@ -1,7 +1,8 @@
 // client/src/components/Inventory.js
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
+import API_BASE_URL from '../config'; // Importa l'URL di base
 
 // Importa le immagini degli ovuli
 import commonEggImage from '../assets/images/common-egg.png';
@@ -16,7 +17,7 @@ function Inventory() {
 
   useEffect(() => {
     if (user) {
-      axios.get(`http://localhost:3000/api/tc/eggs?username=${user}`)
+      axios.get(`${API_BASE_URL}/tc/eggs?username=${user}`)
         .then(response => setEggs(response.data.eggs))
         .catch(error => console.error('Error fetching eggs:', error));
     }

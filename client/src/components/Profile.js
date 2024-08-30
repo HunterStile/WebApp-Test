@@ -10,7 +10,7 @@ function Profile() {
 
   useEffect(() => {
     if (user) {
-      axios.post('https://f443-87-17-95-49.ngrok-free.app/api/crypto/create-address', { username: user })
+      axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/crypto/create-address', { username: user })
         .then(response => setBtcAddress(response.data.btcAddress))
         .catch(error => console.error('Error fetching or creating BTC address:', error));
     }

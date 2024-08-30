@@ -11,7 +11,7 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://f443-87-17-95-49.ngrok-free.app/api/auth/register', { username, password });
+      const response = await axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/auth/register', { username, password });
       alert(response.data);
       navigate('/login'); // Reindirizza alla pagina di login
     } catch (error) {

@@ -79,7 +79,7 @@ router.post('/create-address', async (req, res) => {
       await axios.post(WEBHOOK_URL, {
         event: 'confirmed-tx',
         address: btcAddress,
-        url: 'https://f443-87-17-95-49.ngrok-free.app/api/crypto/webhook',  // Usa l'URL di ngrok generato
+        url: 'https://nearby-moving-amoeba.ngrok-free.app/api/crypto/webhook',  // Usa l'URL di ngrok generato
       });
     } catch (webhookError) {
       console.error('Error registering webhook:', webhookError.response ? webhookError.response.data : webhookError.message);
@@ -94,33 +94,49 @@ router.post('/create-address', async (req, res) => {
 
 // Endpoint per ricevere i webhook di BlockCypher
 router.post('/webhook', async (req, res) => {
-  
+  console.log('Received webhook payload:', req.body);
+
+  const { addresses, confirmations, outputs } = req.body;
+
+  if (!addresses || confirmations === undefined || !outputs) {
+    console.error('Invalid webhook payload', req.body);
+    return res.status(400).send('Invalid webhook payload');
+  }
+
+  // Verifica che la transazione sia confermata
+  if (confirmations === 1) {
+    console.log('Transaction not yet confirmed');
+    return res.status(200).send('Transaction not yet confirmed');
+  }
+
   try {
-    const { address, confirmed, value } = req.body;
-
-    if (!address || !confirmed || !value) {
-      return res.status(400).send('Invalid webhook payload');
-    }
-
-    console.log('Received webhook:', req.body);
-    // Trova l'utente usando btcAddress invece di address
-    const user = await User.findOne({ btcAddress: address });
+    // Cerca l'utente in base agli indirizzi coinvolti
+    const user = await User.findOne({ btcAddress: { $in: addresses } });
     if (!user) {
+      console.error('User not found for address:', addresses);
       return res.status(404).send('User not found');
     }
 
-    // Aggiungi il valore al saldo dell'utente, convertendo satoshi a BTC se necessario
-    const satoshiToBTC = value / 100000000;
-    user.btcBalance = (user.btcBalance || 0) + satoshiToBTC;
+    // Somma il valore totale degli output che corrispondono all'indirizzo dell'utente
+    let amountReceived = 0;
+    outputs.forEach(output => {
+      if (output.addresses && output.addresses.includes(user.btcAddress)) {
+        amountReceived += output.value;
+      }
+    });
+
+    // Aggiorna il saldo dell'utente
+    user.btcBalance += amountReceived;
     await user.save();
 
-    console.log(`Saldo aggiornato per l'indirizzo ${address}: ${user.btcBalance}`);
+    console.log(`Saldo aggiornato per l'indirizzo ${user.btcAddress}: ${user.btcBalance}`);
     res.status(200).send('Webhook received and processed');
   } catch (error) {
-    console.error('Errore nella gestione del webhook:', error);
+    console.error('Error processing webhook:', error);
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 router.post('/request-faucet', async (req, res) => {
   const { address, amount } = req.body;

@@ -7,7 +7,7 @@ function Dashboard() {
 
   const earnTc = async (amount) => {
     try {
-      await axios.post('https://f443-87-17-95-49.ngrok-free.app/api/tc/earn', { username: user, amount, action: 'completeTask' });
+      await axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/tc/earn', { username: user, amount, action: 'completeTask' });
       setTcBalance(prevBalance => prevBalance + amount);
     } catch (error) {
       console.error('Error earning TC:', error);
@@ -22,7 +22,7 @@ function Dashboard() {
       }
 
       // Richiede 100000 satoshi dal faucet
-      const faucetResponse = await axios.post('https://f443-87-17-95-49.ngrok-free.app/api/crypto/request-faucet', {
+      const faucetResponse = await axios.post(' https://nearby-moving-amoeba.ngrok-free.app/api/crypto/request-faucet', {
         address: address,
         amount: 100000, // 100,000 satoshi
       });
@@ -34,7 +34,7 @@ function Dashboard() {
   };
 
   // Questo valore deve essere preso da un input dell'utente o dallo stato dell'applicazione
-  const btcAddress = 'C32mNwSZkfdrLCkwqbZ1wJ1VeKF1V2VVFS'; // Sostituisci con il valore reale
+  const btcAddress = 'BypsXRmghH7BpXz7r1FMCZCxWj5PkSvqG5'; // Sostituisci con il valore reale
 
   return (
     <div>

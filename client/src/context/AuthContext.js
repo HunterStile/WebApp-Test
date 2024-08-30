@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   // Funzione per il login dell'utente
   const login = async (username, password) => {
     try {
-      await axios.post('http://localhost:3000/api/auth/login', { username, password });
+      await axios.post('https://f443-87-17-95-49.ngrok-free.app/api/auth/login', { username, password });
       setUser(username);
       fetchTcBalance(username);
       fetchBtcBalance(username); // Aggiungi la funzione per aggiornare il saldo BTC
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const spendTc = async (amount) => {
     if (tcBalance >= amount) {
       try {
-        await axios.post('http://localhost:3000/api/tc/spend', { username: user, amount });
+        await axios.post('https://f443-87-17-95-49.ngrok-free.app/api/tc/spend', { username: user, amount });
         setTcBalance(prevBalance => prevBalance - amount);
       } catch (error) {
         console.error('Error spending TC:', error);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   const fetchTcBalance = async (username = user) => {
     if (username) {
       try {
-        const response = await axios.get(`http://localhost:3000/api/tc/balance?username=${username}`);
+        const response = await axios.get(`https://f443-87-17-95-49.ngrok-free.app/api/tc/balance?username=${username}`);
         setTcBalance(response.data.tcBalance);
       } catch (error) {
         console.error('Error fetching TC balance:', error);
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   const fetchBtcBalance = async (username = user) => {
     if (username) {
       try {
-        const response = await axios.get(`http://localhost:3000/api/crypto/balance/${username}`);
+        const response = await axios.get(`https://f443-87-17-95-49.ngrok-free.app/api/crypto/balance/${username}`);
         setBtcBalance(response.data.balance);
       } catch (error) {
         console.error('Error fetching BTC balance:', error);

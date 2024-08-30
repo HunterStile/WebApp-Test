@@ -79,7 +79,7 @@ router.post('/create-address', async (req, res) => {
       await axios.post(WEBHOOK_URL, {
         event: 'confirmed-tx',
         address: btcAddress,
-        url: 'http://localhost:3000/api/crypto/webhook',
+        url: 'https://f443-87-17-95-49.ngrok-free.app/api/crypto/webhook',  // Usa l'URL di ngrok generato
       });
     } catch (webhookError) {
       console.error('Error registering webhook:', webhookError.response ? webhookError.response.data : webhookError.message);
@@ -94,33 +94,33 @@ router.post('/create-address', async (req, res) => {
 
 // Endpoint per ricevere i webhook di BlockCypher
 router.post('/webhook', async (req, res) => {
+  
   try {
     const { address, confirmed, value } = req.body;
 
-    // Verifica se l'indirizzo è quello giusto
     if (!address || !confirmed || !value) {
       return res.status(400).send('Invalid webhook payload');
     }
 
-    // Trova l'utente nel database per aggiornare il saldo
-    const user = await User.findOne({ address });
+    console.log('Received webhook:', req.body);
+    // Trova l'utente usando btcAddress invece di address
+    const user = await User.findOne({ btcAddress: address });
     if (!user) {
       return res.status(404).send('User not found');
     }
 
-    // Aggiungi il valore al saldo dell'utente
-    user.balance += value;
+    // Aggiungi il valore al saldo dell'utente, convertendo satoshi a BTC se necessario
+    const satoshiToBTC = value / 100000000;
+    user.btcBalance = (user.btcBalance || 0) + satoshiToBTC;
     await user.save();
 
-    console.log(`Saldo aggiornato per l'indirizzo ${address}: ${user.balance}`);
+    console.log(`Saldo aggiornato per l'indirizzo ${address}: ${user.btcBalance}`);
     res.status(200).send('Webhook received and processed');
   } catch (error) {
     console.error('Errore nella gestione del webhook:', error);
     res.status(500).send('Internal Server Error');
   }
 });
-
-module.exports = router;
 
 router.post('/request-faucet', async (req, res) => {
   const { address, amount } = req.body;

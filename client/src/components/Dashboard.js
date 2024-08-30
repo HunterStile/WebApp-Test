@@ -34,7 +34,7 @@ function Dashboard() {
   };
 
   // Questo valore deve essere preso da un input dell'utente o dallo stato dell'applicazione
-  const btcAddress = 'CEyGsaXsjji1ZFvkvXVwDhxkM2hNavmJZt'; // Sostituisci con il valore reale
+  const btcAddress = 'C2zDDcJJhdrbNnEYJiNRhbaj6Ts5WhWMKP'; // Sostituisci con il valore reale
 
   return (
     <div>

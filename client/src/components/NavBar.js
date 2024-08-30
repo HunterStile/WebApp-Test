@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import './NavBar.css'; // Assicurati di importare il CSS
 
 function Navbar() {
-  const { user, tcBalance, logout } = useContext(AuthContext);
+  const { user, tcBalance, btcBalance, logout } = useContext(AuthContext);
 
   return (
     <nav className="navbar">
@@ -23,6 +23,7 @@ function Navbar() {
             <li><Link to="/profile">Profile</Link></li>
             <li>Welcome, {user}</li>
             <li>Your TC Balance: {tcBalance}</li>
+            <li>Your BTC Balance: {btcBalance} Satoshi</li> {/* Aggiungi il saldo BTC */}
             <li><button className="logout-button" onClick={logout}>Logout</button></li>
           </>
         ) : (

@@ -2,3 +2,5 @@
 #client  = npm run build
 #directory = cp -r client/build/* public/
 #server =  node app.js
+
+curl https://api.blockcypher.com/v1/bcy/test/addrs/YOUR_BTC_ADDRESS/full?token=cdd434bbb074468ab1fa2bc2956ac0e4

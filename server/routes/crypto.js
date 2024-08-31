@@ -1,3 +1,4 @@
+
 // server/routes/crypto.js
 const express = require('express');
 const router = express.Router();
@@ -79,7 +80,7 @@ router.post('/create-address', async (req, res) => {
       await axios.post(WEBHOOK_URL, {
         event: 'confirmed-tx',
         address: btcAddress,
-        url: 'https://nearby-moving-amoeba.ngrok-free.app/api/crypto/webhook',  // Usa l'URL di ngrok generato
+        url: 'https://47cc-87-17-95-49.ngrok-free.app/api/crypto/webhook',  // Usa l'URL di ngrok generato
       });
     } catch (webhookError) {
       console.error('Error registering webhook:', webhookError.response ? webhookError.response.data : webhookError.message);
@@ -104,7 +105,7 @@ router.post('/webhook', async (req, res) => {
   }
 
   // Verifica che la transazione sia confermata
-  if (confirmations === 1) {
+  if (confirmations === 0) {
     console.log('Transaction not yet confirmed');
     return res.status(200).send('Transaction not yet confirmed');
   }

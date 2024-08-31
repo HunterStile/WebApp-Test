@@ -1,11 +1,12 @@
 // client/src/components/Dashboard.js
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';  // Importa la base URL
 
 function Dashboard() {
   const { user, setTcBalance } = useContext(AuthContext);
+  const [btcAddress, setBtcAddress] = useState(''); // Stato per l'indirizzo BTC
 
   const earnTc = async (amount) => {
     try {
@@ -16,16 +17,16 @@ function Dashboard() {
     }
   };
 
-  const requestSatoshis = async (address) => {
+  const requestSatoshis = async () => {
     try {
-      if (!address) {
+      if (!btcAddress) {
         console.error('BTC address is required.');
         return;
       }
 
       // Richiede 100000 satoshi dal faucet
       const faucetResponse = await axios.post(`${API_BASE_URL}/crypto/request-faucet`, {
-        address: address,
+        address: btcAddress,
         amount: 100000, // 100,000 satoshi
       });
 
@@ -35,14 +36,20 @@ function Dashboard() {
     }
   };
 
-  // Questo valore deve essere preso da un input dell'utente o dallo stato dell'applicazione
-  const btcAddress = 'BypsXRmghH7BpXz7r1FMCZCxWj5PkSvqG5'; // Sostituisci con il valore reale
-
   return (
     <div>
       <h2>Dashboard</h2>
       <button onClick={() => earnTc(50)}>Earn 50 TC</button>
-      <button onClick={() => requestSatoshis(btcAddress)}>Request 100,000 Satoshis</button>
+      <div>
+        <label htmlFor="btcAddress">BTC Address:</label>
+        <input
+          id="btcAddress"
+          type="text"
+          value={btcAddress}
+          onChange={(e) => setBtcAddress(e.target.value)} // Aggiorna lo stato con il valore dell'input
+        />
+        <button onClick={requestSatoshis}>Request 100,000 Satoshis</button>
+      </div>
     </div>
   );
 }

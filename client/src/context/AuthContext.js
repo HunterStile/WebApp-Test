@@ -70,6 +70,13 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       fetchTcBalance();
       fetchBtcBalance(); // Aggiorna anche il saldo BTC
+      // Imposta un intervallo di aggiornamento ogni 30 secondi
+      const interval = setInterval(() => {
+        fetchBtcBalance();
+      }, 30000);
+
+      // Pulisce l'intervallo quando il componente viene smontato o l'utente cambia
+      return () => clearInterval(interval);
     }
   }, [user]);
 

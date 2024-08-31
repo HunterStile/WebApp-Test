@@ -4,3 +4,9 @@
 #server =  node app.js
 
 curl https://api.blockcypher.com/v1/bcy/test/addrs/BypsXRmghH7BpXz7r1FMCZCxWj5PkSvqG5/full?token=cdd434bbb074468ab1fa2bc2956ac0e4
+
+cambiare la configurazione nei file :
+-config.js lato client
+
+per i webhook
+-crypto.js lato server

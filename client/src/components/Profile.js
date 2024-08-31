@@ -7,7 +7,6 @@ import API_BASE_URL from '../config';  // Importa la base URL
 function Profile() {
   const { user } = useContext(AuthContext);
   const [btcAddress, setBtcAddress] = useState('');
-  const [btcBalance, setBtcBalance] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -27,7 +26,7 @@ function Profile() {
       ) : (
         <p>Generating your BTC address...</p>
       )}
-      <p>Your BTC Balance: {btcBalance} BTC</p>
+      
     </div>
   );
 }

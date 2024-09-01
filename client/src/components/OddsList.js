@@ -36,9 +36,11 @@ const OddsList = () => {
                     {bookmaker.title}:
                     <ul>
                       {bookmaker.markets.map((market, mIndex) => (
-                        <li key={mIndex}>
-                          {market.key} - Home: {market.outcomes[0].price} | Away: {market.outcomes[1].price}
-                        </li>
+                        market.key === 'h2h' && (
+                          <li key={mIndex}>
+                            1 (Home Win): {market.outcomes[0].price} | X (Draw): {market.outcomes[2]?.price || 'N/A'} | 2 (Away Win): {market.outcomes[1].price}
+                          </li>
+                        )
                       ))}
                     </ul>
                   </li>

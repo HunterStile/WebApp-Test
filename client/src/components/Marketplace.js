@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import mysteryBoxImage from '../assets/images/mystery-box.png';
 import commonEggImage from '../assets/images/common-egg.png';
@@ -7,13 +7,44 @@ import rareEggImage from '../assets/images/rare-egg.png';
 import epicEggImage from '../assets/images/epic-egg.png';
 import legendaryEggImage from '../assets/images/legendary-egg.png';
 import axios from 'axios';
-import API_BASE_URL from '../config'; // Importa l'URL di base
+import API_BASE_URL from '../config';
 
 function Marketplace() {
   const { user, tcBalance, spendTc } = useContext(AuthContext);
   const [result, setResult] = useState('');
   const [eggImage, setEggImage] = useState(null);
   const [boxOpened, setBoxOpened] = useState(false);
+  const [eggsForSale, setEggsForSale] = useState([]);  // Inizializza come array
+  const [inventory, setInventory] = useState({});
+  const [sellPrice, setSellPrice] = useState('');
+
+  useEffect(() => {
+    fetchInventory();
+    fetchEggsForSale();
+  }, []);
+
+  const fetchInventory = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/eggs`, { params: { username: user } });
+      setInventory(response.data.eggs);
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+    }
+  };
+
+  const fetchEggsForSale = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/eggs-for-sale`);
+      if (Array.isArray(response.data)) {
+        setEggsForSale(response.data);
+      } else {
+        setEggsForSale([]);  // Imposta un array vuoto se i dati non sono un array
+      }
+    } catch (error) {
+      console.error('Error fetching eggs for sale:', error);
+      setEggsForSale([]);  // Imposta un array vuoto in caso di errore
+    }
+  };
 
   const openMysteryBox = async () => {
     if (tcBalance < 50) {
@@ -46,9 +77,9 @@ function Marketplace() {
     setEggImage(image);
     spendTc(50); // Deduct 50 TC using the context function
 
-    // Salva l'uovo ottenuto sul server
     try {
       await axios.post(`${API_BASE_URL}/tc/open-box`, { username: user, eggType });
+      fetchInventory()
     } catch (error) {
       console.error('Error saving egg:', error);
     }
@@ -62,11 +93,43 @@ function Marketplace() {
     setBoxOpened(false);
   };
 
+  const handleSellEgg = async (eggType) => {
+    try {
+      await axios.post(`${API_BASE_URL}/tc/sell-egg`, {
+        username: user,
+        eggType,
+        price: sellPrice,
+      });
+      fetchInventory();
+      fetchEggsForSale();
+      setSellPrice('');
+    } catch (error) {
+      console.error('Error selling egg:', error);
+    }
+  };
+
+  const handleBuyEgg = async (sellerUsername, eggType, price) => {
+    try {
+      await axios.post(`${API_BASE_URL}/tc/buy-egg`, {
+        buyerUsername: user,
+        sellerUsername,
+        eggType,
+        price,
+      });
+      fetchInventory();
+      fetchEggsForSale();
+    } catch (error) {
+      console.error('Error buying egg:', error);
+    }
+  };
+
   return (
     <div>
       <h2>Marketplace</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {!boxOpened ? (
         <>
+          <h3>Open you mistery box now!</h3>
           <img src={mysteryBoxImage} alt="Mystery Box" style={{ width: '200px', height: '200px' }} />
           <button onClick={openMysteryBox}>Open Mystery Box (50 TC)</button>
         </>
@@ -76,6 +139,38 @@ function Marketplace() {
           {eggImage && <img src={eggImage} alt={result} style={{ width: '200px', height: '200px' }} />}
           <button onClick={resetBox}>Open a new Mystery Box</button>
         </>
+      )}
+      </div>
+      <h3>Sell Eggs</h3>
+      {Object.keys(inventory).some(eggType => inventory[eggType] > 0) ? (
+        Object.keys(inventory)
+          .filter(eggType => inventory[eggType] > 0) // Mostra solo le uova con quantità maggiore di 0
+          .map((eggType) => (
+            <div key={eggType}>
+              <span>{eggType} (x{inventory[eggType]})</span>
+              <input
+                type="number"
+                value={sellPrice}
+                onChange={(e) => setSellPrice(e.target.value)}
+                placeholder="Set price"
+              />
+              <button onClick={() => handleSellEgg(eggType)}>Sell</button>
+            </div>
+          ))
+      ) : (
+        <p>You have no eggs to sell.</p>
+      )}
+
+      <h3>Eggs for Sale</h3>
+      {Array.isArray(eggsForSale) && eggsForSale.length > 0 ? (
+        eggsForSale.map((egg, index) => (
+          <div key={index}>
+            <span>{egg.eggType} - {egg.price} TC</span>
+            <button onClick={() => handleBuyEgg(egg.sellerUsername, egg.eggType, egg.price)}>Buy</button>
+          </div>
+        ))
+      ) : (
+        <p>No eggs for sale.</p>
       )}
     </div>
   );

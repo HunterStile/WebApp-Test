@@ -18,7 +18,12 @@ function Inventory() {
   useEffect(() => {
     if (user) {
       axios.get(`${API_BASE_URL}/tc/eggs?username=${user}`)
-        .then(response => setEggs(response.data.eggs))
+        .then(response => {
+          const filteredEggs = Object.fromEntries(
+            Object.entries(response.data.eggs).filter(([_, count]) => count > 0)
+          );
+          setEggs(filteredEggs);
+        })
         .catch(error => console.error('Error fetching eggs:', error));
     }
   }, [user]);

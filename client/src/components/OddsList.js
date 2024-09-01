@@ -21,6 +21,12 @@ const OddsList = () => {
     fetchOdds();
   }, []);
 
+  // Funzione per formattare la data in un formato leggibile
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return date.toLocaleString(); // Ritorna la data in formato leggibile locale
+  };
+
   return (
     <div>
       <h2>Upcoming Odds</h2>
@@ -29,7 +35,9 @@ const OddsList = () => {
         <ul>
           {odds.map((game, index) => (
             <li key={index}>
-              {game.sport_title} - {game.home_team} vs {game.away_team}
+              <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
+              <br />
+              <strong>Date:</strong> {formatDate(game.commence_time)} {/* Visualizza la data */}
               <ul>
                 {game.bookmakers.map((bookmaker, bIndex) => (
                   <li key={bIndex}>
@@ -38,7 +46,9 @@ const OddsList = () => {
                       {bookmaker.markets.map((market, mIndex) => (
                         market.key === 'h2h' && (
                           <li key={mIndex}>
-                            1 (Home Win): {market.outcomes[0].price} | X (Draw): {market.outcomes[2]?.price || 'N/A'} | 2 (Away Win): {market.outcomes[1].price}
+                            1 (Home Win): {market.outcomes[0].price} | 
+                            X (Draw): {market.outcomes[2]?.price || 'N/A'} | 
+                            2 (Away Win): {market.outcomes[1].price}
                           </li>
                         )
                       ))}

@@ -11,7 +11,12 @@ const OddsList = () => {
     const fetchOdds = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`);
-        setOdds(response.data);
+        const currentTime = new Date();
+        const filteredOdds = response.data.filter(game => {
+          const eventTime = new Date(game.commence_time);
+          return eventTime > currentTime; // Include solo eventi futuri
+        });
+        setOdds(filteredOdds);
       } catch (error) {
         setError('Error fetching odds data');
         console.error('Error fetching odds:', error);
@@ -21,10 +26,17 @@ const OddsList = () => {
     fetchOdds();
   }, []);
 
-  // Funzione per formattare la data in un formato leggibile
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
-    return date.toLocaleString(); // Ritorna la data in formato leggibile locale
+    return new Intl.DateTimeFormat('default', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    }).format(date);
   };
 
   return (

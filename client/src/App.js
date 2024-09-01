@@ -11,6 +11,8 @@ import Marketplace from './components/Marketplace';
 import Inventory from './components/Inventory';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './components/Profile';
+import OddsList from './components/OddsList';
+
 import { AuthProvider } from './context/AuthContext'; // Importa il provider
 
 import './App.css';
@@ -26,6 +28,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/oddslist" element={<OddsList />} />
             
             {/* Rotte protette */}
             <Route element={<PrivateRoute />}>

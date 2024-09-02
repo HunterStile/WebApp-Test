@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.8f461d04.css",
-    "main.js": "/static/js/main.359ad545.js",
+    "main.js": "/static/js/main.b38c1145.js",
     "static/js/453.419a5d54.chunk.js": "/static/js/453.419a5d54.chunk.js",
     "static/media/mystery-box.png": "/static/media/mystery-box.ad7c42aa4047a4ef8db0.png",
     "static/media/epic-egg.png": "/static/media/epic-egg.17f7317b848758a4a860.png",
@@ -10,11 +10,11 @@
     "static/media/legendary-egg.png": "/static/media/legendary-egg.21f28f1224a367f707cd.png",
     "index.html": "/index.html",
     "main.8f461d04.css.map": "/static/css/main.8f461d04.css.map",
-    "main.359ad545.js.map": "/static/js/main.359ad545.js.map",
+    "main.b38c1145.js.map": "/static/js/main.b38c1145.js.map",
     "453.419a5d54.chunk.js.map": "/static/js/453.419a5d54.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.8f461d04.css",
-    "static/js/main.359ad545.js"
+    "static/js/main.b38c1145.js"
   ]
 }

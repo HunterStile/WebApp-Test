@@ -4,19 +4,20 @@ const axios = require('axios');
 const NodeCache = require('node-cache');
 const router = express.Router();
 
-const API_KEY = '934a387b72ea34f5a437446fdf4f5e9b'; // Sostituisci con il tuo token API
+const API_KEY = '934a387b72ea34f5a437446fdf4f5e9b';
 const BASE_URL = 'https://api.the-odds-api.com/v4/sports';
-const sportKey = 'soccer'; // Puoi usare 'upcoming' o una chiave sport specifica
-const regions = 'eu'; // Puoi modificare questo parametro
-const markets = 'h2h'; // Puoi modificare questo parametro
-const oddsFormat = 'decimal'; // Puoi modificare questo parametro
-const dateFormat = 'iso'; // Puoi modificare questo parametro
+const sportKey = 'soccer';
+const regions = 'eu';
+const markets = 'h2h';
+const oddsFormat = 'decimal';
+const dateFormat = 'iso';
 
-// Configura il caching con un tempo di scadenza di 15 minuti (900 secondi)
-const cache = new NodeCache({ stdTTL: 900, checkperiod: 60 });
+// Configura il caching con un tempo di scadenza di 1 minuto (60 secondi)
+const cache = new NodeCache({ stdTTL: 1000, checkperiod: 10 });
 
 const fetchOddsData = async () => {
   try {
+    console.log('Fetching new odds data...');
     const response = await axios.get(`${BASE_URL}/${sportKey}/odds`, {
       params: {
         apiKey: API_KEY,
@@ -26,22 +27,28 @@ const fetchOddsData = async () => {
         dateFormat,
       }
     });
+    console.log('New odds data fetched successfully');
     return response.data;
   } catch (error) {
-    console.error('Error fetching odds data:', error);
-    return null;
+    console.error('Error fetching odds data:', error.message);
+    throw new Error('Failed to fetch odds data');
   }
 };
 
-// Inizialmente, memorizza i dati
 const updateCachedOdds = async () => {
-  const data = await fetchOddsData();
-  if (data) {
-    cache.set('oddsData', data);
+  try {
+    const data = await fetchOddsData();
+    if (data) {
+      cache.set('oddsData', data);
+      console.log('Odds data cached successfully');
+    }
+  } catch (error) {
+    console.error('Failed to update cached odds:', error.message);
+    // Non fare nulla, mantiene i dati esistenti nel cache
   }
 };
 
-// Aggiorna i dati ogni 15 minuti
+// Aggiorna i dati ogni 1 minuto
 setInterval(updateCachedOdds, 15 * 60 * 1000);
 
 // Prima di tutto, esegui un aggiornamento
@@ -53,7 +60,8 @@ router.get('/upcoming-odds', (req, res) => {
   if (oddsData) {
     res.json(oddsData);
   } else {
-    res.status(500).send('Error fetching upcoming odds');
+    console.error('No odds data available in cache');
+    res.status(500).send('No odds data available at the moment.');
   }
 });
 

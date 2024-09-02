@@ -65,6 +65,17 @@ const OddsList = () => {
     return { puntaX, punta2 };
   };
 
+  const TotalBetting = (betAmount,puntax,punta2) => {
+    const totalbet = betAmount+ puntax + punta2;
+    return totalbet;
+  };
+  
+  const calculateRating = (profit,totalbet) => {
+    const rating = (100*100)+(profit/totalbet)*(100*100);
+    return (rating/100);
+  };
+  
+
   const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
     const totalBet = puntata1 + puntataX + puntata2;
     return (quota * puntata1) - totalBet;
@@ -100,9 +111,9 @@ const OddsList = () => {
                       {bookmaker.markets.map((market, mIndex) => (
                         market.key === 'h2h' && (
                           <li key={mIndex}>
-                            1 (Home Win): {market.outcomes[0]?.price || 'N/A'} | 
+                            1 (Home Win): {market.outcomes[1]?.price || 'N/A'} | 
                             X (Draw): {market.outcomes[2]?.price || 'N/A'} | 
-                            2 (Away Win): {market.outcomes[1]?.price || 'N/A'}
+                            2 (Away Win): {market.outcomes[0]?.price || 'N/A'}
                             <button onClick={() => openModal(game, market)}>Calcola puntate</button>
                           </li>
                         )
@@ -122,6 +133,34 @@ const OddsList = () => {
         <div className="modal">
           <div className="modal-content">
             <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div>
+                <strong>Totale Giocato:</strong>
+              </div>
+              <div>
+                {(() => {
+                  const { odds1, oddsX, odds2 } = modalData;
+                  const { puntaX, punta2 } = calculatePunta(odds1, oddsX, odds2);
+                  const totalBet = TotalBetting(betAmount, puntaX, punta2);
+                  return totalBet.toFixed(2);
+                })()}
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div>
+                <strong>Rating:</strong>
+              </div>
+              <div>
+                {(() => {
+                  const { odds1, oddsX, odds2 } = modalData;
+                  const { puntaX, punta2 } = calculatePunta(odds1, oddsX, odds2);
+                  const totalBet = TotalBetting(betAmount, puntaX, punta2);
+                  const profit = calculateProfit(betAmount, puntaX, punta2, odds1);
+                  const rating = calculateRating(profit, totalBet);
+                  return rating.toFixed(2) + '%';
+                })()}
+              </div>
+            </div>
             <label>
               Importo puntato:
               <input 

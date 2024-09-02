@@ -3,6 +3,12 @@
 #directory = cp -r client/build/* public/
 #server =  node app.js
 
+/* Requirement */
+-mongoose
+-express
+-axios
+-node-cache
+
 /*API blockcypher*/
 //verifica della ricezione
 https://api.blockcypher.com/v1/bcy/test/addrs/(indrizzobtc)/full?token=cdd434bbb074468ab1fa2bc2956ac0e4

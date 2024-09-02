@@ -1,4 +1,3 @@
-// client/src/components/OddsList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
@@ -47,9 +46,9 @@ const OddsList = () => {
     setModalData({
       game,
       market,
-      odds1: market.outcomes[0].price,
+      odds1: market.outcomes[0]?.price || 0,
       oddsX: market.outcomes[2]?.price || 'N/A',
-      odds2: market.outcomes[1].price
+      odds2: market.outcomes[1]?.price || 0
     });
     setModalIsOpen(true);
   };
@@ -64,6 +63,11 @@ const OddsList = () => {
     const puntaX = (betAmount * odds1) / oddsX;
     const punta2 = (betAmount * odds1) / odds2;
     return { puntaX, punta2 };
+  };
+
+  const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
+    const totalBet = puntata1 + puntataX + puntata2;
+    return (quota * puntata1) - totalBet;
   };
 
   const handleAmountChange = (e) => {
@@ -96,9 +100,9 @@ const OddsList = () => {
                       {bookmaker.markets.map((market, mIndex) => (
                         market.key === 'h2h' && (
                           <li key={mIndex}>
-                            1 (Home Win): {market.outcomes[0].price} | 
+                            1 (Home Win): {market.outcomes[0]?.price || 'N/A'} | 
                             X (Draw): {market.outcomes[2]?.price || 'N/A'} | 
-                            2 (Away Win): {market.outcomes[1].price}
+                            2 (Away Win): {market.outcomes[1]?.price || 'N/A'}
                             <button onClick={() => openModal(game, market)}>Calcola puntate</button>
                           </li>
                         )
@@ -157,11 +161,20 @@ const OddsList = () => {
               </label>
             </div>
             <div>
-            <p>Punta 1: {betAmount} a quota {modalData.odds1}</p>
-              {modalData.oddsX !== 'N/A' && (                
-                <p>Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}</p>
+              <p>
+                Punta 1: {betAmount} a quota {modalData.odds1}
+                {modalData.odds1 !== 'N/A' && ` | Profitto: ${calculateProfit(betAmount, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, modalData.odds1).toFixed(2)}`}
+              </p>
+              {modalData.oddsX !== 'N/A' && (
+                <p>
+                  Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}
+                  {modalData.oddsX !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, betAmount, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, modalData.oddsX).toFixed(2)}`}
+                </p>
               )}
-              <p>Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}</p>
+              <p>
+                Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
+                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,betAmount , calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
+              </p>
             </div>
             <button onClick={closeModal}>Chiudi</button>
           </div>
@@ -172,4 +185,3 @@ const OddsList = () => {
 };
 
 export default OddsList;
-

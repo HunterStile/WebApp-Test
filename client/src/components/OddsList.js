@@ -157,7 +157,8 @@ const OddsList = () => {
               </label>
             </div>
             <div>
-              {modalData.oddsX !== 'N/A' && (
+            <p>Punta 1: {betAmount} a quota {modalData.odds1}</p>
+              {modalData.oddsX !== 'N/A' && (                
                 <p>Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}</p>
               )}
               <p>Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}</p>

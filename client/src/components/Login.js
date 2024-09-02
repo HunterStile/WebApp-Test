@@ -1,16 +1,18 @@
-// client/src/components/Login.js
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', { username, password });
-      alert(response.data);
+      await login(username, password);
+      navigate('/'); // Redirigi alla home o dashboard
     } catch (error) {
       alert('Login failed');
     }

@@ -1,16 +1,20 @@
 // client/src/components/Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config';  // Importa la base URL
 
 function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // Aggiungi useNavigate
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/register', { username, password });
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, { username, password }); // Usa la base URL
       alert(response.data);
+      navigate('/login'); // Reindirizza alla pagina di login
     } catch (error) {
       alert('Registration failed');
     }

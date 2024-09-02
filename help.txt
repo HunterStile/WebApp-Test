@@ -1,4 +1,25 @@
-##COMANDI PER AGGIORNAMENTO##
+/*COMANDI PER AGGIORNAMENTO*/
 #client  = npm run build
 #directory = cp -r client/build/* public/
 #server =  node app.js
+
+/*API blockcypher*/
+//verifica della ricezione
+https://api.blockcypher.com/v1/bcy/test/addrs/(indrizzobtc)/full?token=cdd434bbb074468ab1fa2bc2956ac0e4
+
+/* CONFIGURAZIONE NGROK */
+lato client
+-config.js (MODIFICARE API_BASE_URL)
+ 
+lato server
+-crypto.js (MODIFICARE API_BASE_URL)
+
+/* API oddsapi*/
+934a387b72ea34f5a437446fdf4f5e9b
+
+
+/* TO DO LIST */
+[X] Mercato di oggetti con valuta interna tra utenti (Da migliorare)
+
+[] Api di quote live
+

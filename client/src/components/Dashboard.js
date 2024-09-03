@@ -6,7 +6,8 @@ import API_BASE_URL from '../config';  // Importa la base URL
 
 function Dashboard() {
   const { user, setTcBalance } = useContext(AuthContext);
-  const [btcAddress, setBtcAddress] = useState(''); // Stato per l'indirizzo BTC
+  const [btcAddress, setBtcAddress] = useState(''); // Stato per l'indirizzo BTCù
+  const [feedbackMessage, setFeedbackMessage] = useState('');
 
   const earnTc = async (amount) => {
     try {
@@ -20,21 +21,27 @@ function Dashboard() {
   const requestSatoshis = async () => {
     try {
       if (!btcAddress) {
-        console.error('BTC address is required.');
+        setFeedbackMessage('BTC address is required.');
         return;
       }
-
+  
+      // Imposta il messaggio di caricamento
+      setFeedbackMessage('Requesting satoshis...');
+  
       // Richiede 100000 satoshi dal faucet
       const faucetResponse = await axios.post(`${API_BASE_URL}/crypto/request-faucet`, {
         address: btcAddress,
         amount: 100000, // 100,000 satoshi
       });
-
-      console.log('Faucet request successful:', faucetResponse.data.message);
+  
+      // Aggiorna il messaggio di successo
+      setFeedbackMessage('Faucet request successful: ' + faucetResponse.data.message);
     } catch (error) {
-      console.error('Error requesting satoshis:', error);
+      // Aggiorna il messaggio di errore
+      setFeedbackMessage('Error requesting satoshis: ' + error.message);
     }
   };
+  
 
   return (
     <div>
@@ -50,8 +57,14 @@ function Dashboard() {
         />
         <button onClick={requestSatoshis}>Request 100,000 Satoshis</button>
       </div>
+      {feedbackMessage && (
+        <div className="feedback-message">
+          {feedbackMessage}
+        </div>
+      )}
     </div>
   );
+  
 }
 
 export default Dashboard;

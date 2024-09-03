@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
 
-// Mappatura dei nomi dei bookmaker con le loro chiavi
 const bookmakerMapping = {
   'Unibet': 'unibet',
   'LiveScore Bet (EU)': 'livescorebeteu',
@@ -32,44 +31,76 @@ const OddsList = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
   const [selectedBookmakers, setSelectedBookmakers] = useState([]);
+  const [cachedOdds, setCachedOdds] = useState({});
 
-  useEffect(() => {
-    const fetchSports = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/odds/sports`);
-        setSports(response.data);
-      } catch (error) {
-        setError('Error fetching sports data');
-        console.error('Error fetching sports:', error);
-      }
-    };
+  const fetchSports = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/odds/sports`);
+      setSports(response.data);
+    } catch (error) {
+      setError('Error fetching sports data');
+      console.error('Error fetching sports:', error);
+    }
+  }, []);
 
-    fetchSports(); // Richiama l'API degli sport all'avvio del componente
+  const fetchOdds = useCallback(async (sportKey) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
+        params: { sportKey }
+      });
+      const currentTime = new Date();
+      const filteredOdds = response.data.filter(game => {
+        const eventTime = new Date(game.commence_time);
+        return eventTime > currentTime;
+      });
+      setCachedOdds(prevState => ({
+        ...prevState,
+        [sportKey]: filteredOdds
+      }));
+      setOdds(filteredOdds);
+    } catch (error) {
+      setError('Error fetching odds data');
+      console.error('Error fetching odds:', error);
+    }
   }, []);
 
   useEffect(() => {
-    const fetchOdds = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
-          params: { 
-            sportKey: selectedSport, 
-            bookmakers: selectedBookmakers.join(',')
-          }
-        });
-        const currentTime = new Date();
-        const filteredOdds = response.data.filter(game => {
-          const eventTime = new Date(game.commence_time);
-          return eventTime > currentTime;
-        });
-        setOdds(filteredOdds);
-      } catch (error) {
-        setError('Error fetching odds data');
-        console.error('Error fetching odds:', error);
-      }
-    };
+    fetchSports(); // Richiama l'API degli sport all'avvio del componente
+  }, [fetchSports]);
 
-    fetchOdds();
-  }, [selectedSport, selectedBookmakers]); // Aggiorna gli eventi quando `selectedSport` o `selectedBookmakers` cambiano
+  useEffect(() => {
+    if (cachedOdds[selectedSport]) {
+      // Usa i dati già in cache
+      setOdds(cachedOdds[selectedSport]);
+    } else {
+      // Fetch data if not in cache
+      fetchOdds(selectedSport);
+    }
+  }, [selectedSport, cachedOdds, fetchOdds]);
+
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    const bookmakerKey = bookmakerMapping[value];
+    setSelectedBookmakers(prevState => {
+      if (checked) {
+        return [...prevState, bookmakerKey];
+      } else {
+        return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+      }
+    });
+  };
+
+  const getFilteredOdds = () => {
+    if (!selectedBookmakers.length) return odds;
+    return odds.map(game => ({
+      ...game,
+      bookmakers: game.bookmakers.filter(bookmaker => 
+        selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
+      )
+    })).filter(game => game.bookmakers.length > 0);
+  };
+
+  const filteredOdds = getFilteredOdds();
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -133,20 +164,8 @@ const OddsList = () => {
     }));
   };
 
-  const handleSportChange = async (sportKey) => {
+  const handleSportChange = (sportKey) => {
     setSelectedSport(sportKey);
-  };
-
-  const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    const bookmakerKey = bookmakerMapping[value];
-    setSelectedBookmakers(prevState => {
-      if (checked) {
-        return [...prevState, bookmakerKey];
-      } else {
-        return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
-      }
-    });
   };
 
   return (
@@ -182,9 +201,9 @@ const OddsList = () => {
 
       <h2>Upcoming Odds</h2>
       {error && <p>{error}</p>}
-      {odds.length > 0 ? (
+      {filteredOdds.length > 0 ? (
         <ul>
-          {odds.map((game, index) => (
+          {filteredOdds.map((game, index) => (
             <li key={index}>
               <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
               <br />

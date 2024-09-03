@@ -86,7 +86,7 @@ router.get('/sports', async (req, res) => {
         all: all, // Passa il parametro "all" all'API
       }
     });
-    console.log('Sports data received:', response.data);
+    //console.log('Sports data received:', response.data);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching sports data:', error.message);

@@ -168,6 +168,17 @@ const OddsList = () => {
     setSelectedSport(sportKey);
   };
 
+  const handleSelectAll = (e) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      // Seleziona tutti i bookmaker
+      setSelectedBookmakers(Object.values(bookmakerMapping));
+    } else {
+      // Deseleziona tutti i bookmaker
+      setSelectedBookmakers([]);
+    }
+  };
+
   return (
     <div>
       <h2>Available Sports</h2>
@@ -183,9 +194,17 @@ const OddsList = () => {
       ) : (
         <p>No sports available.</p>
       )}
-
+  
       <h2>Filter by Bookmakers</h2>
       <div className="bookmakers-checkboxes">
+        <label>
+          <input
+            type="checkbox"
+            onChange={handleSelectAll}
+            checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
+          />
+          Seleziona/Deseleziona Tutto
+        </label>
         {bookmakerOptions.map((bookmaker, index) => (
           <label key={index}>
             <input
@@ -233,7 +252,7 @@ const OddsList = () => {
       ) : (
         <p>No odds available.</p>
       )}
-
+  
       {modalIsOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -325,7 +344,7 @@ const OddsList = () => {
         </div>
       )}
     </div>
-  );
+  );  
 };
 
 export default OddsList;

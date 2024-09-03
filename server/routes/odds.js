@@ -65,4 +65,23 @@ router.get('/upcoming-odds', (req, res) => {
   }
 });
 
+// Route per ottenere la lista di sport
+router.get('/sports', async (req, res) => {
+  const all = req.query.all === 'true'; // Controlla se il parametro "all" è presente e settato a true
+
+  try {
+    const response = await axios.get(BASE_URL, {
+      params: {
+        apiKey: API_KEY,
+        all: all, // Passa il parametro "all" all'API
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching sports data:', error.message);
+    res.status(500).send('Failed to fetch sports data.');
+  }
+});
+
 module.exports = router;

@@ -5,6 +5,7 @@ import './OddsList.css'; // Importa il CSS per la modale
 
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
+  const [sports, setSports] = useState([]); // Stato per memorizzare gli sport
   const [error, setError] = useState(null);
   const [modalData, setModalData] = useState(null);
   const [betAmount, setBetAmount] = useState(100); // Default amount to 100
@@ -26,7 +27,18 @@ const OddsList = () => {
       }
     };
 
+    const fetchSports = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/odds/sports`);
+        setSports(response.data); // Salva la lista degli sport nel stato
+      } catch (error) {
+        setError('Error fetching sports data');
+        console.error('Error fetching sports:', error);
+      }
+    };
+
     fetchOdds();
+    fetchSports(); // Richiama l'API degli sport all'avvio del componente
   }, []);
 
   const formatDate = (isoDate) => {
@@ -65,16 +77,15 @@ const OddsList = () => {
     return { puntaX, punta2 };
   };
 
-  const TotalBetting = (betAmount,puntax,punta2) => {
-    const totalbet = betAmount+ puntax + punta2;
+  const TotalBetting = (betAmount, puntaX, punta2) => {
+    const totalbet = betAmount + puntaX + punta2;
     return totalbet;
   };
-  
-  const calculateRating = (profit,totalbet) => {
-    const rating = (100*100)+(profit/totalbet)*(100*100);
-    return (rating/100);
+
+  const calculateRating = (profit, totalbet) => {
+    const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
+    return (rating / 100);
   };
-  
 
   const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
     const totalBet = puntata1 + puntataX + puntata2;
@@ -94,6 +105,20 @@ const OddsList = () => {
 
   return (
     <div>
+      <h2>Available Sports</h2>
+      {error && <p>{error}</p>}
+      {sports.length > 0 ? (
+        <ul>
+          {sports.map((sport, index) => (
+            <li key={index}>
+              <strong>{sport.title}</strong> - {sport.description}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No sports available.</p>
+      )}
+
       <h2>Upcoming Odds</h2>
       {error && <p>{error}</p>}
       {odds.length > 0 ? (

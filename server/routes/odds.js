@@ -14,22 +14,18 @@ const dateFormat = 'iso';
 // Configura il caching con un tempo di scadenza di 1 minuto (60 secondi)
 const cache = new NodeCache({ stdTTL: 1000, checkperiod: 10 });
 
-const fetchOddsData = async (sportKey, bookmakers) => {
+const fetchOddsData = async (sportKey) => {
   try {
     console.log(`Fetching new odds data for sport ${sportKey}...`);
-    const params = {
-      apiKey: API_KEY,
-      regions,
-      markets,
-      oddsFormat,
-      dateFormat
-    };
-    
-    if (bookmakers && bookmakers.length > 0) {
-      params.bookmakers = bookmakers.join(',');
-    }
-    
-    const response = await axios.get(`${BASE_URL}/${sportKey}/odds`, { params });
+    const response = await axios.get(`${BASE_URL}/${sportKey}/odds`, {
+      params: {
+        apiKey: API_KEY,
+        regions,
+        markets,
+        oddsFormat,
+        dateFormat,
+      }
+    });
     console.log('New odds data fetched successfully');
     return response.data;
   } catch (error) {
@@ -37,7 +33,6 @@ const fetchOddsData = async (sportKey, bookmakers) => {
     throw new Error('Failed to fetch odds data');
   }
 };
-
 
 const updateCachedOdds = async () => {
   try {
@@ -61,39 +56,24 @@ updateCachedOdds();
 // Route per ottenere le quote delle partite imminenti
 router.get('/upcoming-odds', async (req, res) => {
   const sportKey = req.query.sportKey || 'soccer'; // Usa 'soccer' come valore di default
-  const bookmakers = req.query.bookmakers ? req.query.bookmakers.split(',') : []; // Usa un array vuoto per ottenere tutti i bookmaker
 
   // Verifica se i dati sono già nella cache
-  const cacheKey = `oddsData_${sportKey}_${bookmakers.join(',')}`;
-  const cachedOdds = cache.get(cacheKey);
+  const cachedOdds = cache.get(`oddsData_${sportKey}`);
   if (cachedOdds) {
     console.log('Returning cached odds data');
     return res.json(cachedOdds);
   }
 
   try {
-    console.log(`Fetching odds data for sport ${sportKey} with bookmakers ${bookmakers.join(', ')}...`);
-    const oddsData = await fetchOddsData(sportKey, bookmakers);
-
-    // Se non ci sono bookmaker specificati, non filtrare
-    if (bookmakers.length === 0) {
-      cache.set(cacheKey, oddsData); // Salva i dati non filtrati nella cache
-      res.json(oddsData);
-    } else {
-      // Filtra i bookmaker nei dati ricevuti se è stato passato un elenco
-      const filteredOddsData = oddsData.map(game => ({
-        ...game,
-        bookmakers: game.bookmakers.filter(bookmaker => bookmakers.includes(bookmaker.key))
-      }));
-      cache.set(cacheKey, filteredOddsData); // Salva i dati filtrati nella cache
-      res.json(filteredOddsData);
-    }
+    console.log(`Fetching odds data for sport ${sportKey}...`);
+    const oddsData = await fetchOddsData(sportKey);
+    cache.set(`oddsData_${sportKey}`, oddsData); // Salva i dati nella cache
+    res.json(oddsData);
   } catch (error) {
     console.error('Error fetching odds data:', error.message);
     res.status(500).send('Failed to fetch odds data.');
   }
 });
-
 
 // Route per ottenere la lista di sport
 router.get('/sports', async (req, res) => {

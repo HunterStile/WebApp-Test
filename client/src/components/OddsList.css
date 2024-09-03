@@ -24,3 +24,16 @@
     margin: 5px 0;
   }
   
+  .bookmakers-checkboxes {
+    margin-bottom: 20px;
+  }
+
+  .modal-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .modal-row:last-of-type {
+    margin-bottom: 20px;
+  }

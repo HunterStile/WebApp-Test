@@ -257,7 +257,7 @@ const OddsList = () => {
         <div className="modal">
           <div className="modal-content">
             <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div className="modal-row">
               <div>
                 <strong>Totale Giocato:</strong>
               </div>
@@ -270,7 +270,7 @@ const OddsList = () => {
                 })()}
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <div className="modal-row">
               <div>
                 <strong>Rating:</strong>
               </div>

@@ -3,6 +3,26 @@ import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
 
+// Mappatura dei nomi dei bookmaker con le loro chiavi
+const bookmakerMapping = {
+  'Unibet': 'unibet',
+  'LiveScore Bet (EU)': 'livescorebeteu',
+  'Marathon Bet': 'marathon_bet',
+  '888sport': '888sport',
+  'Pinnacle': 'pinnacle',
+  'Tipico': 'tipico',
+  'Nordic Bet': 'nordicbet',
+  'Betsson': 'betsson',
+  'Betfair': 'betfair',
+  'MyBookie.ag': 'mybookieag',
+  'William Hill': 'williamhill',
+  'Matchbook': 'matchbook',
+  'BetOnline.ag': 'betonlineag',
+  'Coolbet': 'coolbet'
+};
+
+const bookmakerOptions = Object.keys(bookmakerMapping);
+
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
   const [sports, setSports] = useState([]);
@@ -11,6 +31,7 @@ const OddsList = () => {
   const [betAmount, setBetAmount] = useState(100);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
+  const [selectedBookmakers, setSelectedBookmakers] = useState([]);
 
   useEffect(() => {
     const fetchSports = async () => {
@@ -30,7 +51,10 @@ const OddsList = () => {
     const fetchOdds = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
-          params: { sportKey: selectedSport } // Passa il sport selezionato come parametro
+          params: { 
+            sportKey: selectedSport, 
+            bookmakers: selectedBookmakers.join(',')
+          }
         });
         const currentTime = new Date();
         const filteredOdds = response.data.filter(game => {
@@ -45,7 +69,7 @@ const OddsList = () => {
     };
 
     fetchOdds();
-  }, [selectedSport]); // Aggiorna gli eventi quando `selectedSport` cambia
+  }, [selectedSport, selectedBookmakers]); // Aggiorna gli eventi quando `selectedSport` o `selectedBookmakers` cambiano
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -113,6 +137,18 @@ const OddsList = () => {
     setSelectedSport(sportKey);
   };
 
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    const bookmakerKey = bookmakerMapping[value];
+    setSelectedBookmakers(prevState => {
+      if (checked) {
+        return [...prevState, bookmakerKey];
+      } else {
+        return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+      }
+    });
+  };
+
   return (
     <div>
       <h2>Available Sports</h2>
@@ -128,6 +164,21 @@ const OddsList = () => {
       ) : (
         <p>No sports available.</p>
       )}
+
+      <h2>Filter by Bookmakers</h2>
+      <div className="bookmakers-checkboxes">
+        {bookmakerOptions.map((bookmaker, index) => (
+          <label key={index}>
+            <input
+              type="checkbox"
+              value={bookmaker}
+              checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+              onChange={handleCheckboxChange}
+            />
+            {bookmaker}
+          </label>
+        ))}
+      </div>
 
       <h2>Upcoming Odds</h2>
       {error && <p>{error}</p>}

@@ -6,7 +6,6 @@ const router = express.Router();
 
 const API_KEY = '934a387b72ea34f5a437446fdf4f5e9b';
 const BASE_URL = 'https://api.the-odds-api.com/v4/sports';
-const sportKey = 'soccer';
 const regions = 'eu';
 const markets = 'h2h';
 const oddsFormat = 'decimal';
@@ -15,9 +14,9 @@ const dateFormat = 'iso';
 // Configura il caching con un tempo di scadenza di 1 minuto (60 secondi)
 const cache = new NodeCache({ stdTTL: 1000, checkperiod: 10 });
 
-const fetchOddsData = async () => {
+const fetchOddsData = async (sportKey) => {
   try {
-    console.log('Fetching new odds data...');
+    console.log(`Fetching new odds data for sport ${sportKey}...`);
     const response = await axios.get(`${BASE_URL}/${sportKey}/odds`, {
       params: {
         apiKey: API_KEY,
@@ -37,7 +36,7 @@ const fetchOddsData = async () => {
 
 const updateCachedOdds = async () => {
   try {
-    const data = await fetchOddsData();
+    const data = await fetchOddsData('soccer'); // Default sport
     if (data) {
       cache.set('oddsData', data);
       console.log('Odds data cached successfully');
@@ -48,20 +47,31 @@ const updateCachedOdds = async () => {
   }
 };
 
-// Aggiorna i dati ogni 1 minuto
+// Aggiorna i dati ogni 15 minuti
 setInterval(updateCachedOdds, 15 * 60 * 1000);
 
 // Prima di tutto, esegui un aggiornamento
 updateCachedOdds();
 
 // Route per ottenere le quote delle partite imminenti
-router.get('/upcoming-odds', (req, res) => {
-  const oddsData = cache.get('oddsData');
-  if (oddsData) {
+router.get('/upcoming-odds', async (req, res) => {
+  const sportKey = req.query.sportKey || 'soccer'; // Usa 'soccer' come valore di default
+
+  // Verifica se i dati sono già nella cache
+  const cachedOdds = cache.get(`oddsData_${sportKey}`);
+  if (cachedOdds) {
+    console.log('Returning cached odds data');
+    return res.json(cachedOdds);
+  }
+
+  try {
+    console.log(`Fetching odds data for sport ${sportKey}...`);
+    const oddsData = await fetchOddsData(sportKey);
+    cache.set(`oddsData_${sportKey}`, oddsData); // Salva i dati nella cache
     res.json(oddsData);
-  } else {
-    console.error('No odds data available in cache');
-    res.status(500).send('No odds data available at the moment.');
+  } catch (error) {
+    console.error('Error fetching odds data:', error.message);
+    res.status(500).send('Failed to fetch odds data.');
   }
 });
 
@@ -76,7 +86,7 @@ router.get('/sports', async (req, res) => {
         all: all, // Passa il parametro "all" all'API
       }
     });
-
+    console.log('Sports data received:', response.data);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching sports data:', error.message);

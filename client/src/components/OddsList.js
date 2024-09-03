@@ -5,20 +5,37 @@ import './OddsList.css'; // Importa il CSS per la modale
 
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
-  const [sports, setSports] = useState([]); // Stato per memorizzare gli sport
+  const [sports, setSports] = useState([]);
   const [error, setError] = useState(null);
   const [modalData, setModalData] = useState(null);
-  const [betAmount, setBetAmount] = useState(100); // Default amount to 100
+  const [betAmount, setBetAmount] = useState(100);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
+
+  useEffect(() => {
+    const fetchSports = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/odds/sports`);
+        setSports(response.data);
+      } catch (error) {
+        setError('Error fetching sports data');
+        console.error('Error fetching sports:', error);
+      }
+    };
+
+    fetchSports(); // Richiama l'API degli sport all'avvio del componente
+  }, []);
 
   useEffect(() => {
     const fetchOdds = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`);
+        const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
+          params: { sportKey: selectedSport } // Passa il sport selezionato come parametro
+        });
         const currentTime = new Date();
         const filteredOdds = response.data.filter(game => {
           const eventTime = new Date(game.commence_time);
-          return eventTime > currentTime; // Include solo eventi futuri
+          return eventTime > currentTime;
         });
         setOdds(filteredOdds);
       } catch (error) {
@@ -27,19 +44,8 @@ const OddsList = () => {
       }
     };
 
-    const fetchSports = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/odds/sports`);
-        setSports(response.data); // Salva la lista degli sport nel stato
-      } catch (error) {
-        setError('Error fetching sports data');
-        console.error('Error fetching sports:', error);
-      }
-    };
-
     fetchOdds();
-    fetchSports(); // Richiama l'API degli sport all'avvio del componente
-  }, []);
+  }, [selectedSport]); // Aggiorna gli eventi quando `selectedSport` cambia
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -68,7 +74,7 @@ const OddsList = () => {
   const closeModal = () => {
     setModalIsOpen(false);
     setModalData(null);
-    setBetAmount(100); // Reset amount when modal is closed
+    setBetAmount(100);
   };
 
   const calculatePunta = (odds1, oddsX, odds2) => {
@@ -103,6 +109,10 @@ const OddsList = () => {
     }));
   };
 
+  const handleSportChange = async (sportKey) => {
+    setSelectedSport(sportKey);
+  };
+
   return (
     <div>
       <h2>Available Sports</h2>
@@ -110,7 +120,7 @@ const OddsList = () => {
       {sports.length > 0 ? (
         <ul>
           {sports.map((sport, index) => (
-            <li key={index}>
+            <li key={index} onClick={() => handleSportChange(sport.key)}>
               <strong>{sport.title}</strong> - {sport.description}
             </li>
           ))}
@@ -127,7 +137,7 @@ const OddsList = () => {
             <li key={index}>
               <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
               <br />
-              <strong>Date:</strong> {formatDate(game.commence_time)} {/* Visualizza la data */}
+              <strong>Date:</strong> {formatDate(game.commence_time)}
               <ul>
                 {game.bookmakers.map((bookmaker, bIndex) => (
                   <li key={bIndex}>
@@ -237,7 +247,7 @@ const OddsList = () => {
               )}
               <p>
                 Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
-                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,betAmount , calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
+                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, betAmount , calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
               </p>
             </div>
             <button onClick={closeModal}>Chiudi</button>

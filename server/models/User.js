@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const eggForSaleSchema = new mongoose.Schema({
   eggType: { type: String, required: true },
   price: { type: Number, required: true },
+  quantity: { type: Number, required: true }, // Add quantity field
 });
 
 const userSchema = new mongoose.Schema({

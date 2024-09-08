@@ -13,7 +13,7 @@
 
 /*API blockcypher*/
 //verifica della ricezione
-https://api.blockcypher.com/v1/bcy/test/addrs/(indrizzobtc)/full?token=cdd434bbb074468ab1fa2bc2956ac0e4
+https://api.blockcypher.com/v1/bcy/test/addrs/CCn1seEPW8BmbSQHQTXvxd6kDdBvgpoZ2Z/full?token=cdd434bbb074468ab1fa2bc2956ac0e4
 
 /* CONFIGURAZIONE NGROK */
 lato client

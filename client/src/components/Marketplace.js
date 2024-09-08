@@ -17,6 +17,7 @@ function Marketplace() {
   const [eggsForSale, setEggsForSale] = useState([]);  // Inizializza come array
   const [inventory, setInventory] = useState({});
   const [sellPrice, setSellPrice] = useState('');
+  const [sellQuantity, setSellQuantity] = useState({});
 
   useEffect(() => {
     fetchInventory();
@@ -94,15 +95,22 @@ function Marketplace() {
   };
 
   const handleSellEgg = async (eggType) => {
+    if (!sellQuantity[eggType] || sellQuantity[eggType] <= 0) {
+      alert('Please set a valid quantity to sell');
+      return;
+    }
+
     try {
       await axios.post(`${API_BASE_URL}/tc/sell-egg`, {
         username: user,
         eggType,
         price: sellPrice,
+        quantity: sellQuantity[eggType], // Aggiungi la quantità
       });
       fetchInventory();
       fetchEggsForSale();
       setSellPrice('');
+      setSellQuantity({ ...sellQuantity, [eggType]: 0 }); // Reset quantità
     } catch (error) {
       console.error('Error selling egg:', error);
     }
@@ -127,27 +135,36 @@ function Marketplace() {
     <div>
       <h2>Marketplace</h2>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      {!boxOpened ? (
-        <>
-          <h3>Open you mistery box now!</h3>
-          <img src={mysteryBoxImage} alt="Mystery Box" style={{ width: '200px', height: '200px' }} />
-          <button onClick={openMysteryBox}>Open Mystery Box (50 TC)</button>
-        </>
-      ) : (
-        <>
-          <h3>You got a {result}!</h3>
-          {eggImage && <img src={eggImage} alt={result} style={{ width: '200px', height: '200px' }} />}
-          <button onClick={resetBox}>Open a new Mystery Box</button>
-        </>
-      )}
+        {!boxOpened ? (
+          <>
+            <h3>Open you mistery box now!</h3>
+            <img src={mysteryBoxImage} alt="Mystery Box" style={{ width: '200px', height: '200px' }} />
+            <button onClick={openMysteryBox}>Open Mystery Box (50 TC)</button>
+          </>
+        ) : (
+          <>
+            <h3>You got a {result}!</h3>
+            {eggImage && <img src={eggImage} alt={result} style={{ width: '200px', height: '200px' }} />}
+            <button onClick={resetBox}>Open a new Mystery Box</button>
+          </>
+        )}
       </div>
       <h3>Sell Eggs</h3>
       {Object.keys(inventory).some(eggType => inventory[eggType] > 0) ? (
         Object.keys(inventory)
-          .filter(eggType => inventory[eggType] > 0) // Mostra solo le uova con quantità maggiore di 0
+          .filter(eggType => inventory[eggType] > 0)
           .map((eggType) => (
             <div key={eggType}>
               <span>{eggType} (x{inventory[eggType]})</span>
+              <input
+                type="number"
+                value={sellQuantity[eggType] || ''}
+                onChange={(e) =>
+                  setSellQuantity({ ...sellQuantity, [eggType]: Math.min(Number(e.target.value), inventory[eggType]) })
+                }
+                placeholder="Quantity"
+                max={inventory[eggType]} // Imposta il massimo
+              />
               <input
                 type="number"
                 value={sellPrice}
@@ -165,8 +182,11 @@ function Marketplace() {
       {Array.isArray(eggsForSale) && eggsForSale.length > 0 ? (
         eggsForSale.map((egg, index) => (
           <div key={index}>
-            <span>{egg.eggType} - {egg.price} TC</span>
-            <button onClick={() => handleBuyEgg(egg.sellerUsername, egg.eggType, egg.price)}>Buy</button>
+            <span>{egg.eggType}</span>
+            <span> - {egg.totalQuantity} available</span>
+            <span> - Average Price: {egg.averagePrice ? egg.averagePrice.toFixed(2) : 'N/A'} TC</span>
+            <span> - Floor Price: {egg.floorPrice ? egg.floorPrice.toFixed(2) : 'N/A'} TC</span>
+            <button onClick={() => handleBuyEgg(egg.eggType, egg.floorPrice)}>Buy at Floor Price</button>
           </div>
         ))
       ) : (

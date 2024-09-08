@@ -106,7 +106,7 @@ router.get('/eggs', async (req, res) => {
 
 // Metti in vendita un uovo nel mercato secondario
 router.post('/sell-egg', async (req, res) => {
-  const { username, eggType, price } = req.body;
+  const { username, eggType, price, quantity } = req.body;
 
   try {
     const user = await User.findOne({ username });
@@ -115,45 +115,66 @@ router.post('/sell-egg', async (req, res) => {
     }
 
     // Controlla se l'utente ha abbastanza uova di quel tipo
-    if (!user.eggs.has(eggType) || user.eggs.get(eggType) <= 0) {
-      return res.status(400).send('No eggs of this type available for sale');
+    if (!user.eggs.has(eggType) || user.eggs.get(eggType) < quantity) {
+      return res.status(400).send('Not enough eggs of this type available for sale');
     }
 
-    // Riduci il conteggio delle uova e aggiungi l'uovo al mercato
-    user.eggs.set(eggType, user.eggs.get(eggType) - 1);
-    user.eggsForSale.push({ eggType, price });
+    // Cerca se esiste già un'entrata nel mercato con lo stesso eggType e prezzo
+    const existingSaleIndex = user.eggsForSale.findIndex(
+      (egg) => egg.eggType === eggType && egg.price === price
+    );
+
+    if (existingSaleIndex !== -1) {
+      // Se esiste, aggiorna la quantità
+      user.eggsForSale[existingSaleIndex].quantity += quantity;
+    } else {
+      // Se non esiste, aggiungi una nuova entry con la quantità
+      user.eggsForSale.push({ eggType, price, quantity });
+    }
+
+    // Riduci il conteggio delle uova nell'inventario
+    user.eggs.set(eggType, user.eggs.get(eggType) - quantity);
 
     await user.save();
-    res.send('Egg put up for sale successfully');
+    res.send('Eggs put up for sale successfully');
   } catch (error) {
-    res.status(500).send('Error selling egg');
+    res.status(500).send('Error selling eggs');
   }
 });
 
 // Compra un uovo dal mercato secondario
 router.post('/buy-egg', async (req, res) => {
-  const { buyerUsername, sellerUsername, eggType, price } = req.body;
+  const { buyerUsername, eggType, price } = req.body;
 
   try {
     const buyer = await User.findOne({ username: buyerUsername });
-    const seller = await User.findOne({ username: sellerUsername });
 
-    if (!buyer || !seller) {
-      return res.status(404).send('User not found');
+    if (!buyer) {
+      return res.status(404).send('Buyer not found');
     }
 
-    // Verifica se l'acquirente ha abbastanza TC
+    // Trova un venditore che ha uova di quel tipo al prezzo più basso (floor price)
+    const seller = await User.findOne({
+      'eggsForSale.eggType': eggType,
+      'eggsForSale.price': price, // Si cerca l'uovo al floor price
+    });
+
+    if (!seller) {
+      return res.status(404).send('No seller found for the selected egg at this price');
+    }
+
+    // Controlla se l'acquirente ha abbastanza TC
     if (buyer.tcBalance < price) {
       return res.status(400).send('Insufficient TC balance');
     }
 
-    // Trova l'uovo in vendita e rimuovilo
+    // Trova l'uovo in vendita e rimuovilo dal venditore
     const eggIndex = seller.eggsForSale.findIndex(egg => egg.eggType === eggType && egg.price === price);
     if (eggIndex === -1) {
       return res.status(404).send('Egg not found for sale');
     }
 
-    seller.eggsForSale.splice(eggIndex, 1);
+    seller.eggsForSale.splice(eggIndex, 1); // Rimuovi l'uovo dal venditore
     buyer.tcBalance -= price;
     seller.tcBalance += price;
 
@@ -166,10 +187,7 @@ router.post('/buy-egg', async (req, res) => {
 
     await buyer.save();
     await seller.save();
-    console.log('Buyer:', buyerUsername);
-    console.log('Seller:', sellerUsername);
-    console.log('Egg Type:', eggType);
-    console.log('Price:', price);
+
     res.send('Egg purchased successfully');
   } catch (error) {
     res.status(500).send('Error purchasing egg');
@@ -179,29 +197,53 @@ router.post('/buy-egg', async (req, res) => {
 // Ottieni tutte le uova in vendita nel mercato secondario
 router.get('/eggs-for-sale', async (req, res) => {
   try {
-    // Trova tutti gli utenti che hanno uova in vendita
     const usersWithEggsForSale = await User.find({ 'eggsForSale.0': { $exists: true } });
 
-    // Crea un array per contenere tutte le uova in vendita
-    let eggsForSale = [];
+    let eggTypeMap = {};
 
-    // Itera su ciascun utente con uova in vendita
     usersWithEggsForSale.forEach(user => {
       user.eggsForSale.forEach(egg => {
-        eggsForSale.push({
-          sellerUsername: user.username,
-          eggType: egg.eggType,
-          price: egg.price,
-        });
+        const quantity = Number(egg.quantity) || 0;
+        const price = Number(egg.price) || 0;
+
+        if (eggTypeMap[egg.eggType]) {
+          eggTypeMap[egg.eggType].totalQuantity += quantity;
+          eggTypeMap[egg.eggType].totalPrice += price * quantity;
+
+          if (
+            eggTypeMap[egg.eggType].floorPrice === undefined ||
+            price < eggTypeMap[egg.eggType].floorPrice
+          ) {
+            eggTypeMap[egg.eggType].floorPrice = price;
+          }
+        } else {
+          eggTypeMap[egg.eggType] = {
+            eggType: egg.eggType,
+            totalQuantity: quantity,
+            totalPrice: price * quantity,
+            averagePrice: 0,
+            floorPrice: price,
+          };
+        }
       });
     });
 
+    Object.keys(eggTypeMap).forEach(eggType => {
+      const eggData = eggTypeMap[eggType];
+      if (eggData.totalQuantity > 0) {
+        eggData.averagePrice = eggData.totalPrice / eggData.totalQuantity;
+      } else {
+        eggData.averagePrice = 0;
+      }
+    });
+
+    const eggsForSale = Object.values(eggTypeMap);
+
     res.json(eggsForSale);
   } catch (error) {
+    console.error('Error fetching eggs for sale:', error);
     res.status(500).send('Error fetching eggs for sale');
   }
 });
-
-module.exports = router;
 
 module.exports = router;

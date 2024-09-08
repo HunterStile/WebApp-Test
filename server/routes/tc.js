@@ -144,53 +144,55 @@ router.post('/sell-egg', async (req, res) => {
 
 // Compra un uovo dal mercato secondario
 router.post('/buy-egg', async (req, res) => {
-  const { buyerUsername, eggType, price } = req.body;
+  const { username, eggType, price, quantity } = req.body;
 
   try {
-    const buyer = await User.findOne({ username: buyerUsername });
-
-    if (!buyer) {
-      return res.status(404).send('Buyer not found');
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).send('User not found');
     }
 
-    // Trova un venditore che ha uova di quel tipo al prezzo più basso (floor price)
     const seller = await User.findOne({
       'eggsForSale.eggType': eggType,
-      'eggsForSale.price': price, // Si cerca l'uovo al floor price
+      'eggsForSale.price': price,
     });
 
     if (!seller) {
-      return res.status(404).send('No seller found for the selected egg at this price');
+      return res.status(404).send('Seller not found');
     }
 
-    // Controlla se l'acquirente ha abbastanza TC
-    if (buyer.tcBalance < price) {
-      return res.status(400).send('Insufficient TC balance');
+    const eggForSale = seller.eggsForSale.find(
+      (egg) => egg.eggType === eggType && egg.price === price
+    );
+
+    if (!eggForSale || eggForSale.quantity < quantity) {
+      return res.status(400).send('Not enough eggs available');
     }
 
-    // Trova l'uovo in vendita e rimuovilo dal venditore
-    const eggIndex = seller.eggsForSale.findIndex(egg => egg.eggType === eggType && egg.price === price);
-    if (eggIndex === -1) {
-      return res.status(404).send('Egg not found for sale');
+    // Riduci la quantità dell'uovo in vendita
+    eggForSale.quantity -= quantity;
+
+    // Se la quantità dell'uovo è zero, rimuovi l'entry
+    if (eggForSale.quantity === 0) {
+      seller.eggsForSale = seller.eggsForSale.filter(
+        (egg) => !(egg.eggType === eggType && egg.price === price)
+      );
     }
 
-    seller.eggsForSale.splice(eggIndex, 1); // Rimuovi l'uovo dal venditore
-    buyer.tcBalance -= price;
-    seller.tcBalance += price;
-
-    // Aggiungi l'uovo all'inventario dell'acquirente
-    if (buyer.eggs.has(eggType)) {
-      buyer.eggs.set(eggType, buyer.eggs.get(eggType) + 1);
+    // Aggiungi le uova comprate all'account dell'acquirente
+    if (user.eggs.has(eggType)) {
+      user.eggs.set(eggType, user.eggs.get(eggType) + quantity);
     } else {
-      buyer.eggs.set(eggType, 1);
+      user.eggs.set(eggType, quantity);
     }
 
-    await buyer.save();
+    // Salva i cambiamenti
+    await user.save();
     await seller.save();
 
-    res.send('Egg purchased successfully');
+    res.send('Purchase successful');
   } catch (error) {
-    res.status(500).send('Error purchasing egg');
+    res.status(500).send('Error processing purchase');
   }
 });
 

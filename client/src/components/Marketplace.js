@@ -18,6 +18,10 @@ function Marketplace() {
   const [inventory, setInventory] = useState({});
   const [sellPrice, setSellPrice] = useState('');
   const [sellQuantity, setSellQuantity] = useState({});
+  
+  // Stato per la gestione della modale
+  const [selectedEgg, setSelectedEgg] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetchInventory();
@@ -80,7 +84,7 @@ function Marketplace() {
 
     try {
       await axios.post(`${API_BASE_URL}/tc/open-box`, { username: user, eggType });
-      fetchInventory()
+      fetchInventory();
     } catch (error) {
       console.error('Error saving egg:', error);
     }
@@ -116,18 +120,42 @@ function Marketplace() {
     }
   };
 
-  const handleBuyEgg = async (sellerUsername, eggType, price) => {
+  const handleBuyEgg = async (eggType, price, quantity) => {
     try {
-      await axios.post(`${API_BASE_URL}/tc/buy-egg`, {
-        buyerUsername: user,
-        sellerUsername,
+      const response = await axios.post(`${API_BASE_URL}/tc/buy-egg`, {
+        username: user, // Imposta l'utente attuale
         eggType,
         price,
+        quantity,
       });
-      fetchInventory();
-      fetchEggsForSale();
+      console.log('Purchase successful:', response.data);
+      alert('Purchase successful!');
+      fetchInventory();  // Aggiorna l'inventario dopo l'acquisto
+      fetchEggsForSale();  // Aggiorna il mercato dopo l'acquisto
     } catch (error) {
       console.error('Error buying egg:', error);
+      alert('Error during purchase');
+    }
+  };
+
+  // Funzione per aprire la modale
+  const handleOpenModal = (egg) => {
+    setSelectedEgg(egg);
+    setQuantity(1);  // Imposta la quantità a 1 di default
+    document.querySelector('.modal').classList.add('open');
+  };
+
+  // Funzione per chiudere la modale
+  const handleCloseModal = () => {
+    document.querySelector('.modal').classList.remove('open');
+    setSelectedEgg(null);
+  };
+
+  // Funzione per gestire l'acquisto dalla modale
+  const handleBuy = () => {
+    if (selectedEgg && quantity > 0) {
+      handleBuyEgg(selectedEgg.eggType, selectedEgg.floorPrice, quantity);
+      handleCloseModal(); // Chiudi la modale dopo l'acquisto
     }
   };
 
@@ -137,7 +165,7 @@ function Marketplace() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {!boxOpened ? (
           <>
-            <h3>Open you mistery box now!</h3>
+            <h3>Open your mystery box now!</h3>
             <img src={mysteryBoxImage} alt="Mystery Box" style={{ width: '200px', height: '200px' }} />
             <button onClick={openMysteryBox}>Open Mystery Box (50 TC)</button>
           </>
@@ -149,6 +177,7 @@ function Marketplace() {
           </>
         )}
       </div>
+
       <h3>Sell Eggs</h3>
       {Object.keys(inventory).some(eggType => inventory[eggType] > 0) ? (
         Object.keys(inventory)
@@ -186,12 +215,39 @@ function Marketplace() {
             <span> - {egg.totalQuantity} available</span>
             <span> - Average Price: {egg.averagePrice ? egg.averagePrice.toFixed(2) : 'N/A'} TC</span>
             <span> - Floor Price: {egg.floorPrice ? egg.floorPrice.toFixed(2) : 'N/A'} TC</span>
-            <button onClick={() => handleBuyEgg(egg.eggType, egg.floorPrice)}>Buy at Floor Price</button>
+            <button onClick={() => handleOpenModal(egg)}>Anteprima</button>
           </div>
         ))
       ) : (
         <p>No eggs for sale.</p>
       )}
+
+      {/* Modale */}
+      <div className="modal">
+        <div className="modal-content">
+          <span className="close" onClick={handleCloseModal}>&times;</span>
+          {selectedEgg && (
+            <div>
+              <h3>Compra Uova di tipo: {selectedEgg.eggType}</h3>
+              <div>
+                <label>Quantità: </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={selectedEgg.totalQuantity}  // Impedisce di acquistare più di quanto disponibile
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Math.min(selectedEgg.totalQuantity, parseInt(e.target.value))))}
+                />
+              </div>
+              <div>
+                <label>Prezzo: </label>
+                <span>{(selectedEgg.floorPrice * quantity).toFixed(2)} TC</span>
+              </div>
+              <button onClick={handleBuy}>Buy</button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

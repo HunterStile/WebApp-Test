@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const axios = require('axios');
 
 // Ottieni il saldo di TC dell'utente
 router.get('/balance', async (req, res) => {
@@ -29,15 +30,16 @@ router.post('/earn', async (req, res) => {
     }
 
     // Aggiungi logica per il guadagno in base all'azione
-    if (action === 'completeTask') {
+    if (action === 'completeTask' || action === 'sellEggs') {
       user.tcBalance += amount;
-    } else if (action === 'purchaseMysteryBox') {
-      user.tcBalance += amount;
-    } // Aggiungi altre azioni se necessario
+    } else {
+      return res.status(400).send('Invalid action');
+    }
 
     await user.save();
     res.send('TC earned successfully');
   } catch (error) {
+    console.error('Error earning TC:', error);
     res.status(500).send('Error earning TC');
   }
 });
@@ -147,10 +149,14 @@ router.post('/buy-egg', async (req, res) => {
   const { username, eggType, price, quantity } = req.body;
 
   try {
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).send('User not found');
+    console.log('Request Body:', req.body);
+
+    const buyer = await User.findOne({ username });
+    if (!buyer) {
+      return res.status(404).send('Buyer not found');
     }
+
+    console.log('Buyer:', buyer);
 
     const seller = await User.findOne({
       'eggsForSale.eggType': eggType,
@@ -161,6 +167,8 @@ router.post('/buy-egg', async (req, res) => {
       return res.status(404).send('Seller not found');
     }
 
+    console.log('Seller:', seller);
+
     const eggForSale = seller.eggsForSale.find(
       (egg) => egg.eggType === eggType && egg.price === price
     );
@@ -169,29 +177,35 @@ router.post('/buy-egg', async (req, res) => {
       return res.status(400).send('Not enough eggs available');
     }
 
-    // Riduci la quantità dell'uovo in vendita
+    const totalCost = price * quantity;
+
+    if (buyer.tcBalance < totalCost) {
+      return res.status(400).send('Insufficient TC balance');
+    }
+
+    buyer.tcBalance -= totalCost;
+    seller.tcBalance += totalCost;
     eggForSale.quantity -= quantity;
 
-    // Se la quantità dell'uovo è zero, rimuovi l'entry
     if (eggForSale.quantity === 0) {
       seller.eggsForSale = seller.eggsForSale.filter(
         (egg) => !(egg.eggType === eggType && egg.price === price)
       );
     }
 
-    // Aggiungi le uova comprate all'account dell'acquirente
-    if (user.eggs.has(eggType)) {
-      user.eggs.set(eggType, user.eggs.get(eggType) + quantity);
+    if (buyer.eggs.has(eggType)) {
+      buyer.eggs.set(eggType, buyer.eggs.get(eggType) + quantity);
     } else {
-      user.eggs.set(eggType, quantity);
+      buyer.eggs.set(eggType, quantity);
     }
 
-    // Salva i cambiamenti
-    await user.save();
+    await buyer.save();
     await seller.save();
 
+    console.log('Purchase successful');
     res.send('Purchase successful');
   } catch (error) {
+    console.error('Error processing purchase:', error);
     res.status(500).send('Error processing purchase');
   }
 });

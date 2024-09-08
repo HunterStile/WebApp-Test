@@ -18,7 +18,7 @@ function Marketplace() {
   const [inventory, setInventory] = useState({});
   const [sellPrice, setSellPrice] = useState('');
   const [sellQuantity, setSellQuantity] = useState({});
-  
+
   // Stato per la gestione della modale
   const [selectedEgg, setSelectedEgg] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -28,6 +28,8 @@ function Marketplace() {
     fetchEggsForSale();
   }, []);
 
+
+  
   const fetchInventory = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/tc/eggs`, { params: { username: user } });
@@ -120,24 +122,6 @@ function Marketplace() {
     }
   };
 
-  const handleBuyEgg = async (eggType, price, quantity) => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/tc/buy-egg`, {
-        username: user, // Imposta l'utente attuale
-        eggType,
-        price,
-        quantity,
-      });
-      console.log('Purchase successful:', response.data);
-      alert('Purchase successful!');
-      fetchInventory();  // Aggiorna l'inventario dopo l'acquisto
-      fetchEggsForSale();  // Aggiorna il mercato dopo l'acquisto
-    } catch (error) {
-      console.error('Error buying egg:', error);
-      alert('Error during purchase');
-    }
-  };
-
   // Funzione per aprire la modale
   const handleOpenModal = (egg) => {
     setSelectedEgg(egg);
@@ -152,10 +136,34 @@ function Marketplace() {
   };
 
   // Funzione per gestire l'acquisto dalla modale
-  const handleBuy = () => {
+  const handleBuy = async () => {
     if (selectedEgg && quantity > 0) {
-      handleBuyEgg(selectedEgg.eggType, selectedEgg.floorPrice, quantity);
-      handleCloseModal(); // Chiudi la modale dopo l'acquisto
+      // Calcola il costo totale
+      const totalCost = selectedEgg.floorPrice * quantity;
+  
+      // Verifica se l'utente ha abbastanza TC
+      if (tcBalance < totalCost) {
+        alert('Insufficient TC balance');
+        return;
+      }
+  
+      // Procedi con l'acquisto
+      try {
+        await axios.post(`${API_BASE_URL}/tc/buy-egg`, {
+          username: user,
+          eggType: selectedEgg.eggType,
+          price: selectedEgg.floorPrice,
+          quantity
+        });
+  
+        // Chiudi la modale e aggiorna i dati
+        handleCloseModal();
+        fetchInventory();
+        fetchEggsForSale();
+      } catch (error) {
+        console.error('Error during purchase:', error);
+        alert('Error during purchase');
+      }
     }
   };
 

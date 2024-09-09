@@ -9,6 +9,7 @@ function Inventory() {
   const [eggs, setEggs] = useState({});
   const [incubators, setIncubators] = useState([]);
   const [message, setMessage] = useState('');
+  const [dragons, setDragons] = useState([]);
 
   useEffect(() => {
     if (user) {
@@ -20,7 +21,7 @@ function Inventory() {
           setEggs(filteredEggs);
         })
         .catch(error => console.error('Error fetching eggs:', error));
-      
+
       axios.get(`${API_BASE_URL}/tc/incubators?username=${user}`)
         .then(response => {
           setIncubators(response.data.incubators);
@@ -31,7 +32,7 @@ function Inventory() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIncubators(prevIncubators => 
+      setIncubators(prevIncubators =>
         prevIncubators.map(incubator => {
           if (incubator.incubationEndTime) {
             return {
@@ -46,6 +47,16 @@ function Inventory() {
 
     return () => clearInterval(interval); // Pulizia dell'intervallo quando il componente viene smontato
   }, [incubators]);
+
+  useEffect(() => {
+    if (user) {
+      axios.get(`${API_BASE_URL}/tc/dragons?username=${user}`)
+        .then(response => {
+          setDragons(response.data.dragons);
+        })
+        .catch(error => console.error('Error fetching dragons:', error));
+    }
+  }, [user]);
 
   const handleIncubate = (eggType) => {
     axios.post(`${API_BASE_URL}/tc/incubate`, { username: user, eggType })
@@ -68,16 +79,30 @@ function Inventory() {
   };
 
   const handleOpen = (index) => {
-    axios.post(`${API_BASE_URL}/tc/open-incubated-egg`, { username: user, index })
-      .then(response => {
-        setMessage('L\'uovo è stato aperto con successo!');
-        setIncubators(prev => prev.filter((_, i) => i !== index));
-      })
-      .catch(error => {
-        console.error('Error opening incubated egg:', error);
-        setMessage('Errore durante l\'apertura dell\'uovo.');
-      });
-  };
+  axios.post(`${API_BASE_URL}/tc/open-incubated-egg`, { username: user, index })
+    .then(response => {
+      setMessage('L\'uovo è stato aperto con successo!');
+      // Rimuovi l'uovo dalla lista degli incubatori
+      setIncubators(prev => prev.filter((_, i) => i !== index));
+      // Ricarica l'elenco degli incubatori e dei draghi
+      axios.get(`${API_BASE_URL}/tc/incubators?username=${user}`)
+        .then(response => {
+          setIncubators(response.data.incubators);
+        })
+        .catch(error => console.error('Error fetching incubators:', error));
+
+      axios.get(`${API_BASE_URL}/tc/dragons?username=${user}`)
+        .then(response => {
+          setDragons(response.data.dragons);
+        })
+        .catch(error => console.error('Error fetching dragons:', error));
+    })
+    .catch(error => {
+      console.error('Error opening incubated egg:', error);
+      setMessage('Errore durante l\'apertura dell\'uovo.');
+    });
+};
+
 
   const calculateTimeLeft = (endTime) => {
     const now = new Date();
@@ -137,6 +162,21 @@ function Inventory() {
       ) : (
         <p>No eggs are currently incubating.</p>
       )}
+      <h3>Your Dragons</h3>
+      {dragons.length > 0 ? (
+        <ul>
+          {dragons.map((dragon, index) => (
+            <li key={index}>
+              <p>Name: {dragon.name}</p>
+              <p>Resistance: {dragon.resistance}</p>
+              <p>Mining Power: {dragon.miningPower}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>You have no dragons.</p>
+      )}
+
     </div>
   );
 }

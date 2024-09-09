@@ -370,5 +370,70 @@ router.get('/incubators', async (req, res) => {
   }
 });
 
+// Genera un drago in base alla rarità dell'uovo
+const generateDragon = (eggType) => {
+  const dragons = {
+    'Common Egg': { name: 'Common Dragon', resistance: 10, miningPower: 5 },
+    'Uncommon Egg': { name: 'Uncommon Dragon', resistance: 20, miningPower: 10 },
+    'Rare Egg': { name: 'Rare Dragon', resistance: 30, miningPower: 20 },
+    'Epic Egg': { name: 'Epic Dragon', resistance: 40, miningPower: 30 },
+    'Legendary Egg': { name: 'Legendary Dragon', resistance: 50, miningPower: 50 },
+  };
+  return dragons[eggType] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
+};
+
+// Endpoint per aprire un uovo incubato
+router.post('/open-incubated-egg', async (req, res) => {
+  const { username, index } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    if (index < 0 || index >= user.incubators.length) {
+      return res.status(400).json({ error: 'Indice dell\'uovo non valido' });
+    }
+
+    const incubatedEgg = user.incubators[index];
+    const { eggType } = incubatedEgg;
+
+    // Genera il drago in base al tipo di uovo
+    const dragon = generateDragon(eggType);
+
+    // Rimuovi l'uovo dall'incubatore
+    user.incubators.splice(index, 1);
+
+    // Aggiungi il drago all'inventario dell'utente
+    user.dragons.push(dragon);
+
+    await user.save();
+
+    res.json({ success: 'Uovo aperto con successo', dragon });
+  } catch (error) {
+    console.error('Errore durante l\'apertura dell\'uovo:', error);
+    res.status(500).json({ error: 'Errore durante l\'apertura dell\'uovo' });
+  }
+});
+
+// Endpoint per recuperare i draghi dell'utente
+router.get('/dragons', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    res.json({ dragons: user.dragons });
+  } catch (error) {
+    console.error('Errore durante il recupero dei draghi:', error);
+    res.status(500).json({ error: 'Errore durante il recupero dei draghi' });
+  }
+});
 
 module.exports = router;

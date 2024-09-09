@@ -1,4 +1,3 @@
-// client/src/components/Inventory.js
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
@@ -8,6 +7,7 @@ import eggImages from '../utils/eggImages'; // Importa il modulo delle immagini
 function Inventory() {
   const { user } = useContext(AuthContext);
   const [eggs, setEggs] = useState({});
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -22,9 +22,26 @@ function Inventory() {
     }
   }, [user]);
 
+  const handleIncubate = (eggType) => {
+    axios.post(`${API_BASE_URL}/tc/incubate`, { username: user, eggType })
+      .then(response => {
+        setMessage(`L'uovo di tipo ${eggType} è stato inserito nell'incubatore!`);
+        // Aggiorna lo stato rimuovendo un'unità di quell'uovo dall'inventario
+        setEggs(prevEggs => ({
+          ...prevEggs,
+          [eggType]: prevEggs[eggType] - 1
+        }));
+      })
+      .catch(error => {
+        console.error('Error incubating egg:', error);
+        setMessage('Errore durante l\'incubazione.');
+      });
+  };
+
   return (
     <div>
       <h2>Your Egg Inventory</h2>
+      {message && <p>{message}</p>} {/* Mostra messaggi di stato */}
       {Object.keys(eggs).length > 0 ? (
         <ul>
           {Object.entries(eggs).map(([eggType, count]) => {
@@ -34,6 +51,9 @@ function Inventory() {
               <li key={eggType}>
                 <img src={image} alt={eggType} style={{ width: '50px', height: '50px' }} />
                 {eggType}: {count}
+                <button onClick={() => handleIncubate(eggType)} disabled={count <= 0}>
+                  Incubate
+                </button>
               </li>
             );
           })}

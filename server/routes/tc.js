@@ -297,4 +297,62 @@ router.get('/egg-sales', async (req, res) => {
   }
 });
 
+// Incuba un uovo
+router.post('/incubate', async (req, res) => {
+  const { username, eggType } = req.body;
+
+  try {
+    // Verifica che username e eggType siano presenti
+    if (!username || !eggType) {
+      return res.status(400).json({ error: 'Missing username or eggType' });
+    }
+
+    // Trova l'utente
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    // Verifica che l'utente abbia abbastanza uova di quel tipo
+    if (!user.eggs.has(eggType) || user.eggs.get(eggType) <= 0) {
+      return res.status(400).json({ error: `Non hai abbastanza uova di tipo ${eggType}` });
+    }
+
+    const incubationTimes = {
+      'Common Egg': 1 * 60 * 1000,      // 1 minuto
+      'Uncommon Egg': 10 * 60 * 1000,   // 10 minuti
+      'Rare Egg': 60 * 60 * 1000,       // 1 ora
+      'Epic Egg': 24 * 60 * 60 * 1000,  // 24 ore
+      'Legendary Egg': 7 * 24 * 60 * 60 * 1000, // 1 settimana
+    };
+
+    // Verifica se il tipo di uovo esiste nell'incubationTimes
+    if (!incubationTimes.hasOwnProperty(eggType)) {
+      return res.status(400).json({ error: 'Tipo di uovo non valido' });
+    }
+
+    // Calcola il tempo di fine incubazione
+    const incubationEndTime = new Date(Date.now() + incubationTimes[eggType]);
+
+    // Aggiungi l'uovo nell'incubatore
+    user.incubators.push({
+      eggType,
+      incubationEndTime
+    });
+
+    // Rimuovi un uovo dall'inventario
+    const eggCount = user.eggs.get(eggType);
+    user.eggs.set(eggType, eggCount - 1);
+
+    // Salva l'utente
+    await user.save();
+
+    res.json({ success: 'Uovo inserito nell\'incubatore' });
+  } catch (error) {
+    res.status(500).json({ error: 'Errore durante l\'incubazione' });
+  }
+});
+
+
 module.exports = router;

@@ -137,6 +137,7 @@ function Marketplace() {
   // Funzione per aprire la modale
   const handleOpenModal = async (egg) => {
     setSelectedEgg(egg);
+    setEggImage(getEggImage(egg.eggType));
     setQuantity(1);  // Imposta la quantità a 1 di default
     document.querySelector('.modal').classList.add('open');
     await fetchEggSales(egg.eggType); // Recupera gli articoli in vendita per l'egg selezionato
@@ -178,6 +179,23 @@ function Marketplace() {
         console.error('Error during purchase:', error);
         alert('Error during purchase');
       }
+    }
+  };
+
+  const getEggImage = (eggType) => {
+    switch (eggType) {
+      case 'Common Egg':
+        return commonEggImage;
+      case 'Uncommon Egg':
+        return uncommonEggImage;
+      case 'Rare Egg':
+        return rareEggImage;
+      case 'Epic Egg':
+        return epicEggImage;
+      case 'Legendary Egg':
+        return legendaryEggImage;
+      default:
+        return null;
     }
   };
 
@@ -279,7 +297,9 @@ function Marketplace() {
                 </div>
                 <div style={{ width: '30%' }}>
                   <h4>Selected Egg Details:</h4>
-                  <img src={eggImage} alt={selectedEgg.eggType} style={{ width: '100%' }} />
+                  {eggImage && (
+                    <img src={eggImage} alt={selectedEgg.eggType} style={{ width: '50px', height: '50px' }} />
+                  )}
                   <div>
                     <label>Quantity: </label>
                     <input

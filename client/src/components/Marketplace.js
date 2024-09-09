@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import mysteryBoxImage from '../assets/images/mystery-box.png';
-import commonEggImage from '../assets/images/common-egg.png';
-import uncommonEggImage from '../assets/images/uncommon-egg.png';
-import rareEggImage from '../assets/images/rare-egg.png';
-import epicEggImage from '../assets/images/epic-egg.png';
-import legendaryEggImage from '../assets/images/legendary-egg.png';
+import commonEggImage from '../assets/images/egg/common-egg.png';
+import uncommonEggImage from '../assets/images/egg/uncommon-egg.png';
+import rareEggImage from '../assets/images/egg/rare-egg.png';
+import epicEggImage from '../assets/images/egg/epic-egg.png';
+import legendaryEggImage from '../assets/images/egg/legendary-egg.png';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
@@ -22,6 +22,14 @@ function Marketplace() {
   const [selectedEgg, setSelectedEgg] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [eggSales, setEggSales] = useState([]); // Stato per gli articoli in vendita
+
+  const eggImages = {
+    'Common Egg': commonEggImage,
+    'Uncommon Egg': uncommonEggImage,
+    'Rare Egg': rareEggImage,
+    'Epic Egg': epicEggImage,
+    'Legendary Egg': legendaryEggImage,
+  };
 
   useEffect(() => {
     fetchInventory();
@@ -77,20 +85,17 @@ function Marketplace() {
 
     if (randomValue < 60) {
       eggType = 'Common Egg';
-      image = commonEggImage;
     } else if (randomValue < 86) {
       eggType = 'Uncommon Egg';
-      image = uncommonEggImage;
     } else if (randomValue < 95) {
       eggType = 'Rare Egg';
-      image = rareEggImage;
     } else if (randomValue < 99) {
       eggType = 'Epic Egg';
-      image = epicEggImage;
     } else {
       eggType = 'Legendary Egg';
-      image = legendaryEggImage;
     }
+
+    image = eggImages[eggType]; // Usa la mappatura per ottenere l'immagine
 
     setResult(eggType);
     setEggImage(image);
@@ -182,22 +187,7 @@ function Marketplace() {
     }
   };
 
-  const getEggImage = (eggType) => {
-    switch (eggType) {
-      case 'Common Egg':
-        return commonEggImage;
-      case 'Uncommon Egg':
-        return uncommonEggImage;
-      case 'Rare Egg':
-        return rareEggImage;
-      case 'Epic Egg':
-        return epicEggImage;
-      case 'Legendary Egg':
-        return legendaryEggImage;
-      default:
-        return null;
-    }
-  };
+  const getEggImage = (eggType) => eggImages[eggType] || null;
 
   return (
     <div>

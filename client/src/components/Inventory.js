@@ -5,11 +5,11 @@ import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 
 // Importa le immagini degli ovuli
-import commonEggImage from '../assets/images/common-egg.png';
-import uncommonEggImage from '../assets/images/uncommon-egg.png';
-import rareEggImage from '../assets/images/rare-egg.png';
-import epicEggImage from '../assets/images/epic-egg.png';
-import legendaryEggImage from '../assets/images/legendary-egg.png';
+import commonEggImage from '../assets/images/egg/common-egg.png';
+import uncommonEggImage from '../assets/images/egg/uncommon-egg.png';
+import rareEggImage from '../assets/images/egg/rare-egg.png';
+import epicEggImage from '../assets/images/egg/epic-egg.png';
+import legendaryEggImage from '../assets/images/egg/legendary-egg.png';
 
 function Inventory() {
   const { user } = useContext(AuthContext);

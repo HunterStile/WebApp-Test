@@ -370,18 +370,6 @@ router.get('/incubators', async (req, res) => {
   }
 });
 
-// Genera un drago in base alla rarità dell'uovo
-const generateDragon = (eggType) => {
-  const dragons = {
-    'Common Egg': { name: 'Common Dragon', resistance: 10, miningPower: 5 },
-    'Uncommon Egg': { name: 'Uncommon Dragon', resistance: 20, miningPower: 10 },
-    'Rare Egg': { name: 'Rare Dragon', resistance: 30, miningPower: 20 },
-    'Epic Egg': { name: 'Epic Dragon', resistance: 40, miningPower: 30 },
-    'Legendary Egg': { name: 'Legendary Dragon', resistance: 50, miningPower: 50 },
-  };
-  return dragons[eggType] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
-};
-
 // Endpoint per aprire un uovo incubato
 router.post('/open-incubated-egg', async (req, res) => {
   const { username, index } = req.body;
@@ -435,5 +423,37 @@ router.get('/dragons', async (req, res) => {
     res.status(500).json({ error: 'Errore durante il recupero dei draghi' });
   }
 });
+
+//SEZIONE PER CREAZIONE DI DRAGHI//
+
+// Genera un drago in base alla rarità dell'uovo
+const generateDragon = (eggType) => {
+  const dragons = {
+    'Common Egg': [
+      { name: 'Fire Dragon', resistance: 5, miningPower: 10, probability: 33 },
+      { name: 'Water Dragon', resistance: 7, miningPower: 8, probability: 33 },
+      { name: 'Grass Dragon', resistance: 10, miningPower: 5, probability: 34 }
+    ],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
+    'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
+    'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
+    'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
+  };
+
+  // Seleziona casualmente il drago in base alle probabilità
+  if (eggType === 'Common Egg') {
+    const randomValue = Math.random() * 100;
+    let cumulativeProbability = 0;
+    for (const dragon of dragons['Common Egg']) {
+      cumulativeProbability += dragon.probability;
+      if (randomValue <= cumulativeProbability) {
+        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower };
+      }
+    }
+  }
+
+  // Per le altre uova, restituisce il primo (unico) drago
+  return dragons[eggType]?.[0] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
+};
 
 module.exports = router;

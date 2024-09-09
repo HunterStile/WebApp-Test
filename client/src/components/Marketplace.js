@@ -1,3 +1,4 @@
+// client/src/components/Marketplace.js
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import mysteryBoxImage from '../assets/images/mystery-box.png';
@@ -10,11 +11,11 @@ import axios from 'axios';
 import API_BASE_URL from '../config';
 
 function Marketplace() {
-  const { user, tcBalance, spendTc } = useContext(AuthContext);
+  const { user, tcBalance, spendTc, fetchTcBalance } = useContext(AuthContext);
   const [result, setResult] = useState('');
   const [eggImage, setEggImage] = useState(null);
   const [boxOpened, setBoxOpened] = useState(false);
-  const [eggsForSale, setEggsForSale] = useState([]);  // Inizializza come array
+  const [eggsForSale, setEggsForSale] = useState([]);
   const [inventory, setInventory] = useState({});
   const [sellPrice, setSellPrice] = useState('');
   const [sellQuantity, setSellQuantity] = useState({});
@@ -28,8 +29,6 @@ function Marketplace() {
     fetchEggsForSale();
   }, []);
 
-
-  
   const fetchInventory = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/tc/eggs`, { params: { username: user } });
@@ -140,26 +139,27 @@ function Marketplace() {
     if (selectedEgg && quantity > 0) {
       // Calcola il costo totale
       const totalCost = selectedEgg.floorPrice * quantity;
-  
+
       // Verifica se l'utente ha abbastanza TC
       if (tcBalance < totalCost) {
         alert('Insufficient TC balance');
         return;
       }
-  
+
       // Procedi con l'acquisto
       try {
         await axios.post(`${API_BASE_URL}/tc/buy-egg`, {
           username: user,
           eggType: selectedEgg.eggType,
           price: selectedEgg.floorPrice,
-          quantity
+          quantity,
         });
-  
+
         // Chiudi la modale e aggiorna i dati
         handleCloseModal();
         fetchInventory();
         fetchEggsForSale();
+        fetchTcBalance(); // Aggiorna il saldo TC
       } catch (error) {
         console.error('Error during purchase:', error);
         alert('Error during purchase');

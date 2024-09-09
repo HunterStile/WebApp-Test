@@ -19,10 +19,9 @@ function Marketplace() {
   const [inventory, setInventory] = useState({});
   const [sellPrice, setSellPrice] = useState('');
   const [sellQuantity, setSellQuantity] = useState({});
-
-  // Stato per la gestione della modale
   const [selectedEgg, setSelectedEgg] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [eggSales, setEggSales] = useState([]); // Stato per gli articoli in vendita
 
   useEffect(() => {
     fetchInventory();
@@ -49,6 +48,20 @@ function Marketplace() {
     } catch (error) {
       console.error('Error fetching eggs for sale:', error);
       setEggsForSale([]);  // Imposta un array vuoto in caso di errore
+    }
+  };
+
+  const fetchEggSales = async (eggType) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/egg-sales`, { params: { eggType } });
+      if (Array.isArray(response.data)) {
+        setEggSales(response.data);
+      } else {
+        setEggSales([]);  // Imposta un array vuoto se i dati non sono un array
+      }
+    } catch (error) {
+      console.error('Error fetching egg sales:', error);
+      setEggSales([]);  // Imposta un array vuoto in caso di errore
     }
   };
 
@@ -122,10 +135,11 @@ function Marketplace() {
   };
 
   // Funzione per aprire la modale
-  const handleOpenModal = (egg) => {
+  const handleOpenModal = async (egg) => {
     setSelectedEgg(egg);
     setQuantity(1);  // Imposta la quantità a 1 di default
     document.querySelector('.modal').classList.add('open');
+    await fetchEggSales(egg.eggType); // Recupera gli articoli in vendita per l'egg selezionato
   };
 
   // Funzione per chiudere la modale
@@ -237,21 +251,52 @@ function Marketplace() {
           {selectedEgg && (
             <div>
               <h3>Compra Uova di tipo: {selectedEgg.eggType}</h3>
-              <div>
-                <label>Quantità: </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={selectedEgg.totalQuantity}  // Impedisce di acquistare più di quanto disponibile
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, Math.min(selectedEgg.totalQuantity, parseInt(e.target.value))))}
-                />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ width: '60%' }}>
+                  <h4>Items for Sale:</h4>
+                  {eggSales.length > 0 ? (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Price</th>
+                          <th>Quantity</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {eggSales
+                          .sort((a, b) => a.price - b.price) // Ordina per prezzo
+                          .map((sale, index) => (
+                            <tr key={index}>
+                              <td>{sale.price.toFixed(2)} TC</td>
+                              <td>{sale.quantity}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p>No items for sale.</p>
+                  )}
+                </div>
+                <div style={{ width: '30%' }}>
+                  <h4>Selected Egg Details:</h4>
+                  <img src={eggImage} alt={selectedEgg.eggType} style={{ width: '100%' }} />
+                  <div>
+                    <label>Quantity: </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={selectedEgg.totalQuantity}
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, Math.min(selectedEgg.totalQuantity, parseInt(e.target.value))))}
+                    />
+                  </div>
+                  <div>
+                    <label>Price: </label>
+                    <span>{(selectedEgg.floorPrice * quantity).toFixed(2)} TC</span>
+                  </div>
+                  <button onClick={handleBuy}>Buy</button>
+                </div>
               </div>
-              <div>
-                <label>Prezzo: </label>
-                <span>{(selectedEgg.floorPrice * quantity).toFixed(2)} TC</span>
-              </div>
-              <button onClick={handleBuy}>Buy</button>
             </div>
           )}
         </div>

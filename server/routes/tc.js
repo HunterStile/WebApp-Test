@@ -262,4 +262,39 @@ router.get('/eggs-for-sale', async (req, res) => {
   }
 });
 
+// Ottieni gli articoli in vendita per un tipo di egg specifico
+router.get('/egg-sales', async (req, res) => {
+  const { eggType } = req.query;
+
+  if (!eggType) {
+    return res.status(400).send('Egg type is required');
+  }
+
+  try {
+    const usersWithEggsForSale = await User.find({ 'eggsForSale.0': { $exists: true } });
+
+    let sales = [];
+
+    usersWithEggsForSale.forEach(user => {
+      user.eggsForSale.forEach(egg => {
+        if (egg.eggType === eggType) {
+          const quantity = Number(egg.quantity) || 0;
+          const price = Number(egg.price) || 0;
+          if (quantity > 0 && price > 0) {
+            sales.push({ price, quantity });
+          }
+        }
+      });
+    });
+
+    // Ordina per prezzo crescente
+    sales.sort((a, b) => a.price - b.price);
+
+    res.json(sales);
+  } catch (error) {
+    console.error('Error fetching egg sales:', error);
+    res.status(500).send('Error fetching egg sales');
+  }
+});
+
 module.exports = router;

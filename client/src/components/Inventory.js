@@ -29,16 +29,32 @@ function Inventory() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIncubators(prevIncubators => 
+        prevIncubators.map(incubator => {
+          if (incubator.incubationEndTime) {
+            return {
+              ...incubator,
+              timeLeft: calculateTimeLeft(new Date(incubator.incubationEndTime))
+            };
+          }
+          return incubator; // Restituisci l'oggetto incubator se incubationEndTime non è definito
+        })
+      );
+    }, 1000); // Aggiorna ogni secondo
+
+    return () => clearInterval(interval); // Pulizia dell'intervallo quando il componente viene smontato
+  }, [incubators]);
+
   const handleIncubate = (eggType) => {
     axios.post(`${API_BASE_URL}/tc/incubate`, { username: user, eggType })
       .then(response => {
         setMessage(`L'uovo di tipo ${eggType} è stato inserito nell'incubatore!`);
-        // Aggiorna lo stato rimuovendo un'unità di quell'uovo dall'inventario
         setEggs(prevEggs => ({
           ...prevEggs,
           [eggType]: prevEggs[eggType] - 1
         }));
-        // Aggiungi la nuova uova incubata alla lista
         axios.get(`${API_BASE_URL}/tc/incubators?username=${user}`)
           .then(response => {
             setIncubators(response.data.incubators);
@@ -55,7 +71,6 @@ function Inventory() {
     axios.post(`${API_BASE_URL}/tc/open-incubated-egg`, { username: user, index })
       .then(response => {
         setMessage('L\'uovo è stato aperto con successo!');
-        // Rimuovi l'uovo dalla lista degli incubatori
         setIncubators(prev => prev.filter((_, i) => i !== index));
       })
       .catch(error => {
@@ -67,6 +82,7 @@ function Inventory() {
   const calculateTimeLeft = (endTime) => {
     const now = new Date();
     const timeLeft = endTime - now;
+    if (timeLeft < 0) return { hours: 0, minutes: 0, seconds: 0 }; // Se il tempo è scaduto, restituisci 0 per tutti
     const hours = Math.floor(timeLeft / (1000 * 60 * 60));
     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
@@ -102,16 +118,15 @@ function Inventory() {
       {incubators.length > 0 ? (
         <ul>
           {incubators.map((incubator, index) => {
-            const { eggType, incubationEndTime } = incubator;
+            const { eggType, incubationEndTime, timeLeft } = incubator;
             const imageName = `${eggType.toLowerCase().replace(/ /g, '-')}.png`;
             const image = eggImages[imageName];
-            const timeLeft = calculateTimeLeft(new Date(incubationEndTime));
-            const isReady = timeLeft.hours <= 0 && timeLeft.minutes <= 0 && timeLeft.seconds <= 0;
+            const isReady = timeLeft?.hours <= 0 && timeLeft?.minutes <= 0 && timeLeft?.seconds <= 0;
 
             return (
               <li key={index}>
                 <img src={image} alt={eggType} style={{ width: '50px', height: '50px' }} />
-                {eggType}: {isReady ? 'Ready to Open' : `Time Left: ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`}
+                {eggType}: {isReady ? 'Ready to Open' : `Time Left: ${timeLeft?.hours}h ${timeLeft?.minutes}m ${timeLeft?.seconds}s`}
                 <button onClick={() => handleOpen(index)} disabled={!isReady}>
                   Open
                 </button>

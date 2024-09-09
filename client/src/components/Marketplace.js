@@ -2,11 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import mysteryBoxImage from '../assets/images/mystery-box.png';
-import commonEggImage from '../assets/images/egg/common-egg.png';
-import uncommonEggImage from '../assets/images/egg/uncommon-egg.png';
-import rareEggImage from '../assets/images/egg/rare-egg.png';
-import epicEggImage from '../assets/images/egg/epic-egg.png';
-import legendaryEggImage from '../assets/images/egg/legendary-egg.png';
+import eggImages from '../utils/eggImages';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
@@ -23,14 +19,8 @@ function Marketplace() {
   const [quantity, setQuantity] = useState(1);
   const [eggSales, setEggSales] = useState([]); // Stato per gli articoli in vendita
 
-  const eggImages = {
-    'Common Egg': commonEggImage,
-    'Uncommon Egg': uncommonEggImage,
-    'Rare Egg': rareEggImage,
-    'Epic Egg': epicEggImage,
-    'Legendary Egg': legendaryEggImage,
-  };
-
+  const getEggImage = (eggType) => eggImages[`${eggType.toLowerCase().replace(/ /g, '-')}.png`] || null;
+  
   useEffect(() => {
     fetchInventory();
     fetchEggsForSale();
@@ -78,11 +68,10 @@ function Marketplace() {
       alert('Insufficient TC balance');
       return;
     }
-
+  
     const randomValue = Math.random() * 100;
     let eggType = '';
-    let image = null;
-
+  
     if (randomValue < 60) {
       eggType = 'Common Egg';
     } else if (randomValue < 86) {
@@ -94,23 +83,23 @@ function Marketplace() {
     } else {
       eggType = 'Legendary Egg';
     }
-
-    image = eggImages[eggType]; // Usa la mappatura per ottenere l'immagine
-
+  
+    const image = getEggImage(eggType); // Usa la funzione per ottenere l'immagine
+  
     setResult(eggType);
     setEggImage(image);
     spendTc(50); // Deduct 50 TC using the context function
-
+  
     try {
       await axios.post(`${API_BASE_URL}/tc/open-box`, { username: user, eggType });
       fetchInventory();
     } catch (error) {
       console.error('Error saving egg:', error);
     }
-
+  
     setBoxOpened(true);
   };
-
+  
   const resetBox = () => {
     setResult('');
     setEggImage(null);
@@ -186,8 +175,6 @@ function Marketplace() {
       }
     }
   };
-
-  const getEggImage = (eggType) => eggImages[eggType] || null;
 
   return (
     <div>

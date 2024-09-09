@@ -354,5 +354,21 @@ router.post('/incubate', async (req, res) => {
   }
 });
 
+// Ottieni le uova incubate dell'utente
+router.get('/incubators', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ incubators: user.incubators });
+  } catch (error) {
+    console.error('Error fetching incubators:', error);
+    res.status(500).json({ error: 'Error fetching incubators' });
+  }
+});
+
 
 module.exports = router;

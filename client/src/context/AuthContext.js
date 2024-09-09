@@ -73,6 +73,7 @@ export const AuthProvider = ({ children }) => {
       // Imposta un intervallo di aggiornamento ogni 30 secondi
       const interval = setInterval(() => {
         fetchBtcBalance();
+        fetchTcBalance();
       }, 30000);
 
       // Pulisce l'intervallo quando il componente viene smontato o l'utente cambia

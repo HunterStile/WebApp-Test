@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config'; // Importa l'URL di base
-import eggImages from '../utils/eggImages'; // Importa il modulo delle immagini
+import eggImages from '../utils/eggImages';
+import dragonImages from '../utils/dragonImages';
 
 function Inventory() {
   const { user } = useContext(AuthContext);
@@ -79,29 +80,29 @@ function Inventory() {
   };
 
   const handleOpen = (index) => {
-  axios.post(`${API_BASE_URL}/tc/open-incubated-egg`, { username: user, index })
-    .then(response => {
-      setMessage('L\'uovo è stato aperto con successo!');
-      // Rimuovi l'uovo dalla lista degli incubatori
-      setIncubators(prev => prev.filter((_, i) => i !== index));
-      // Ricarica l'elenco degli incubatori e dei draghi
-      axios.get(`${API_BASE_URL}/tc/incubators?username=${user}`)
-        .then(response => {
-          setIncubators(response.data.incubators);
-        })
-        .catch(error => console.error('Error fetching incubators:', error));
+    axios.post(`${API_BASE_URL}/tc/open-incubated-egg`, { username: user, index })
+      .then(response => {
+        setMessage('L\'uovo è stato aperto con successo!');
+        // Rimuovi l'uovo dalla lista degli incubatori
+        setIncubators(prev => prev.filter((_, i) => i !== index));
+        // Ricarica l'elenco degli incubatori e dei draghi
+        axios.get(`${API_BASE_URL}/tc/incubators?username=${user}`)
+          .then(response => {
+            setIncubators(response.data.incubators);
+          })
+          .catch(error => console.error('Error fetching incubators:', error));
 
-      axios.get(`${API_BASE_URL}/tc/dragons?username=${user}`)
-        .then(response => {
-          setDragons(response.data.dragons);
-        })
-        .catch(error => console.error('Error fetching dragons:', error));
-    })
-    .catch(error => {
-      console.error('Error opening incubated egg:', error);
-      setMessage('Errore durante l\'apertura dell\'uovo.');
-    });
-};
+        axios.get(`${API_BASE_URL}/tc/dragons?username=${user}`)
+          .then(response => {
+            setDragons(response.data.dragons);
+          })
+          .catch(error => console.error('Error fetching dragons:', error));
+      })
+      .catch(error => {
+        console.error('Error opening incubated egg:', error);
+        setMessage('Errore durante l\'apertura dell\'uovo.');
+      });
+  };
 
 
   const calculateTimeLeft = (endTime) => {
@@ -165,18 +166,24 @@ function Inventory() {
       <h3>Your Dragons</h3>
       {dragons.length > 0 ? (
         <ul>
-          {dragons.map((dragon, index) => (
-            <li key={index}>
-              <p>Name: {dragon.name}</p>
-              <p>Resistance: {dragon.resistance}</p>
-              <p>Mining Power: {dragon.miningPower}</p>
-            </li>
-          ))}
+          {dragons.map((dragon, index) => {
+            const imageName = dragon.name
+              ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
+              : 'default-dragon.png'; // Usa un'immagine di default se `dragon.name` è undefined
+            const image = dragonImages[imageName];
+            return (
+              <li key={index}>
+                <img src={image} alt={dragon.name || 'Unknown Dragon'} style={{ width: '200px', height: '200px' }} />
+                <p>Name: {dragon.name}</p>
+                <p>Resistance: {dragon.resistance}</p>
+                <p>Mining Power: {dragon.miningPower}</p>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <p>You have no dragons.</p>
       )}
-
     </div>
   );
 }

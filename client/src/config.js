@@ -1,4 +1,4 @@
 // client/src/config.js
-const API_BASE_URL = 'https://d421-80-182-135-86.ngrok-free.app/api';
+const API_BASE_URL = 'https://a57c-82-57-91-108.ngrok-free.app/api';
 
 export default API_BASE_URL;

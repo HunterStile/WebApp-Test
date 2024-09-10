@@ -106,7 +106,7 @@ function Casino() {
       return;
     }
 
-    spendTc(5); // Deduce 5 TC
+    spendTc(aviatorBet); // Deduce la puntata TC scelta dall'utente
     setAviatorGameRunning(true);
     setAviatorCrashPoint(generateCrashPoint());
     setAviatorMultiplier(1);

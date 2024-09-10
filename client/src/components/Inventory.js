@@ -63,10 +63,24 @@ function Inventory() {
     axios.post(`${API_BASE_URL}/tc/incubate`, { username: user, eggType })
       .then(response => {
         setMessage(`L'uovo di tipo ${eggType} è stato inserito nell'incubatore!`);
-        setEggs(prevEggs => ({
-          ...prevEggs,
-          [eggType]: prevEggs[eggType] - 1
-        }));
+  
+        // Aggiorna lo stato delle uova rimuovendo quelle che hanno conteggio 0
+        setEggs(prevEggs => {
+          const updatedEggs = {
+            ...prevEggs,
+            [eggType]: prevEggs[eggType] - 1
+          };
+          
+          // Rimuovi le uova con conteggio 0
+          if (updatedEggs[eggType] <= 0) {
+            const { [eggType]: _, ...filteredEggs } = updatedEggs;
+            return filteredEggs;
+          }
+  
+          return updatedEggs;
+        });
+  
+        // Aggiorna l'elenco degli incubatori
         axios.get(`${API_BASE_URL}/tc/incubators?username=${user}`)
           .then(response => {
             setIncubators(response.data.incubators);
@@ -77,7 +91,7 @@ function Inventory() {
         console.error('Error incubating egg:', error);
         setMessage('Errore durante l\'incubazione.');
       });
-  };
+  };  
 
   const handleOpen = (index) => {
     axios.post(`${API_BASE_URL}/tc/open-incubated-egg`, { username: user, index })

@@ -66,6 +66,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Funzione per guadagnare TC
+  const earnTc = async (amount, action) => {
+    try {
+      await axios.post(`${API_BASE_URL}/tc/earn`, { username: user, amount, action });
+      fetchTcBalance(); // Aggiorna il saldo TC dopo aver guadagnato
+    } catch (error) {
+      console.error('Error earning TC:', error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchTcBalance();
@@ -82,7 +92,7 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, tcBalance, btcBalance, setTcBalance, setBtcBalance, login, logout, spendTc, fetchTcBalance, fetchBtcBalance }}>
+    <AuthContext.Provider value={{ user, tcBalance, btcBalance, setTcBalance, setBtcBalance, login, logout, spendTc, fetchTcBalance, fetchBtcBalance, earnTc}}>
       {children}
     </AuthContext.Provider>
   );

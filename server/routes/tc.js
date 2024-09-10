@@ -32,7 +32,7 @@ router.post('/earn', async (req, res) => {
     }
 
     // Aggiungi logica per il guadagno in base all'azione
-    if (action === 'completeTask' || action === 'sellEggs') {
+    if (action === 'completeTask' || action === 'wincasino') {
       user.tcBalance += amount;
     } else {
       return res.status(400).send('Invalid action');

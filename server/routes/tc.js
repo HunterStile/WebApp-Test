@@ -4,6 +4,8 @@ const router = express.Router();
 const User = require('../models/User');
 const axios = require('axios');
 
+// INIZIO ENDPONT //
+
 // Ottieni il saldo di TC dell'utente
 router.get('/balance', async (req, res) => {
   const { username } = req.query;
@@ -424,15 +426,48 @@ router.get('/dragons', async (req, res) => {
   }
 });
 
+// FINE ENDPONT //
+
+//FUNZIONI BASE//
+
+// Funzione per generare un valore casuale tra min e max
+const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Funzione per determinare il bonus basato su probabilità
+const getRandomBonus = () => {
+  const rand = Math.random();
+  if (rand < 0.75) return 0;
+  if (rand < 0.95) return 1;
+  return 2;
+};
+
 //SEZIONE PER CREAZIONE DI DRAGHI//
 
 // Genera un drago in base alla rarità dell'uovo
 const generateDragon = (eggType) => {
   const dragons = {
     'Common Egg': [
-      { name: 'Fire Dragon', resistance: 5, miningPower: 10, probability: 33 },
-      { name: 'Water Dragon', resistance: 7, miningPower: 8, probability: 33 },
-      { name: 'Grass Dragon', resistance: 10, miningPower: 5, probability: 34 }
+      { 
+        name: 'Fire Dragon', 
+        resistance: getRandomInRange(4, 6), 
+        miningPower: getRandomInRange(9, 11), 
+        bonus: getRandomBonus(),
+        probability: 33 
+      },
+      { 
+        name: 'Water Dragon', 
+        resistance: getRandomInRange(6, 8), 
+        miningPower: getRandomInRange(7, 9), 
+        bonus: getRandomBonus(),
+        probability: 33 
+      },
+      { 
+        name: 'Grass Dragon', 
+        resistance: getRandomInRange(9, 11), 
+        miningPower: getRandomInRange(4, 6), 
+        bonus: getRandomBonus(),
+        probability: 34 
+      }
     ],
     'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
     'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
@@ -447,7 +482,7 @@ const generateDragon = (eggType) => {
     for (const dragon of dragons['Common Egg']) {
       cumulativeProbability += dragon.probability;
       if (randomValue <= cumulativeProbability) {
-        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower };
+        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower, bonus: dragon.bonus };
       }
     }
   }

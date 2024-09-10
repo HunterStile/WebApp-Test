@@ -177,6 +177,7 @@ function Inventory() {
                 <p>Name: {dragon.name}</p>
                 <p>Resistance: {dragon.resistance}</p>
                 <p>Mining Power: {dragon.miningPower}</p>
+                <p>bonus: {dragon.bonus}</p>
               </li>
             );
           })}

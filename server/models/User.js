@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 // Schema per i draghi
 const dragonSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  miningPower: { type: Number, required: true },  // Capacità di mining
-  resistance: { type: Number, required: true },        // Resistenza massima iniziale
+  miningPower: { type: Number, required: true },
+  resistance: { type: Number, required: true },  
+  bonus: { type: Number,  default: 0 },
 });
 
 // Schema per le uova in incubazione

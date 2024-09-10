@@ -11,7 +11,8 @@ function Casino() {
   const [nextCard, setNextCard] = useState(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const [winnings, setWinnings] = useState(1); // Imposta 1 come valore predefinito
+  const [winnings, setWinnings] = useState(0); // Inizializza a 0
+  const [bet, setBet] = useState(1); // Puntata iniziale
   const [message, setMessage] = useState('');
 
   // Stati per il gioco Aviator
@@ -37,16 +38,17 @@ function Casino() {
 
   // Inizia il gioco Carta Alta
   const startGame = async () => {
-    if (tcBalance < winnings) {
+    if (tcBalance < bet) {
       setMessage('Insufficient TC balance to start the game.');
       return;
     }
 
-    spendTc(winnings); // Deduce la puntata TC
+    spendTc(bet); // Deduce la puntata TC
     const firstCard = drawCard();
     setCurrentCard(firstCard);
     setGameStarted(true);
     setGameOver(false);
+    setWinnings(0); // Inizializza winnings a 0
     setMessage('');
   };
 
@@ -70,7 +72,8 @@ function Casino() {
       (guessHigh && cardValues[nextDraw] > cardValues[currentCard]) ||
       (!guessHigh && cardValues[nextDraw] < cardValues[currentCard])
     ) {
-      setWinnings(prevWinnings => prevWinnings + 1);
+      const newWinnings = winnings + bet * 0.25;
+      setWinnings(newWinnings);
       setCurrentCard(nextDraw);
       setMessage('Correct! Keep going or cash out.');
     } else {
@@ -84,7 +87,8 @@ function Casino() {
     setGameStarted(false);
     setCurrentCard(null);
     setNextCard(null);
-    setWinnings(1); // Resetta la puntata a 1
+    setWinnings(0); // Resetta la vincita a 0
+    setBet(1); // Resetta la puntata a 1
     setGameOver(false);
     setMessage('');
   };
@@ -170,8 +174,8 @@ function Casino() {
           <div>
             <input
               type="number"
-              value={winnings}
-              onChange={(e) => setWinnings(Math.max(1, Number(e.target.value)))}
+              value={bet}
+              onChange={(e) => setBet(Math.max(1, Number(e.target.value)))}
               placeholder="Place your bet"
               min="1"
               step="1"

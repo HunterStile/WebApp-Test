@@ -26,6 +26,11 @@ lato server
 934a387b72ea34f5a437446fdf4f5e9b 
 75555127482ee54e4a4d261370d5098a
 
+/*CREAZIONE CHIAVE SEGRETA*/
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" = genera chiave da insireri nel file .env del server
+npm install dotenv = Pacchetto per leggere la chiave
+require('dotenv').config(); = da inserire nel file principale ( app.js)
+const secret = process.env.SECRET_KEY; = la uso
 
 /* TO DO LIST */
 [X] Mercato di oggetti con valuta interna tra utenti (Da migliorare)

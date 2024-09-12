@@ -6,7 +6,9 @@ import API_BASE_URL from '../config';  // Importa la base URL
 
 function Dashboard() {
   const { user, setTcBalance } = useContext(AuthContext);
-  const [btcAddress, setBtcAddress] = useState(''); // Stato per l'indirizzo BTCù
+  const [btcAddress, setBtcAddress] = useState(''); // Stato per l'indirizzo BTC
+  const [recipientAddress, setRecipientAddress] = useState(''); // Stato per l'indirizzo del destinatario
+  const [amount, setAmount] = useState(''); // Stato per l'importo da inviare
   const [feedbackMessage, setFeedbackMessage] = useState('');
 
   const earnTc = async (amount) => {
@@ -41,7 +43,32 @@ function Dashboard() {
       setFeedbackMessage('Error requesting satoshis: ' + error.message);
     }
   };
+
+  // Funzione per inviare fondi ad un altro wallet
+  const sendTransaction = async () => {
+    try {
+      if (!recipientAddress || !amount) {
+        setFeedbackMessage('Recipient address and amount are required.');
+        return;
+      }
   
+      // Imposta il messaggio di caricamento
+      setFeedbackMessage('Sending transaction...');
+  
+      // Esegui la richiesta POST per inviare la transazione
+      const sendResponse = await axios.post(`${API_BASE_URL}/crypto/send-transaction`, {
+        username: user,
+        recipientAddress,
+        amount: parseInt(amount), // Assicurati che l'importo sia in satoshi
+      });
+  
+      // Aggiorna il messaggio di successo
+      setFeedbackMessage('Transaction sent successfully: ' + sendResponse.data.message);
+    } catch (error) {
+      // Aggiorna il messaggio di errore
+      setFeedbackMessage('Error sending transaction: ' + error.message);
+    }
+  };
 
   return (
     <div>
@@ -57,6 +84,24 @@ function Dashboard() {
         />
         <button onClick={requestSatoshis}>Request 100,000 Satoshis</button>
       </div>
+      <div>
+        <h3>Send BTC</h3>
+        <label htmlFor="recipientAddress">Recipient Address:</label>
+        <input
+          id="recipientAddress"
+          type="text"
+          value={recipientAddress}
+          onChange={(e) => setRecipientAddress(e.target.value)} // Stato per l'indirizzo destinatario
+        />
+        <label htmlFor="amount">Amount (in Satoshis):</label>
+        <input
+          id="amount"
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)} // Stato per l'importo
+        />
+        <button onClick={sendTransaction}>Send Transaction</button>
+      </div>
       {feedbackMessage && (
         <div className="feedback-message">
           {feedbackMessage}
@@ -64,7 +109,6 @@ function Dashboard() {
       )}
     </div>
   );
-  
 }
 
 export default Dashboard;

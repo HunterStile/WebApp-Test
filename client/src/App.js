@@ -12,6 +12,7 @@ import Inventory from './components/Inventory';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './components/Profile';
 import OddsList from './components/OddsList';
+import Casino from './components/Casino';
 
 import { AuthProvider } from './context/AuthContext'; // Importa il provider
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/casino" element={<Casino />} />
             </Route>
             
           </Routes>

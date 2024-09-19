@@ -3,9 +3,17 @@
 #directory = cp -r client/build/* public/
 #server =  node app.js
 
+/* Requirement */
+-mongoose
+-express
+-axios
+-node-cache
+-crypto
+-bitcoinjs-lib
+
 /*API blockcypher*/
 //verifica della ricezione
-https://api.blockcypher.com/v1/bcy/test/addrs/(indrizzobtc)/full?token=cdd434bbb074468ab1fa2bc2956ac0e4
+https://api.blockcypher.com/v1/bcy/test/addrs/CCn1seEPW8BmbSQHQTXvxd6kDdBvgpoZ2Z/full?token=cdd434bbb074468ab1fa2bc2956ac0e4
 
 /* CONFIGURAZIONE NGROK */
 lato client
@@ -15,11 +23,22 @@ lato server
 -crypto.js (MODIFICARE API_BASE_URL)
 
 /* API oddsapi*/
-934a387b72ea34f5a437446fdf4f5e9b
+934a387b72ea34f5a437446fdf4f5e9b 
+75555127482ee54e4a4d261370d5098a
 
+/*CREAZIONE CHIAVE SEGRETA*/
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" = genera chiave da insireri nel file .env del server
+npm install dotenv = Pacchetto per leggere la chiave
+require('dotenv').config(); = da inserire nel file principale ( app.js)
+const secret = process.env.SECRET_KEY; = la uso
 
 /* TO DO LIST */
 [X] Mercato di oggetti con valuta interna tra utenti (Da migliorare)
 
 [] Api di quote live
 
+/* Installazione */
+client
+- npm install
+server
+npm init -y

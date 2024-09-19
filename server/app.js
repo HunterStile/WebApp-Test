@@ -7,6 +7,7 @@ const tcRoutes = require('./routes/tc'); // Importa le rotte per TC
 const cryptoRoutes = require('./routes/crypto'); // Importa le rotte per le criptovalute
 const oddsRoutes = require('./routes/odds');
 
+require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000; // Utilizza una variabile d'ambiente per la porta
 

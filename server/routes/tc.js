@@ -2,6 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const axios = require('axios');
+
+// INIZIO ENDPONT //
 
 // Ottieni il saldo di TC dell'utente
 router.get('/balance', async (req, res) => {
@@ -29,15 +32,16 @@ router.post('/earn', async (req, res) => {
     }
 
     // Aggiungi logica per il guadagno in base all'azione
-    if (action === 'completeTask') {
+    if (action === 'completeTask' || action === 'wincasino') {
       user.tcBalance += amount;
-    } else if (action === 'purchaseMysteryBox') {
-      user.tcBalance += amount;
-    } // Aggiungi altre azioni se necessario
+    } else {
+      return res.status(400).send('Invalid action');
+    }
 
     await user.save();
     res.send('TC earned successfully');
   } catch (error) {
+    console.error('Error earning TC:', error);
     res.status(500).send('Error earning TC');
   }
 });
@@ -106,7 +110,7 @@ router.get('/eggs', async (req, res) => {
 
 // Metti in vendita un uovo nel mercato secondario
 router.post('/sell-egg', async (req, res) => {
-  const { username, eggType, price } = req.body;
+  const { username, eggType, price, quantity } = req.body;
 
   try {
     const user = await User.findOne({ username });
@@ -115,93 +119,376 @@ router.post('/sell-egg', async (req, res) => {
     }
 
     // Controlla se l'utente ha abbastanza uova di quel tipo
-    if (!user.eggs.has(eggType) || user.eggs.get(eggType) <= 0) {
-      return res.status(400).send('No eggs of this type available for sale');
+    if (!user.eggs.has(eggType) || user.eggs.get(eggType) < quantity) {
+      return res.status(400).send('Not enough eggs of this type available for sale');
     }
 
-    // Riduci il conteggio delle uova e aggiungi l'uovo al mercato
-    user.eggs.set(eggType, user.eggs.get(eggType) - 1);
-    user.eggsForSale.push({ eggType, price });
+    // Cerca se esiste già un'entrata nel mercato con lo stesso eggType e prezzo
+    const existingSaleIndex = user.eggsForSale.findIndex(
+      (egg) => egg.eggType === eggType && egg.price === price
+    );
+
+    if (existingSaleIndex !== -1) {
+      // Se esiste, aggiorna la quantità
+      user.eggsForSale[existingSaleIndex].quantity += quantity;
+    } else {
+      // Se non esiste, aggiungi una nuova entry con la quantità
+      user.eggsForSale.push({ eggType, price, quantity });
+    }
+
+    // Riduci il conteggio delle uova nell'inventario
+    user.eggs.set(eggType, user.eggs.get(eggType) - quantity);
 
     await user.save();
-    res.send('Egg put up for sale successfully');
+    res.send('Eggs put up for sale successfully');
   } catch (error) {
-    res.status(500).send('Error selling egg');
+    res.status(500).send('Error selling eggs');
   }
 });
 
 // Compra un uovo dal mercato secondario
 router.post('/buy-egg', async (req, res) => {
-  const { buyerUsername, sellerUsername, eggType, price } = req.body;
+  const { username, eggType, price, quantity } = req.body;
 
   try {
-    const buyer = await User.findOne({ username: buyerUsername });
-    const seller = await User.findOne({ username: sellerUsername });
+    console.log('Request Body:', req.body);
 
-    if (!buyer || !seller) {
-      return res.status(404).send('User not found');
+    const buyer = await User.findOne({ username });
+    if (!buyer) {
+      return res.status(404).send('Buyer not found');
     }
 
-    // Verifica se l'acquirente ha abbastanza TC
-    if (buyer.tcBalance < price) {
+    console.log('Buyer:', buyer);
+
+    const seller = await User.findOne({
+      'eggsForSale.eggType': eggType,
+      'eggsForSale.price': price,
+    });
+
+    if (!seller) {
+      return res.status(404).send('Seller not found');
+    }
+
+    console.log('Seller:', seller);
+
+    const eggForSale = seller.eggsForSale.find(
+      (egg) => egg.eggType === eggType && egg.price === price
+    );
+
+    if (!eggForSale || eggForSale.quantity < quantity) {
+      return res.status(400).send('Not enough eggs available');
+    }
+
+    const totalCost = price * quantity;
+
+    if (buyer.tcBalance < totalCost) {
       return res.status(400).send('Insufficient TC balance');
     }
 
-    // Trova l'uovo in vendita e rimuovilo
-    const eggIndex = seller.eggsForSale.findIndex(egg => egg.eggType === eggType && egg.price === price);
-    if (eggIndex === -1) {
-      return res.status(404).send('Egg not found for sale');
+    buyer.tcBalance -= totalCost;
+    seller.tcBalance += totalCost;
+    eggForSale.quantity -= quantity;
+
+    if (eggForSale.quantity === 0) {
+      seller.eggsForSale = seller.eggsForSale.filter(
+        (egg) => !(egg.eggType === eggType && egg.price === price)
+      );
     }
 
-    seller.eggsForSale.splice(eggIndex, 1);
-    buyer.tcBalance -= price;
-    seller.tcBalance += price;
-
-    // Aggiungi l'uovo all'inventario dell'acquirente
     if (buyer.eggs.has(eggType)) {
-      buyer.eggs.set(eggType, buyer.eggs.get(eggType) + 1);
+      buyer.eggs.set(eggType, buyer.eggs.get(eggType) + quantity);
     } else {
-      buyer.eggs.set(eggType, 1);
+      buyer.eggs.set(eggType, quantity);
     }
 
     await buyer.save();
     await seller.save();
-    console.log('Buyer:', buyerUsername);
-    console.log('Seller:', sellerUsername);
-    console.log('Egg Type:', eggType);
-    console.log('Price:', price);
-    res.send('Egg purchased successfully');
+
+    console.log('Purchase successful');
+    res.send('Purchase successful');
   } catch (error) {
-    res.status(500).send('Error purchasing egg');
+    console.error('Error processing purchase:', error);
+    res.status(500).send('Error processing purchase');
   }
 });
 
 // Ottieni tutte le uova in vendita nel mercato secondario
 router.get('/eggs-for-sale', async (req, res) => {
   try {
-    // Trova tutti gli utenti che hanno uova in vendita
     const usersWithEggsForSale = await User.find({ 'eggsForSale.0': { $exists: true } });
 
-    // Crea un array per contenere tutte le uova in vendita
-    let eggsForSale = [];
+    let eggTypeMap = {};
 
-    // Itera su ciascun utente con uova in vendita
     usersWithEggsForSale.forEach(user => {
       user.eggsForSale.forEach(egg => {
-        eggsForSale.push({
-          sellerUsername: user.username,
-          eggType: egg.eggType,
-          price: egg.price,
-        });
+        const quantity = Number(egg.quantity) || 0;
+        const price = Number(egg.price) || 0;
+
+        if (eggTypeMap[egg.eggType]) {
+          eggTypeMap[egg.eggType].totalQuantity += quantity;
+          eggTypeMap[egg.eggType].totalPrice += price * quantity;
+
+          if (
+            eggTypeMap[egg.eggType].floorPrice === undefined ||
+            price < eggTypeMap[egg.eggType].floorPrice
+          ) {
+            eggTypeMap[egg.eggType].floorPrice = price;
+          }
+        } else {
+          eggTypeMap[egg.eggType] = {
+            eggType: egg.eggType,
+            totalQuantity: quantity,
+            totalPrice: price * quantity,
+            averagePrice: 0,
+            floorPrice: price,
+          };
+        }
       });
     });
 
+    Object.keys(eggTypeMap).forEach(eggType => {
+      const eggData = eggTypeMap[eggType];
+      if (eggData.totalQuantity > 0) {
+        eggData.averagePrice = eggData.totalPrice / eggData.totalQuantity;
+      } else {
+        eggData.averagePrice = 0;
+      }
+    });
+
+    const eggsForSale = Object.values(eggTypeMap);
+
     res.json(eggsForSale);
   } catch (error) {
+    console.error('Error fetching eggs for sale:', error);
     res.status(500).send('Error fetching eggs for sale');
   }
 });
 
-module.exports = router;
+// Ottieni gli articoli in vendita per un tipo di egg specifico
+router.get('/egg-sales', async (req, res) => {
+  const { eggType } = req.query;
+
+  if (!eggType) {
+    return res.status(400).send('Egg type is required');
+  }
+
+  try {
+    const usersWithEggsForSale = await User.find({ 'eggsForSale.0': { $exists: true } });
+
+    let sales = [];
+
+    usersWithEggsForSale.forEach(user => {
+      user.eggsForSale.forEach(egg => {
+        if (egg.eggType === eggType) {
+          const quantity = Number(egg.quantity) || 0;
+          const price = Number(egg.price) || 0;
+          if (quantity > 0 && price > 0) {
+            sales.push({ price, quantity });
+          }
+        }
+      });
+    });
+
+    // Ordina per prezzo crescente
+    sales.sort((a, b) => a.price - b.price);
+
+    res.json(sales);
+  } catch (error) {
+    console.error('Error fetching egg sales:', error);
+    res.status(500).send('Error fetching egg sales');
+  }
+});
+
+// Incuba un uovo
+router.post('/incubate', async (req, res) => {
+  const { username, eggType } = req.body;
+
+  try {
+    // Verifica che username e eggType siano presenti
+    if (!username || !eggType) {
+      return res.status(400).json({ error: 'Missing username or eggType' });
+    }
+
+    // Trova l'utente
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    // Verifica che l'utente abbia abbastanza uova di quel tipo
+    if (!user.eggs.has(eggType) || user.eggs.get(eggType) <= 0) {
+      return res.status(400).json({ error: `Non hai abbastanza uova di tipo ${eggType}` });
+    }
+
+    const incubationTimes = {
+      'Common Egg': 1 * 60 * 1000,      // 1 minuto
+      'Uncommon Egg': 10 * 60 * 1000,   // 10 minuti
+      'Rare Egg': 60 * 60 * 1000,       // 1 ora
+      'Epic Egg': 24 * 60 * 60 * 1000,  // 24 ore
+      'Legendary Egg': 7 * 24 * 60 * 60 * 1000, // 1 settimana
+    };
+
+    // Verifica se il tipo di uovo esiste nell'incubationTimes
+    if (!incubationTimes.hasOwnProperty(eggType)) {
+      return res.status(400).json({ error: 'Tipo di uovo non valido' });
+    }
+
+    // Calcola il tempo di fine incubazione
+    const incubationEndTime = new Date(Date.now() + incubationTimes[eggType]);
+
+    // Aggiungi l'uovo nell'incubatore
+    user.incubators.push({
+      eggType,
+      incubationEndTime
+    });
+
+    // Rimuovi un uovo dall'inventario
+    const eggCount = user.eggs.get(eggType);
+    user.eggs.set(eggType, eggCount - 1);
+
+    // Salva l'utente
+    await user.save();
+
+    res.json({ success: 'Uovo inserito nell\'incubatore' });
+  } catch (error) {
+    res.status(500).json({ error: 'Errore durante l\'incubazione' });
+  }
+});
+
+// Ottieni le uova incubate dell'utente
+router.get('/incubators', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ incubators: user.incubators });
+  } catch (error) {
+    console.error('Error fetching incubators:', error);
+    res.status(500).json({ error: 'Error fetching incubators' });
+  }
+});
+
+// Endpoint per aprire un uovo incubato
+router.post('/open-incubated-egg', async (req, res) => {
+  const { username, index } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    if (index < 0 || index >= user.incubators.length) {
+      return res.status(400).json({ error: 'Indice dell\'uovo non valido' });
+    }
+
+    const incubatedEgg = user.incubators[index];
+    const { eggType } = incubatedEgg;
+
+    // Genera il drago in base al tipo di uovo
+    const dragon = generateDragon(eggType);
+
+    // Rimuovi l'uovo dall'incubatore
+    user.incubators.splice(index, 1);
+
+    // Aggiungi il drago all'inventario dell'utente
+    user.dragons.push(dragon);
+
+    await user.save();
+
+    res.json({ success: 'Uovo aperto con successo', dragon });
+  } catch (error) {
+    console.error('Errore durante l\'apertura dell\'uovo:', error);
+    res.status(500).json({ error: 'Errore durante l\'apertura dell\'uovo' });
+  }
+});
+
+// Endpoint per recuperare i draghi dell'utente
+router.get('/dragons', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    res.json({ dragons: user.dragons });
+  } catch (error) {
+    console.error('Errore durante il recupero dei draghi:', error);
+    res.status(500).json({ error: 'Errore durante il recupero dei draghi' });
+  }
+});
+
+// FINE ENDPONT //
+
+//FUNZIONI BASE//
+
+// Funzione per generare un valore casuale tra min e max
+const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Funzione per determinare il bonus basato su probabilità
+const getRandomBonus = () => {
+  const rand = Math.random();
+  if (rand < 0.75) return 0;
+  if (rand < 0.95) return 1;
+  return 2;
+};
+
+//SEZIONE PER CREAZIONE DI DRAGHI//
+
+// Genera un drago in base alla rarità dell'uovo
+const generateDragon = (eggType) => {
+  const dragons = {
+    'Common Egg': [
+      { 
+        name: 'Fire Dragon', 
+        resistance: getRandomInRange(4, 6), 
+        miningPower: getRandomInRange(9, 11), 
+        bonus: getRandomBonus(),
+        probability: 33 
+      },
+      { 
+        name: 'Water Dragon', 
+        resistance: getRandomInRange(6, 8), 
+        miningPower: getRandomInRange(7, 9), 
+        bonus: getRandomBonus(),
+        probability: 33 
+      },
+      { 
+        name: 'Grass Dragon', 
+        resistance: getRandomInRange(9, 11), 
+        miningPower: getRandomInRange(4, 6), 
+        bonus: getRandomBonus(),
+        probability: 34 
+      }
+    ],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
+    'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
+    'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
+    'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
+  };
+
+  // Seleziona casualmente il drago in base alle probabilità
+  if (eggType === 'Common Egg') {
+    const randomValue = Math.random() * 100;
+    let cumulativeProbability = 0;
+    for (const dragon of dragons['Common Egg']) {
+      cumulativeProbability += dragon.probability;
+      if (randomValue <= cumulativeProbability) {
+        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower, bonus: dragon.bonus };
+      }
+    }
+  }
+
+  // Per le altre uova, restituisce il primo (unico) drago
+  return dragons[eggType]?.[0] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
+};
 
 module.exports = router;

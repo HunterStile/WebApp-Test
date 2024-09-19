@@ -1,33 +1,106 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
 
+const bookmakerMapping = {
+  'Unibet': 'unibet',
+  'LiveScore Bet (EU)': 'livescorebeteu',
+  'Marathon Bet': 'marathon_bet',
+  '888sport': '888sport',
+  'Pinnacle': 'pinnacle',
+  'Tipico': 'tipico',
+  'Nordic Bet': 'nordicbet',
+  'Betsson': 'betsson',
+  'Betfair': 'betfair',
+  'MyBookie.ag': 'mybookieag',
+  'William Hill': 'williamhill',
+  'Matchbook': 'matchbook',
+  'BetOnline.ag': 'betonlineag',
+  'Coolbet': 'coolbet'
+};
+
+const bookmakerOptions = Object.keys(bookmakerMapping);
+
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
+  const [sports, setSports] = useState([]);
   const [error, setError] = useState(null);
   const [modalData, setModalData] = useState(null);
-  const [betAmount, setBetAmount] = useState(100); // Default amount to 100
+  const [betAmount, setBetAmount] = useState(100);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
+  const [selectedBookmakers, setSelectedBookmakers] = useState([]);
+  const [cachedOdds, setCachedOdds] = useState({});
+
+  const fetchSports = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/odds/sports`);
+      setSports(response.data);
+    } catch (error) {
+      setError('Error fetching sports data');
+      console.error('Error fetching sports:', error);
+    }
+  }, []);
+
+  const fetchOdds = useCallback(async (sportKey) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
+        params: { sportKey }
+      });
+      const currentTime = new Date();
+      const filteredOdds = response.data.filter(game => {
+        const eventTime = new Date(game.commence_time);
+        return eventTime > currentTime;
+      });
+      setCachedOdds(prevState => ({
+        ...prevState,
+        [sportKey]: filteredOdds
+      }));
+      setOdds(filteredOdds);
+    } catch (error) {
+      setError('Error fetching odds data');
+      console.error('Error fetching odds:', error);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchOdds = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`);
-        const currentTime = new Date();
-        const filteredOdds = response.data.filter(game => {
-          const eventTime = new Date(game.commence_time);
-          return eventTime > currentTime; // Include solo eventi futuri
-        });
-        setOdds(filteredOdds);
-      } catch (error) {
-        setError('Error fetching odds data');
-        console.error('Error fetching odds:', error);
-      }
-    };
+    fetchSports(); // Richiama l'API degli sport all'avvio del componente
+  }, [fetchSports]);
 
-    fetchOdds();
-  }, []);
+  useEffect(() => {
+    if (cachedOdds[selectedSport]) {
+      // Usa i dati già in cache
+      setOdds(cachedOdds[selectedSport]);
+    } else {
+      // Fetch data if not in cache
+      fetchOdds(selectedSport);
+    }
+  }, [selectedSport, cachedOdds, fetchOdds]);
+
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    const bookmakerKey = bookmakerMapping[value];
+    setSelectedBookmakers(prevState => {
+      if (checked) {
+        return [...prevState, bookmakerKey];
+      } else {
+        return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+      }
+    });
+  };
+
+  const getFilteredOdds = () => {
+    if (!selectedBookmakers.length) return odds;
+    return odds.map(game => ({
+      ...game,
+      bookmakers: game.bookmakers.filter(bookmaker => 
+        selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
+      )
+    })).filter(game => game.bookmakers.length > 0);
+  };
+
+  const filteredOdds = getFilteredOdds();
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -56,7 +129,7 @@ const OddsList = () => {
   const closeModal = () => {
     setModalIsOpen(false);
     setModalData(null);
-    setBetAmount(100); // Reset amount when modal is closed
+    setBetAmount(100);
   };
 
   const calculatePunta = (odds1, oddsX, odds2) => {
@@ -65,16 +138,15 @@ const OddsList = () => {
     return { puntaX, punta2 };
   };
 
-  const TotalBetting = (betAmount,puntax,punta2) => {
-    const totalbet = betAmount+ puntax + punta2;
+  const TotalBetting = (betAmount, puntaX, punta2) => {
+    const totalbet = betAmount + puntaX + punta2;
     return totalbet;
   };
-  
-  const calculateRating = (profit,totalbet) => {
-    const rating = (100*100)+(profit/totalbet)*(100*100);
-    return (rating/100);
+
+  const calculateRating = (profit, totalbet) => {
+    const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
+    return (rating / 100);
   };
-  
 
   const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
     const totalBet = puntata1 + puntataX + puntata2;
@@ -92,17 +164,69 @@ const OddsList = () => {
     }));
   };
 
+  const handleSportChange = (sportKey) => {
+    setSelectedSport(sportKey);
+  };
+
+  const handleSelectAll = (e) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      // Seleziona tutti i bookmaker
+      setSelectedBookmakers(Object.values(bookmakerMapping));
+    } else {
+      // Deseleziona tutti i bookmaker
+      setSelectedBookmakers([]);
+    }
+  };
+
   return (
     <div>
+      <h2>Available Sports</h2>
+      {error && <p>{error}</p>}
+      {sports.length > 0 ? (
+        <ul>
+          {sports.map((sport, index) => (
+            <li key={index} onClick={() => handleSportChange(sport.key)}>
+              <strong>{sport.title}</strong> - {sport.description}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No sports available.</p>
+      )}
+  
+      <h2>Filter by Bookmakers</h2>
+      <div className="bookmakers-checkboxes">
+        <label>
+          <input
+            type="checkbox"
+            onChange={handleSelectAll}
+            checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
+          />
+          Seleziona/Deseleziona Tutto
+        </label>
+        {bookmakerOptions.map((bookmaker, index) => (
+          <label key={index}>
+            <input
+              type="checkbox"
+              value={bookmaker}
+              checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+              onChange={handleCheckboxChange}
+            />
+            {bookmaker}
+          </label>
+        ))}
+      </div>
+
       <h2>Upcoming Odds</h2>
       {error && <p>{error}</p>}
-      {odds.length > 0 ? (
+      {filteredOdds.length > 0 ? (
         <ul>
-          {odds.map((game, index) => (
+          {filteredOdds.map((game, index) => (
             <li key={index}>
               <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
               <br />
-              <strong>Date:</strong> {formatDate(game.commence_time)} {/* Visualizza la data */}
+              <strong>Date:</strong> {formatDate(game.commence_time)}
               <ul>
                 {game.bookmakers.map((bookmaker, bIndex) => (
                   <li key={bIndex}>
@@ -128,12 +252,12 @@ const OddsList = () => {
       ) : (
         <p>No odds available.</p>
       )}
-
+  
       {modalIsOpen && (
         <div className="modal">
           <div className="modal-content">
             <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div className="modal-row">
               <div>
                 <strong>Totale Giocato:</strong>
               </div>
@@ -146,7 +270,7 @@ const OddsList = () => {
                 })()}
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <div className="modal-row">
               <div>
                 <strong>Rating:</strong>
               </div>
@@ -212,7 +336,7 @@ const OddsList = () => {
               )}
               <p>
                 Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
-                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,betAmount , calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
+                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, betAmount , calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
               </p>
             </div>
             <button onClick={closeModal}>Chiudi</button>
@@ -220,7 +344,7 @@ const OddsList = () => {
         </div>
       )}
     </div>
-  );
+  );  
 };
 
 export default OddsList;

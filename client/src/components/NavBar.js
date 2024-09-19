@@ -22,6 +22,7 @@ function Navbar() {
             <li><Link to="/marketplace">Marketplace</Link></li>
             <li><Link to="/inventory">Inventory</Link></li>
             <li><Link to="/profile">Profile</Link></li>
+            <li><Link to="/casino">Casino</Link></li>
             <li>Welcome, {user}</li>
             <li>Your TC Balance: {tcBalance}</li>
             <li>Your BTC Balance: {btcBalance} Satoshi</li> {/* Aggiungi il saldo BTC */}

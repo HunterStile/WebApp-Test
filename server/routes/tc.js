@@ -6,6 +6,8 @@ const axios = require('axios');
 
 // INIZIO ENDPONT //
 
+// AZIONI PRINCIPALI PER LA MONETA CENTRALIZZATA //
+
 // Ottieni il saldo di TC dell'utente
 router.get('/balance', async (req, res) => {
   const { username } = req.query;
@@ -68,6 +70,8 @@ router.post('/spend', async (req, res) => {
     res.status(500).send('Error spending TC');
   }
 });
+
+// UOVA E DRAGHI 
 
 // Salva l'apertura di una mystery box e memorizza l'uovo
 router.post('/open-box', async (req, res) => {

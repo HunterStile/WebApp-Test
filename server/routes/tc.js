@@ -493,6 +493,64 @@ router.post('/remove-egg-sale', async (req, res) => {
   }
 });
 
+// Endpoint per aggiungere un drago alla zona mining
+router.post('/add-to-mining-zone', async (req, res) => {
+  const { username, dragonId } = req.body;
+
+  console.log('Richiesta ricevuta per aggiungere alla zona mining:', { username, dragonId });
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      console.log('Utente non trovato:', username);
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    console.log('Utente trovato:', user);
+
+    const dragon = user.dragons.find(d => d._id.toString() === dragonId);
+    if (!dragon) {
+      console.log('Drago non trovato con ID:', dragonId);
+      return res.status(404).json({ error: 'Drago non trovato' });
+    }
+
+    console.log('Drago trovato:', dragon);
+
+    // Verifica se il drago è già nella zona mining
+    const alreadyInMiningZone = user.miningZone.find(d => d._id.toString() === dragonId);
+    if (alreadyInMiningZone) {
+      console.log('Drago già presente nella zona mining:', dragonId);
+      return res.status(400).json({ error: 'Drago già presente nella zona mining' });
+    }
+
+    console.log('Aggiunta il drago alla zona mining:', dragon);
+    user.miningZone.push(dragon);
+    await user.save();
+
+    res.json({ message: 'Drago aggiunto alla zona mining', miningZone: user.miningZone });
+  } catch (error) {
+    console.error('Errore durante l\'aggiunta del drago alla zona mining:', error);
+    res.status(500).json({ error: 'Errore durante l\'aggiunta del drago alla zona mining' });
+  }
+});
+
+
+// Endpoint per recuperare i draghi nella zona mining
+router.get('/mining-zone', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    res.json({ miningZone: user.miningZone });
+  } catch (error) {
+    console.error('Errore durante il recupero della zona mining:', error);
+    res.status(500).json({ error: 'Errore durante il recupero della zona mining' });
+  }
+});
 // FINE ENDPONT //
 
 //FUNZIONI BASE//
@@ -514,26 +572,26 @@ const getRandomBonus = () => {
 const generateDragon = (eggType) => {
   const dragons = {
     'Common Egg': [
-      { 
-        name: 'Fire Dragon', 
-        resistance: getRandomInRange(4, 6), 
-        miningPower: getRandomInRange(9, 11), 
+      {
+        name: 'Fire Dragon',
+        resistance: getRandomInRange(4, 6),
+        miningPower: getRandomInRange(9, 11),
         bonus: getRandomBonus(),
-        probability: 33 
+        probability: 33
       },
-      { 
-        name: 'Water Dragon', 
-        resistance: getRandomInRange(6, 8), 
-        miningPower: getRandomInRange(7, 9), 
+      {
+        name: 'Water Dragon',
+        resistance: getRandomInRange(6, 8),
+        miningPower: getRandomInRange(7, 9),
         bonus: getRandomBonus(),
-        probability: 33 
+        probability: 33
       },
-      { 
-        name: 'Grass Dragon', 
-        resistance: getRandomInRange(9, 11), 
-        miningPower: getRandomInRange(4, 6), 
+      {
+        name: 'Grass Dragon',
+        resistance: getRandomInRange(9, 11),
+        miningPower: getRandomInRange(4, 6),
         bonus: getRandomBonus(),
-        probability: 34 
+        probability: 34
       }
     ],
     'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],

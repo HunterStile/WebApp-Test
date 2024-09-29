@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const dragonSchema = new mongoose.Schema({
   name: { type: String, required: true },
   miningPower: { type: Number, required: true },
-  resistance: { type: Number, required: true },  
-  bonus: { type: Number,  default: 0 },
+  resistance: { type: Number, required: true },
+  bonus: { type: Number, default: 0 },
 });
 
 // Schema per le uova in incubazione
@@ -17,7 +17,7 @@ const incubatorSchema = new mongoose.Schema({
 const eggForSaleSchema = new mongoose.Schema({
   eggType: { type: String, required: true },
   price: { type: Number, required: true },
-  quantity: { type: Number, required: true }, // Add quantity field
+  quantity: { type: Number, required: true }, // Quantità disponibile per la vendita
 });
 
 const userSchema = new mongoose.Schema({
@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
   eggsForSale: [eggForSaleSchema],              // Uova messe in vendita
   incubators: [incubatorSchema],                // Incubatori dell'utente
   dragons: [dragonSchema],                      // Draghi posseduti dall'utente
+  miningZone: [dragonSchema],                   // Zona mining per i draghi attualmente in uso
   btcAddress: { type: String },
   encryptedPrivateKey: { type: String },
   btcBalance: { type: Number, default: 0 },

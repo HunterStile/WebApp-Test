@@ -12,6 +12,7 @@ function Marketplace() {
   const [eggImage, setEggImage] = useState(null);
   const [boxOpened, setBoxOpened] = useState(false);
   const [eggsForSale, setEggsForSale] = useState([]);
+  const [eggsForSaleUser, setEggsForSaleUser] = useState([]);
   const [inventory, setInventory] = useState({});
   const [sellPrice, setSellPrice] = useState('');
   const [sellQuantity, setSellQuantity] = useState({});
@@ -20,10 +21,11 @@ function Marketplace() {
   const [eggSales, setEggSales] = useState([]); // Stato per gli articoli in vendita
 
   const getEggImage = (eggType) => eggImages[`${eggType.toLowerCase().replace(/ /g, '-')}.png`] || null;
-  
+
   useEffect(() => {
     fetchInventory();
     fetchEggsForSale();
+    fetchEggsForSaleUser();
   }, []);
 
   const fetchInventory = async () => {
@@ -68,10 +70,10 @@ function Marketplace() {
       alert('Insufficient TC balance');
       return;
     }
-  
+
     const randomValue = Math.random() * 100;
     let eggType = '';
-  
+
     if (randomValue < 60) {
       eggType = 'Common Egg';
     } else if (randomValue < 86) {
@@ -83,23 +85,23 @@ function Marketplace() {
     } else {
       eggType = 'Legendary Egg';
     }
-  
+
     const image = getEggImage(eggType); // Usa la funzione per ottenere l'immagine
-  
+
     setResult(eggType);
     setEggImage(image);
     spendTc(50); // Deduct 50 TC using the context function
-  
+
     try {
       await axios.post(`${API_BASE_URL}/tc/open-box`, { username: user, eggType });
       fetchInventory();
     } catch (error) {
       console.error('Error saving egg:', error);
     }
-  
+
     setBoxOpened(true);
   };
-  
+
   const resetBox = () => {
     setResult('');
     setEggImage(null);
@@ -121,6 +123,7 @@ function Marketplace() {
       });
       fetchInventory();
       fetchEggsForSale();
+      fetchEggsForSaleUser();
       setSellPrice('');
       setSellQuantity({ ...sellQuantity, [eggType]: 0 }); // Reset quantità
     } catch (error) {
@@ -168,11 +171,42 @@ function Marketplace() {
         handleCloseModal();
         fetchInventory();
         fetchEggsForSale();
+        fetchEggsForSaleUser();
         fetchTcBalance(); // Aggiorna il saldo TC
       } catch (error) {
         console.error('Error during purchase:', error);
         alert('Error during purchase');
       }
+    }
+  };
+
+  // Funzione per rimuovere un uovo dalla vendita
+  const handleRemoveEggSale = async (eggType) => {
+    try {
+      await axios.post(`${API_BASE_URL}/tc/remove-egg-sale`, {
+        username: user,
+        eggType,
+      });
+      fetchInventory()
+      fetchEggsForSale();
+      fetchEggsForSaleUser(); // Aggiorna la lista di uova in vendita
+    } catch (error) {
+      console.error('Error removing egg sale:', error);
+      alert('Error removing egg sale');
+    }
+  };
+
+  const fetchEggsForSaleUser = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/my-eggs-for-sale`, { params: { username: user } });
+      if (Array.isArray(response.data)) {
+        setEggsForSaleUser(response.data);
+      } else {
+        setEggsForSaleUser([]); // Imposta un array vuoto se i dati non sono un array
+      }
+    } catch (error) {
+      console.error('Error fetching eggs for sale:', error);
+      setEggsForSaleUser([]); // Imposta un array vuoto in caso di errore
     }
   };
 
@@ -239,6 +273,20 @@ function Marketplace() {
         <p>No eggs for sale.</p>
       )}
 
+      <h3>My Eggs for Sale</h3>
+      {Array.isArray(eggsForSaleUser) && eggsForSaleUser.length > 0 ? (
+        eggsForSaleUser.map((egg, index) => (
+          <div key={index}>
+            <span>{egg.eggType}</span>
+            <span> - {egg.quantity} available</span> {/* Usa `egg.quantity` invece di `egg.totalQuantity` se il dato è differente */}
+            <span> - Price: {egg.price ? egg.price.toFixed(2) : 'N/A'} TC</span>
+            <button onClick={() => handleRemoveEggSale(egg.eggType)}>Remove</button>
+          </div>
+        ))
+      ) : (
+        <p>No eggs for sale.</p>
+      )}
+
       {/* Modale */}
       <div className="modal">
         <div className="modal-content">
@@ -299,6 +347,7 @@ function Marketplace() {
         </div>
       </div>
     </div>
+
   );
 }
 

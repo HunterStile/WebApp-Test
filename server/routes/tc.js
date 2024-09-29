@@ -430,6 +430,69 @@ router.get('/dragons', async (req, res) => {
   }
 });
 
+// Recupera solo le uova messe in vendita dall'utente corrente
+router.get('/my-eggs-for-sale', async (req, res) => {
+  const { username } = req.query;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username is required' });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Restituisci solo le uova che l'utente ha messo in vendita
+    res.json(user.eggsForSale);
+  } catch (error) {
+    console.error('Error fetching user egg sales:', error);
+    res.status(500).json({ error: 'An error occurred while fetching user egg sales' });
+  }
+});
+
+// Rimuovi un uovo dalla vendita
+router.post('/remove-egg-sale', async (req, res) => {
+  const { username, eggType } = req.body;
+
+  if (!username || !eggType) {
+    return res.status(400).json({ error: 'Username and egg type are required' });
+  }
+
+  try {
+    // Trova l'utente
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Trova l'uovo in vendita e rimuovilo
+    const eggIndex = user.eggsForSale.findIndex((egg) => egg.eggType === eggType);
+
+    if (eggIndex === -1) {
+      return res.status(404).json({ error: 'Egg not found in user\'s sale list' });
+    }
+
+    // Aggiungi la quantità di uova di nuovo all'inventario dell'utente
+    const eggToRemove = user.eggsForSale[eggIndex];
+    user.eggs.set(eggType, (user.eggs.get(eggType) || 0) + eggToRemove.quantity);
+
+    // Rimuovi l'uovo dalla lista delle vendite
+    user.eggsForSale.splice(eggIndex, 1);
+
+    // Salva le modifiche
+    await user.save();
+
+    res.json({ message: 'Egg sale removed successfully' });
+  } catch (error) {
+    console.error('Error removing egg sale:', error);
+    res.status(500).json({ error: 'An error occurred while removing egg sale' });
+  }
+});
+
 // FINE ENDPONT //
 
 //FUNZIONI BASE//

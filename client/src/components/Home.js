@@ -41,6 +41,7 @@ function Home() {
     try {
       await axios.post(`${API_BASE_URL}/tc/add-to-mining-zone`, { username: user, dragonId });
       fetchMiningZone(); // Aggiorna la zona mining
+      fetchDragons(); // Aggiorna l'inventario
     } catch (error) {
       console.error('Errore durante l\'aggiunta del drago alla zona mining:', error);
       alert('Errore durante l\'aggiunta del drago alla zona mining');
@@ -49,10 +50,30 @@ function Home() {
 
   const calculateTotalMiningPower = (dragonsInZone) => {
     let totalPower = 0;
+    let totalBonus = 0;
+  
+    // Calcola il bonus totale
     dragonsInZone.forEach(dragon => {
-      totalPower += dragon.miningPower * (1 + dragon.bonus);
+      totalBonus += dragon.bonus;
     });
+  
+    // Applica il bonus totale alla potenza di ogni drago
+    dragonsInZone.forEach(dragon => {
+      totalPower += dragon.miningPower * (1 + totalBonus / 100);
+    });
+  
     setTotalMiningPower(totalPower);
+  };
+
+  const removeFromMiningZone = async (dragonId) => {
+    try {
+      await axios.post(`${API_BASE_URL}/tc/remove-from-mining-zone`, { username: user, dragonId });
+      fetchMiningZone(); // Aggiorna la zona mining
+      fetchDragons(); // Aggiorna l'inventario
+    } catch (error) {
+      console.error('Errore durante la rimozione del drago dalla zona mining:', error);
+      alert('Errore durante la rimozione del drago dalla zona mining');
+    }
   };
 
   return (
@@ -78,7 +99,7 @@ function Home() {
           {dragons.length > 0 ? (
             dragons.map(dragon => (
               <div key={dragon._id}> {/* Assicurati di usare dragon._id se è il campo corretto */}
-                <span>{dragon.name} - Power: {dragon.miningPower}, Bonus: {dragon.bonus * 100}%</span>
+                <span>{dragon.name} - Power: {dragon.miningPower}, Bonus: {dragon.bonus}%</span>
                 <button onClick={() => addToMiningZone(dragon._id)}> {/* Assicurati di usare dragon._id qui */}
                   Add to Mining Zone
                 </button>
@@ -92,8 +113,9 @@ function Home() {
           {miningZone.length > 0 ? (
             <>
               {miningZone.map(dragon => (
-                <div key={dragon.id}>
-                  <span>{dragon.type} - Mining Power: {dragon.miningPower}, Bonus: {dragon.bonus * 100}%</span>
+                <div key={dragon._id}>
+                  <span>{dragon.name} - Mining Power: {dragon.miningPower}, Bonus: {dragon.bonus}%</span>
+                  <button onClick={() => removeFromMiningZone(dragon._id)}>Remove from Mining Zone</button>
                 </div>
               ))}
               <h3>Total Mining Power: {totalMiningPower}</h3>

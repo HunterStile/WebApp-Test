@@ -497,34 +497,27 @@ router.post('/remove-egg-sale', async (req, res) => {
 router.post('/add-to-mining-zone', async (req, res) => {
   const { username, dragonId } = req.body;
 
-  console.log('Richiesta ricevuta per aggiungere alla zona mining:', { username, dragonId });
-
   try {
     const user = await User.findOne({ username });
     if (!user) {
-      console.log('Utente non trovato:', username);
       return res.status(404).json({ error: 'Utente non trovato' });
     }
 
-    console.log('Utente trovato:', user);
-
-    const dragon = user.dragons.find(d => d._id.toString() === dragonId);
-    if (!dragon) {
-      console.log('Drago non trovato con ID:', dragonId);
+    const dragonIndex = user.dragons.findIndex(d => d._id.toString() === dragonId);
+    if (dragonIndex === -1) {
       return res.status(404).json({ error: 'Drago non trovato' });
     }
-
-    console.log('Drago trovato:', dragon);
 
     // Verifica se il drago è già nella zona mining
     const alreadyInMiningZone = user.miningZone.find(d => d._id.toString() === dragonId);
     if (alreadyInMiningZone) {
-      console.log('Drago già presente nella zona mining:', dragonId);
       return res.status(400).json({ error: 'Drago già presente nella zona mining' });
     }
 
-    console.log('Aggiunta il drago alla zona mining:', dragon);
+    // Aggiungi il drago alla zona mining e rimuovilo dall'inventario
+    const dragon = user.dragons[dragonIndex];
     user.miningZone.push(dragon);
+    user.dragons.splice(dragonIndex, 1);
     await user.save();
 
     res.json({ message: 'Drago aggiunto alla zona mining', miningZone: user.miningZone });
@@ -533,7 +526,6 @@ router.post('/add-to-mining-zone', async (req, res) => {
     res.status(500).json({ error: 'Errore durante l\'aggiunta del drago alla zona mining' });
   }
 });
-
 
 // Endpoint per recuperare i draghi nella zona mining
 router.get('/mining-zone', async (req, res) => {
@@ -551,6 +543,38 @@ router.get('/mining-zone', async (req, res) => {
     res.status(500).json({ error: 'Errore durante il recupero della zona mining' });
   }
 });
+
+// Endpoint per rimuovere un drago dalla zona mining
+router.post('/remove-from-mining-zone', async (req, res) => {
+  const { username, dragonId } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    // Trova l'indice del drago nella zona mining
+    const dragonIndex = user.miningZone.findIndex(d => d._id.toString() === dragonId);
+    if (dragonIndex === -1) {
+      return res.status(404).json({ error: 'Drago non trovato nella zona mining' });
+    }
+
+    // Rimuovi il drago dalla zona mining
+    const [removedDragon] = user.miningZone.splice(dragonIndex, 1);
+
+    // Riaggiungi il drago all'inventario
+    user.dragons.push(removedDragon);
+
+    await user.save();
+
+    res.json({ message: 'Drago rimosso dalla zona mining', miningZone: user.miningZone });
+  } catch (error) {
+    console.error('Errore durante la rimozione del drago dalla zona mining:', error);
+    res.status(500).json({ error: 'Errore durante la rimozione del drago dalla zona mining' });
+  }
+});
+
 // FINE ENDPONT //
 
 //FUNZIONI BASE//

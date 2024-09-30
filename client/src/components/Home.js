@@ -1,4 +1,3 @@
-// client/src/components/Home.js
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -10,12 +9,13 @@ function Home() {
   const [dragons, setDragons] = useState([]);
   const [miningZone, setMiningZone] = useState([]);
   const [totalMiningPower, setTotalMiningPower] = useState(0);
-  
+  const [totalServerMiningPower, setTotalServerMiningPower] = useState(0);
   
   useEffect(() => {
     if (user) {
       fetchDragons();
       fetchMiningZone();
+      fetchTotalServerMiningPower(); // Aggiunta per recuperare la potenza di mining totale del server
     }
   }, [user]);
 
@@ -38,11 +38,21 @@ function Home() {
     }
   };
 
+  const fetchTotalServerMiningPower = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/total-mining-power`);
+      setTotalServerMiningPower(response.data.totalServerMiningPower || 0);
+    } catch (error) {
+      console.error('Errore durante il recupero della potenza totale di mining del server:', error);
+    }
+  };
+
   const addToMiningZone = async (dragonId) => {
     try {
       await axios.post(`${API_BASE_URL}/tc/add-to-mining-zone`, { username: user, dragonId });
       fetchMiningZone(); // Aggiorna la zona mining
       fetchDragons(); // Aggiorna l'inventario
+      fetchTotalServerMiningPower(); // Aggiorna la potenza totale di mining del server
     } catch (error) {
       console.error('Errore durante l\'aggiunta del drago alla zona mining:', error);
       alert('Errore durante l\'aggiunta del drago alla zona mining');
@@ -54,6 +64,7 @@ function Home() {
       await axios.post(`${API_BASE_URL}/tc/remove-from-mining-zone`, { username: user, dragonId });
       fetchMiningZone(); // Aggiorna la zona mining
       fetchDragons(); // Aggiorna l'inventario
+      fetchTotalServerMiningPower(); // Aggiorna la potenza totale di mining del server
     } catch (error) {
       console.error('Errore durante la rimozione del drago dalla zona mining:', error);
       alert('Errore durante la rimozione del drago dalla zona mining');
@@ -110,9 +121,9 @@ function Home() {
           <h2>Your Dragons</h2>
           {dragons.length > 0 ? (
             dragons.map(dragon => (
-              <div key={dragon._id}> {/* Assicurati di usare dragon._id se è il campo corretto */}
+              <div key={dragon._id}>
                 <span>{dragon.name} - Power: {formatMiningPower(dragon.miningPower)}, Bonus: {dragon.bonus}%</span>
-                <button onClick={() => addToMiningZone(dragon._id)}> {/* Assicurati di usare dragon._id qui */}
+                <button onClick={() => addToMiningZone(dragon._id)}>
                   Add to Mining Zone
                 </button>
               </div>
@@ -135,6 +146,9 @@ function Home() {
           ) : (
             <p>No dragons in the mining zone.</p>
           )}
+
+          {/* Visualizza la potenza totale di mining del server */}
+          <h3>Total Server Mining Power: {formatMiningPower(totalServerMiningPower)}</h3>
         </>
       )}
     </div>

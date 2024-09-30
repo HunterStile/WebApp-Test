@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
   incubators: [incubatorSchema],                // Incubatori dell'utente
   dragons: [dragonSchema],                      // Draghi posseduti dall'utente
   miningZone: [dragonSchema],                   // Zona mining per i draghi attualmente in uso
+  totalMiningPower: { type: Number, default: 0 }, // Aggiungi questo campo
   btcAddress: { type: String },
   encryptedPrivateKey: { type: String },
   btcBalance: { type: Number, default: 0 },

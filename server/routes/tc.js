@@ -508,16 +508,13 @@ router.post('/add-to-mining-zone', async (req, res) => {
       return res.status(404).json({ error: 'Drago non trovato' });
     }
 
-    // Verifica se il drago è già nella zona mining
-    const alreadyInMiningZone = user.miningZone.find(d => d._id.toString() === dragonId);
-    if (alreadyInMiningZone) {
-      return res.status(400).json({ error: 'Drago già presente nella zona mining' });
-    }
-
-    // Aggiungi il drago alla zona mining e rimuovilo dall'inventario
     const dragon = user.dragons[dragonIndex];
     user.miningZone.push(dragon);
     user.dragons.splice(dragonIndex, 1);
+
+    // Calcola e aggiorna la potenza totale di mining
+    user.totalMiningPower = calculateTotalMiningPower(user.miningZone);
+
     await user.save();
 
     res.json({ message: 'Drago aggiunto alla zona mining', miningZone: user.miningZone });
@@ -554,17 +551,16 @@ router.post('/remove-from-mining-zone', async (req, res) => {
       return res.status(404).json({ error: 'Utente non trovato' });
     }
 
-    // Trova l'indice del drago nella zona mining
     const dragonIndex = user.miningZone.findIndex(d => d._id.toString() === dragonId);
     if (dragonIndex === -1) {
       return res.status(404).json({ error: 'Drago non trovato nella zona mining' });
     }
 
-    // Rimuovi il drago dalla zona mining
     const [removedDragon] = user.miningZone.splice(dragonIndex, 1);
-
-    // Riaggiungi il drago all'inventario
     user.dragons.push(removedDragon);
+
+    // Calcola e aggiorna la potenza totale di mining
+    user.totalMiningPower = calculateTotalMiningPower(user.miningZone);
 
     await user.save();
 
@@ -604,6 +600,23 @@ router.get('/server-mining-power', async (req, res) => {
   }
 });
 
+// Endpoint per calcolare la potenza totale di mining del server
+router.get('/total-mining-power', async (req, res) => {
+  try {
+    const users = await User.find({});
+    let totalServerMiningPower = 0;
+
+    // Calcola la potenza totale di mining del server
+    users.forEach(user => {
+      totalServerMiningPower += user.totalMiningPower || 0; // Assicurati di utilizzare la proprietà corretta
+    });
+
+    res.json({ totalServerMiningPower });
+  } catch (error) {
+    console.error('Errore durante il recupero della potenza totale di mining del server:', error);
+    res.status(500).json({ error: 'Errore durante il recupero della potenza totale di mining del server' });
+  }
+});
 // FINE ENDPONT //
 
 //FUNZIONI BASE//
@@ -617,6 +630,24 @@ const getRandomBonus = () => {
   if (rand < 0.75) return 0;
   if (rand < 0.95) return 1;
   return 2;
+};
+
+// Funzione per calcolare la potenza totale di mining
+const calculateTotalMiningPower = (miningZone) => {
+  let totalPower = 0;
+  let totalBonus = 0;
+
+  // Calcola il bonus totale
+  miningZone.forEach(dragon => {
+    totalBonus += dragon.bonus;
+  });
+
+  // Applica il bonus totale alla potenza di ogni drago
+  miningZone.forEach(dragon => {
+    totalPower += dragon.miningPower * (1 + totalBonus / 100);
+  });
+
+  return totalPower;
 };
 
 //SEZIONE PER CREAZIONE DI DRAGHI//

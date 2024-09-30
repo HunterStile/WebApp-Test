@@ -575,6 +575,35 @@ router.post('/remove-from-mining-zone', async (req, res) => {
   }
 });
 
+// Endpoint per ottenere la potenza totale del server
+router.get('/server-mining-power', async (req, res) => {
+  try {
+    const users = await User.find(); // Recupera tutti gli utenti
+    let totalServerPower = 0;
+
+    users.forEach(user => {
+      // Calcola la potenza totale di mining per ogni utente
+      let userTotalPower = 0;
+      let totalBonus = 1; // Bonus totale inizia a 1 (nessun bonus)
+      
+      user.miningZone.forEach(dragon => {
+        totalBonus += dragon.bonus; // Somma tutti i bonus
+      });
+
+      user.miningZone.forEach(dragon => {
+        userTotalPower += dragon.miningPower * totalBonus; // Applica il bonus totale
+      });
+
+      totalServerPower += userTotalPower; // Aggiungi alla potenza totale del server
+    });
+
+    res.json({ totalServerPower });
+  } catch (error) {
+    console.error('Errore durante il calcolo della potenza totale del server:', error);
+    res.status(500).json({ error: 'Errore durante il calcolo della potenza totale del server' });
+  }
+});
+
 // FINE ENDPONT //
 
 //FUNZIONI BASE//
@@ -618,7 +647,7 @@ const generateDragon = (eggType) => {
         probability: 34
       }
     ],
-    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 1000 }],
     'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
     'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
     'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],

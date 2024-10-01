@@ -32,6 +32,7 @@ const OddsList = () => {
   const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
   const [selectedBookmakers, setSelectedBookmakers] = useState([]);
   const [cachedOdds, setCachedOdds] = useState({});
+  const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
 
   // State to track expanded descriptions
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
@@ -167,8 +168,9 @@ const OddsList = () => {
     }));
   };
 
-  const handleSportChange = (sportKey) => {
+  const handleSportChange = (sportKey,sport) => {
     setSelectedSport(sportKey);
+    setCompetitionTitle(sport.title);
   };
 
   const handleSelectAll = (e) => {
@@ -213,7 +215,7 @@ const OddsList = () => {
                 {expandedDescriptions[description] && (
                   <ul>
                     {sports.map((sport) => (
-                      <li key={sport.key} onClick={() => handleSportChange(sport.key)}>
+                      <li key={sport.key} onClick={() => handleSportChange(sport.key,sport)}>
                         <strong>{sport.title}</strong>
                       </li>
                     ))}
@@ -250,7 +252,7 @@ const OddsList = () => {
           ))}
         </div>
 
-        <h2>Upcoming Odds</h2>
+        <h2>{competitionTitle}</h2>
         {error && <p>{error}</p>}
         {filteredOdds.length > 0 ? (
           <ul>

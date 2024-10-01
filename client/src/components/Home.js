@@ -10,12 +10,14 @@ function Home() {
   const [miningZone, setMiningZone] = useState([]);
   const [totalMiningPower, setTotalMiningPower] = useState(0);
   const [totalServerMiningPower, setTotalServerMiningPower] = useState(0);
+  const [estimatedRewards, setEstimatedRewards] = useState({ tc: 0, satoshi: 0 });
   
   useEffect(() => {
     if (user) {
       fetchDragons();
       fetchMiningZone();
-      fetchTotalServerMiningPower(); // Aggiunta per recuperare la potenza di mining totale del server
+      fetchTotalServerMiningPower();
+      fetchEstimatedRewards();
     }
   }, [user]);
 
@@ -47,12 +49,22 @@ function Home() {
     }
   };
 
+  const fetchEstimatedRewards = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/estimated-rewards`, { params: { username: user } });
+      setEstimatedRewards(response.data || { tc: 0, satoshi: 0 });
+    } catch (error) {
+      console.error('Errore durante il recupero delle ricompense stimate:', error);
+    }
+  };
+
   const addToMiningZone = async (dragonId) => {
     try {
       await axios.post(`${API_BASE_URL}/tc/add-to-mining-zone`, { username: user, dragonId });
-      fetchMiningZone(); // Aggiorna la zona mining
-      fetchDragons(); // Aggiorna l'inventario
-      fetchTotalServerMiningPower(); // Aggiorna la potenza totale di mining del server
+      fetchMiningZone();
+      fetchDragons();
+      fetchTotalServerMiningPower();
+      fetchEstimatedRewards();
     } catch (error) {
       console.error('Errore durante l\'aggiunta del drago alla zona mining:', error);
       alert('Errore durante l\'aggiunta del drago alla zona mining');
@@ -62,9 +74,10 @@ function Home() {
   const removeFromMiningZone = async (dragonId) => {
     try {
       await axios.post(`${API_BASE_URL}/tc/remove-from-mining-zone`, { username: user, dragonId });
-      fetchMiningZone(); // Aggiorna la zona mining
-      fetchDragons(); // Aggiorna l'inventario
-      fetchTotalServerMiningPower(); // Aggiorna la potenza totale di mining del server
+      fetchMiningZone();
+      fetchDragons();
+      fetchTotalServerMiningPower();
+      fetchEstimatedRewards();
     } catch (error) {
       console.error('Errore durante la rimozione del drago dalla zona mining:', error);
       alert('Errore durante la rimozione del drago dalla zona mining');
@@ -75,12 +88,10 @@ function Home() {
     let totalPower = 0;
     let totalBonus = 0;
   
-    // Calcola il bonus totale
     dragonsInZone.forEach(dragon => {
       totalBonus += dragon.bonus;
     });
   
-    // Applica il bonus totale alla potenza di ogni drago
     dragonsInZone.forEach(dragon => {
       totalPower += dragon.miningPower * (1 + totalBonus / 100);
     });
@@ -147,8 +158,10 @@ function Home() {
             <p>No dragons in the mining zone.</p>
           )}
 
-          {/* Visualizza la potenza totale di mining del server */}
           <h3>Total Server Mining Power: {formatMiningPower(totalServerMiningPower)}</h3>
+          
+          {/* Gestione dei valori non definiti con una condizione ternaria */}
+          <h3>Estimated Rewards: {estimatedRewards.tc ? estimatedRewards.tc.toFixed(2) : '0.00'} TC, {estimatedRewards.satoshi || 0} Satoshi</h3>
         </>
       )}
     </div>

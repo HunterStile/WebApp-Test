@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const axios = require('axios');
+const cron = require('node-cron');
+const TOTAL_REWARDS_TC = 1000; // La quantità totale di TC distribuita ogni intervallo di tempo
+const TOTAL_REWARDS_SATOSHI = 50000; // La quantità totale di Satoshi distribuita ogni intervallo di tempo
 
 // INIZIO ENDPONT //
 
@@ -617,6 +620,42 @@ router.get('/total-mining-power', async (req, res) => {
     res.status(500).json({ error: 'Errore durante il recupero della potenza totale di mining del server' });
   }
 });
+
+// Endpoint per ottenere le ricompense stimate
+router.get('/estimated-rewards', async (req, res) => {
+  const username = req.query.username;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username non fornito' });
+  }
+
+  try {
+    // Ottieni l'utente e la sua potenza di mining
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    const userMiningPower = user.totalMiningPower;
+
+    // Ottieni la potenza totale di mining del server
+    const allUsers = await User.find({});
+    const totalServerMiningPower = allUsers.reduce((total, currentUser) => total + (currentUser.totalMiningPower || 0), 0);
+
+    // Calcola le ricompense stimate in base alla potenza di mining dell'utente
+    const tcReward = (userMiningPower / totalServerMiningPower) * TOTAL_REWARDS_TC;
+    const satoshiReward = (userMiningPower / totalServerMiningPower) * TOTAL_REWARDS_SATOSHI;
+
+    res.json({
+      tc: isNaN(tcReward) ? 0 : tcReward,
+      satoshi: isNaN(satoshiReward) ? 0 : satoshiReward,
+    });
+  } catch (error) {
+    console.error('Errore durante il calcolo delle ricompense stimate:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
 // FINE ENDPONT //
 
 //FUNZIONI BASE//
@@ -649,6 +688,43 @@ const calculateTotalMiningPower = (miningZone) => {
 
   return totalPower;
 };
+
+const distributeRewards = async () => {
+  try {
+    // Calcola la potenza totale del server
+    const totalServerPowerResult = await User.aggregate([{ $group: { _id: null, total: { $sum: "$totalMiningPower" } } }]);
+    const totalServerPower = totalServerPowerResult.length > 0 ? totalServerPowerResult[0].total : 0;
+
+    if (totalServerPower === 0) {
+      console.log('Nessuna potenza di mining attiva, nessuna ricompensa distribuita.');
+      return;
+    }
+
+    // Recupera tutti gli utenti
+    const users = await User.find();
+
+    users.forEach(async (user) => {
+      if (user.totalMiningPower > 0) {
+        // Calcola la quota di ricompensa in base alla potenza di mining dell'utente
+        const rewardRatio = user.totalMiningPower / totalServerPower;
+        const rewardTc = TOTAL_REWARDS_TC * rewardRatio;
+        const rewardSatoshi = TOTAL_REWARDS_SATOSHI * rewardRatio;
+
+        // Aggiungi le ricompense all'utente
+        user.tcBalance += rewardTc;
+        user.btcBalance += rewardSatoshi;
+
+        await user.save();
+        console.log(`Ricompense distribuite a ${user.username}: ${rewardTc.toFixed(2)} TC e ${rewardSatoshi.toFixed(2)} Satoshi.`);
+      }
+    });
+  } catch (error) {
+    console.error('Errore durante la distribuzione delle ricompense:', error);
+  }
+};
+
+// Esegui il cron job ogni 10 minuti
+cron.schedule('*/10 * * * *', distributeRewards);
 
 //SEZIONE PER CREAZIONE DI DRAGHI//
 

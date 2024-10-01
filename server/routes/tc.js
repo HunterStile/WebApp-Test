@@ -7,6 +7,126 @@ const cron = require('node-cron');
 const TOTAL_REWARDS_TC = 1000; // La quantità totale di TC distribuita ogni intervallo di tempo
 const TOTAL_REWARDS_SATOSHI = 50000; // La quantità totale di Satoshi distribuita ogni intervallo di tempo
 
+//CRON JOB//
+
+const distributeRewards = async () => {
+  try {
+    // Calcola la potenza totale del server
+    const totalServerPowerResult = await User.aggregate([{ $group: { _id: null, total: { $sum: "$totalMiningPower" } } }]);
+    const totalServerPower = totalServerPowerResult.length > 0 ? totalServerPowerResult[0].total : 0;
+
+    if (totalServerPower === 0) {
+      console.log('Nessuna potenza di mining attiva, nessuna ricompensa distribuita.');
+      return;
+    }
+
+    // Recupera tutti gli utenti
+    const users = await User.find();
+
+    users.forEach(async (user) => {
+      if (user.totalMiningPower > 0) {
+        // Calcola la quota di ricompensa in base alla potenza di mining dell'utente
+        const rewardRatio = user.totalMiningPower / totalServerPower;
+        const rewardTc = TOTAL_REWARDS_TC * rewardRatio;
+        const rewardSatoshi = TOTAL_REWARDS_SATOSHI * rewardRatio;
+
+        // Aggiungi le ricompense all'utente
+        user.tcBalance += rewardTc;
+        user.btcBalance += rewardSatoshi;
+
+        await user.save();
+        console.log(`Ricompense distribuite a ${user.username}: ${rewardTc.toFixed(2)} TC e ${rewardSatoshi.toFixed(2)} Satoshi.`);
+      }
+    });
+  } catch (error) {
+    console.error('Errore durante la distribuzione delle ricompense:', error);
+  }
+};
+
+// Esegui il cron job ogni 10 minuti
+cron.schedule('*/10 * * * *', distributeRewards);
+
+//FUNZIONI AUSILIARI//
+
+// Funzione per generare un valore casuale tra min e max
+const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Funzione per determinare il bonus basato su probabilità
+const getRandomBonus = () => {
+  const rand = Math.random();
+  if (rand < 0.75) return 0;
+  if (rand < 0.95) return 1;
+  return 2;
+};
+
+// Funzione per calcolare la potenza totale di mining
+const calculateTotalMiningPower = (miningZone) => {
+  let totalPower = 0;
+  let totalBonus = 0;
+
+  // Calcola il bonus totale
+  miningZone.forEach(dragon => {
+    totalBonus += dragon.bonus;
+  });
+
+  // Applica il bonus totale alla potenza di ogni drago
+  miningZone.forEach(dragon => {
+    totalPower += dragon.miningPower * (1 + totalBonus / 100);
+  });
+
+  return totalPower;
+};
+
+//GENERAZIONE DRAGHI//
+
+// Genera un drago in base alla rarità dell'uovo
+const generateDragon = (eggType) => {
+  const dragons = {
+    'Common Egg': [
+      {
+        name: 'Fire Dragon',
+        resistance: getRandomInRange(4, 6),
+        miningPower: getRandomInRange(9, 11),
+        bonus: getRandomBonus(),
+        probability: 33
+      },
+      {
+        name: 'Water Dragon',
+        resistance: getRandomInRange(6, 8),
+        miningPower: getRandomInRange(7, 9),
+        bonus: getRandomBonus(),
+        probability: 33
+      },
+      {
+        name: 'Grass Dragon',
+        resistance: getRandomInRange(9, 11),
+        miningPower: getRandomInRange(4, 6),
+        bonus: getRandomBonus(),
+        probability: 34
+      }
+    ],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 1000 }],
+    'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
+    'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
+    'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
+  };
+
+  // Seleziona casualmente il drago in base alle probabilità
+  if (eggType === 'Common Egg') {
+    const randomValue = Math.random() * 100;
+    let cumulativeProbability = 0;
+    for (const dragon of dragons['Common Egg']) {
+      cumulativeProbability += dragon.probability;
+      if (randomValue <= cumulativeProbability) {
+        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower, bonus: dragon.bonus };
+      }
+    }
+  }
+
+  // Per le altre uova, restituisce il primo (unico) drago
+  return dragons[eggType]?.[0] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
+};
+
 // INIZIO ENDPONT //
 
 // AZIONI PRINCIPALI PER LA MONETA CENTRALIZZATA //
@@ -657,123 +777,5 @@ router.get('/estimated-rewards', async (req, res) => {
 });
 
 // FINE ENDPONT //
-
-//FUNZIONI BASE//
-
-// Funzione per generare un valore casuale tra min e max
-const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-// Funzione per determinare il bonus basato su probabilità
-const getRandomBonus = () => {
-  const rand = Math.random();
-  if (rand < 0.75) return 0;
-  if (rand < 0.95) return 1;
-  return 2;
-};
-
-// Funzione per calcolare la potenza totale di mining
-const calculateTotalMiningPower = (miningZone) => {
-  let totalPower = 0;
-  let totalBonus = 0;
-
-  // Calcola il bonus totale
-  miningZone.forEach(dragon => {
-    totalBonus += dragon.bonus;
-  });
-
-  // Applica il bonus totale alla potenza di ogni drago
-  miningZone.forEach(dragon => {
-    totalPower += dragon.miningPower * (1 + totalBonus / 100);
-  });
-
-  return totalPower;
-};
-
-const distributeRewards = async () => {
-  try {
-    // Calcola la potenza totale del server
-    const totalServerPowerResult = await User.aggregate([{ $group: { _id: null, total: { $sum: "$totalMiningPower" } } }]);
-    const totalServerPower = totalServerPowerResult.length > 0 ? totalServerPowerResult[0].total : 0;
-
-    if (totalServerPower === 0) {
-      console.log('Nessuna potenza di mining attiva, nessuna ricompensa distribuita.');
-      return;
-    }
-
-    // Recupera tutti gli utenti
-    const users = await User.find();
-
-    users.forEach(async (user) => {
-      if (user.totalMiningPower > 0) {
-        // Calcola la quota di ricompensa in base alla potenza di mining dell'utente
-        const rewardRatio = user.totalMiningPower / totalServerPower;
-        const rewardTc = TOTAL_REWARDS_TC * rewardRatio;
-        const rewardSatoshi = TOTAL_REWARDS_SATOSHI * rewardRatio;
-
-        // Aggiungi le ricompense all'utente
-        user.tcBalance += rewardTc;
-        user.btcBalance += rewardSatoshi;
-
-        await user.save();
-        console.log(`Ricompense distribuite a ${user.username}: ${rewardTc.toFixed(2)} TC e ${rewardSatoshi.toFixed(2)} Satoshi.`);
-      }
-    });
-  } catch (error) {
-    console.error('Errore durante la distribuzione delle ricompense:', error);
-  }
-};
-
-// Esegui il cron job ogni 10 minuti
-cron.schedule('*/10 * * * *', distributeRewards);
-
-//SEZIONE PER CREAZIONE DI DRAGHI//
-
-// Genera un drago in base alla rarità dell'uovo
-const generateDragon = (eggType) => {
-  const dragons = {
-    'Common Egg': [
-      {
-        name: 'Fire Dragon',
-        resistance: getRandomInRange(4, 6),
-        miningPower: getRandomInRange(9, 11),
-        bonus: getRandomBonus(),
-        probability: 33
-      },
-      {
-        name: 'Water Dragon',
-        resistance: getRandomInRange(6, 8),
-        miningPower: getRandomInRange(7, 9),
-        bonus: getRandomBonus(),
-        probability: 33
-      },
-      {
-        name: 'Grass Dragon',
-        resistance: getRandomInRange(9, 11),
-        miningPower: getRandomInRange(4, 6),
-        bonus: getRandomBonus(),
-        probability: 34
-      }
-    ],
-    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 1000 }],
-    'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
-    'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
-    'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
-  };
-
-  // Seleziona casualmente il drago in base alle probabilità
-  if (eggType === 'Common Egg') {
-    const randomValue = Math.random() * 100;
-    let cumulativeProbability = 0;
-    for (const dragon of dragons['Common Egg']) {
-      cumulativeProbability += dragon.probability;
-      if (randomValue <= cumulativeProbability) {
-        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower, bonus: dragon.bonus };
-      }
-    }
-  }
-
-  // Per le altre uova, restituisce il primo (unico) drago
-  return dragons[eggType]?.[0] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
-};
 
 module.exports = router;

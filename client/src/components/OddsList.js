@@ -33,6 +33,9 @@ const OddsList = () => {
   const [selectedBookmakers, setSelectedBookmakers] = useState([]);
   const [cachedOdds, setCachedOdds] = useState({});
 
+  // State to track expanded descriptions
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
+
   const fetchSports = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/odds/sports`);
@@ -94,7 +97,7 @@ const OddsList = () => {
     if (!selectedBookmakers.length) return odds;
     return odds.map(game => ({
       ...game,
-      bookmakers: game.bookmakers.filter(bookmaker => 
+      bookmakers: game.bookmakers.filter(bookmaker =>
         selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
       )
     })).filter(game => game.bookmakers.length > 0);
@@ -179,80 +182,110 @@ const OddsList = () => {
     }
   };
 
+  // Group sports by description
+  const groupedSports = sports.reduce((acc, sport) => {
+    if (!acc[sport.description]) {
+      acc[sport.description] = [];
+    }
+    acc[sport.description].push(sport);
+    return acc;
+  }, {});
+
+  const toggleDescription = (description) => {
+    setExpandedDescriptions(prevState => ({
+      ...prevState,
+      [description]: !prevState[description]
+    }));
+  };
+
   return (
-    <div>
-      <h2>Available Sports</h2>
-      {error && <p>{error}</p>}
-      {sports.length > 0 ? (
-        <ul>
-          {sports.map((sport, index) => (
-            <li key={index} onClick={() => handleSportChange(sport.key)}>
-              <strong>{sport.title}</strong> - {sport.description}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No sports available.</p>
-      )}
-  
-      <h2>Filter by Bookmakers</h2>
-      <div className="bookmakers-checkboxes">
-        <label>
-          <input
-            type="checkbox"
-            onChange={handleSelectAll}
-            checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
-          />
-          Seleziona/Deseleziona Tutto
-        </label>
-        {bookmakerOptions.map((bookmaker, index) => (
-          <label key={index}>
+    <div className="container-odds">
+      <div className="available-sports">
+        <h2>Available Sports</h2>
+        {error && <p>{error}</p>}
+        {Object.keys(groupedSports).length > 0 ? (
+          <div>
+            {Object.entries(groupedSports).map(([description, sports]) => (
+              <div key={description}>
+                <h3 onClick={() => toggleDescription(description)} style={{ cursor: 'pointer', color: 'blue' }}>
+                  {description} {expandedDescriptions[description] ? '▲' : '▼'}
+                </h3>
+                {expandedDescriptions[description] && (
+                  <ul>
+                    {sports.map((sport) => (
+                      <li key={sport.key} onClick={() => handleSportChange(sport.key)}>
+                        <strong>{sport.title}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No sports available.</p>
+        )}
+      </div>
+      <div className="upcoming-odds">
+        <h2>Filter by Bookmakers</h2>
+        <div className="bookmakers-checkboxes">
+          <label>
             <input
               type="checkbox"
-              value={bookmaker}
-              checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
-              onChange={handleCheckboxChange}
+              onChange={handleSelectAll}
+              checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
             />
-            {bookmaker}
+            Seleziona/Deseleziona Tutto
           </label>
-        ))}
+          {bookmakerOptions.map((bookmaker, index) => (
+            <label key={index}>
+              <input
+                type="checkbox"
+                value={bookmaker}
+                checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+                onChange={handleCheckboxChange}
+              />
+              {bookmaker}
+            </label>
+          ))}
+        </div>
+
+        <h2>Upcoming Odds</h2>
+        {error && <p>{error}</p>}
+        {filteredOdds.length > 0 ? (
+          <ul>
+            {filteredOdds.map((game, index) => (
+              <li key={index}>
+                <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
+                <br />
+                <strong>Date:</strong> {formatDate(game.commence_time)}
+                <ul>
+                  {game.bookmakers.map((bookmaker, bIndex) => (
+                    <li key={bIndex}>
+                      {bookmaker.title}:
+                      <ul>
+                        {bookmaker.markets.map((market, mIndex) => (
+                          market.key === 'h2h' && (
+                            <li key={mIndex}>
+                              1 (Home Win): {market.outcomes[1]?.price || 'N/A'} |
+                              X (Draw): {market.outcomes[2]?.price || 'N/A'} |
+                              2 (Away Win): {market.outcomes[0]?.price || 'N/A'}
+                              <button onClick={() => openModal(game, market)}>Calcola puntate</button>
+                            </li>
+                          )
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No odds available.</p>
+        )}
       </div>
 
-      <h2>Upcoming Odds</h2>
-      {error && <p>{error}</p>}
-      {filteredOdds.length > 0 ? (
-        <ul>
-          {filteredOdds.map((game, index) => (
-            <li key={index}>
-              <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
-              <br />
-              <strong>Date:</strong> {formatDate(game.commence_time)}
-              <ul>
-                {game.bookmakers.map((bookmaker, bIndex) => (
-                  <li key={bIndex}>
-                    {bookmaker.title}:
-                    <ul>
-                      {bookmaker.markets.map((market, mIndex) => (
-                        market.key === 'h2h' && (
-                          <li key={mIndex}>
-                            1 (Home Win): {market.outcomes[1]?.price || 'N/A'} | 
-                            X (Draw): {market.outcomes[2]?.price || 'N/A'} | 
-                            2 (Away Win): {market.outcomes[0]?.price || 'N/A'}
-                            <button onClick={() => openModal(game, market)}>Calcola puntate</button>
-                          </li>
-                        )
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No odds available.</p>
-      )}
-  
       {modalIsOpen && (
         <div className="modal-odds">
           <div className="modal-content">
@@ -287,39 +320,39 @@ const OddsList = () => {
             </div>
             <label>
               Importo puntato:
-              <input 
-                type="number" 
-                value={betAmount} 
-                onChange={handleAmountChange} 
+              <input
+                type="number"
+                value={betAmount}
+                onChange={handleAmountChange}
               />
             </label>
             <div>
               <label>
                 Quota 1:
-                <input 
-                  type="number" 
-                  value={modalData.odds1} 
-                  onChange={(e) => handleOddsChange(e, 'odds1')} 
+                <input
+                  type="number"
+                  value={modalData.odds1}
+                  onChange={(e) => handleOddsChange(e, 'odds1')}
                 />
               </label>
             </div>
             <div>
               <label>
                 Quota X:
-                <input 
-                  type="number" 
-                  value={modalData.oddsX} 
-                  onChange={(e) => handleOddsChange(e, 'oddsX')} 
+                <input
+                  type="number"
+                  value={modalData.oddsX}
+                  onChange={(e) => handleOddsChange(e, 'oddsX')}
                 />
               </label>
             </div>
             <div>
               <label>
                 Quota 2:
-                <input 
-                  type="number" 
-                  value={modalData.odds2} 
-                  onChange={(e) => handleOddsChange(e, 'odds2')} 
+                <input
+                  type="number"
+                  value={modalData.odds2}
+                  onChange={(e) => handleOddsChange(e, 'odds2')}
                 />
               </label>
             </div>
@@ -336,7 +369,7 @@ const OddsList = () => {
               )}
               <p>
                 Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
-                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, betAmount , calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
+                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, betAmount, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
               </p>
             </div>
             <button onClick={closeModal}>Chiudi</button>
@@ -344,7 +377,7 @@ const OddsList = () => {
         </div>
       )}
     </div>
-  );  
+  );
 };
 
 export default OddsList;

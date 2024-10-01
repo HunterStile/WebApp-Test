@@ -1,3 +1,28 @@
+/* Contenitore principale per il layout */
+.container-odds {
+  display: flex; /* Utilizza Flexbox per il layout a due colonne */
+}
+
+/* Stili per la sezione degli sport disponibili */
+.available-sports {
+  flex: 1; /* Questa sezione occupa 1 parte della larghezza totale */
+  border-right: 1px solid #ccc; /* Separatore a destra */
+  max-height: 100vh; /* Altezza massima per la sezione */
+  overflow-y: auto; /* Scorrimento verticale se necessario */
+}
+
+/* Stili per la sezione degli upcoming odds e filtri */
+.upcoming-odds {
+  flex: 2; /* Questa sezione occupa 2 parti della larghezza totale */
+  padding: 20px; /* Padding per spaziatura interna */
+  overflow-y: auto; /* Scorrimento verticale se necessario */
+}
+
+/* Puoi anche aggiungere uno stile generale per il contenitore di tutto */
+h2 {
+  margin-top: 0; /* Rimuove il margine superiore per un aspetto più pulito */
+}
+
 .modal-odds {
     position: fixed;
     top: 0;

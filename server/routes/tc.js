@@ -4,8 +4,8 @@ const router = express.Router();
 const User = require('../models/User');
 const axios = require('axios');
 const cron = require('node-cron');
-const TOTAL_REWARDS_TC = 1000; // La quantità totale di TC distribuita ogni intervallo di tempo
-const TOTAL_REWARDS_SATOSHI = 50000; // La quantità totale di Satoshi distribuita ogni intervallo di tempo
+const TOTAL_REWARDS_TC = 10; // La quantità totale di TC distribuita ogni intervallo di tempo
+const TOTAL_REWARDS_SATOSHI = 500; // La quantità totale di Satoshi distribuita ogni intervallo di tempo
 
 //CRON JOB//
 

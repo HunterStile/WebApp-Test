@@ -254,7 +254,7 @@ const OddsList = () => {
       )}
   
       {modalIsOpen && (
-        <div className="modal">
+        <div className="modal-odds">
           <div className="modal-content">
             <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
             <div className="modal-row">

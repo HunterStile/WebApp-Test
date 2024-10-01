@@ -48,7 +48,7 @@ const updateCachedOdds = async () => {
 };
 
 // Aggiorna i dati ogni 15 minuti
-setInterval(updateCachedOdds, 15 * 60 * 1000);
+//setInterval(updateCachedOdds, 15 * 60 * 1000);
 
 // Prima di tutto, esegui un aggiornamento
 //updateCachedOdds();

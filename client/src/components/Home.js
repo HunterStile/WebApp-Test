@@ -11,15 +11,50 @@ function Home() {
   const [totalMiningPower, setTotalMiningPower] = useState(0);
   const [totalServerMiningPower, setTotalServerMiningPower] = useState(0);
   const [estimatedRewards, setEstimatedRewards] = useState({ tc: 0, satoshi: 0 });
-  
+  const [timer, setTimer] = useState(0); // Aggiungi lo stato per il timer
+
   useEffect(() => {
     if (user) {
       fetchDragons();
       fetchMiningZone();
       fetchTotalServerMiningPower();
-      fetchEstimatedRewards();
+      fetchEstimatedRewards(); // Recupera le ricompense stimate
+      fetchTimeUntilNextRewards(); // Recupera il tempo rimanente dal server
     }
   }, [user]);
+
+  // Funzione per recuperare il tempo rimanente dal server
+  const fetchTimeUntilNextRewards = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/tc/time-until-next-rewards`);
+      if (response.data) {
+        const secondsRemaining = response.data.secondsRemaining;
+        setTimer(secondsRemaining); // Imposta il timer
+        startTimer(secondsRemaining); // Inizia il timer con il tempo rimanente
+      }
+    } catch (error) {
+      console.error('Errore durante il recupero del tempo rimanente:', error);
+    }
+  };
+
+  // Funzione per avviare il timer
+  const startTimer = (initialTime) => {
+    setTimer(initialTime); // Imposta il timer iniziale
+
+    const interval = setInterval(() => {
+      setTimer(prevTimer => {
+        if (prevTimer <= 0) {
+          clearInterval(interval);
+          fetchTimeUntilNextRewards(); // Ricarica il tempo rimanente
+          return 0; // Ferma il timer a 0
+        }
+        return prevTimer - 1; // Decrementa il timer
+      });
+    }, 1000);
+
+    // Pulisci l'intervallo quando il componente si smonta
+    return () => clearInterval(interval);
+  };
 
   const fetchDragons = async () => {
     try {
@@ -83,19 +118,19 @@ function Home() {
       alert('Errore durante la rimozione del drago dalla zona mining');
     }
   };
-  
+
   const calculateTotalMiningPower = (dragonsInZone) => {
     let totalPower = 0;
     let totalBonus = 0;
-  
+
     dragonsInZone.forEach(dragon => {
       totalBonus += dragon.bonus;
     });
-  
+
     dragonsInZone.forEach(dragon => {
       totalPower += dragon.miningPower * (1 + totalBonus / 100);
     });
-  
+
     setTotalMiningPower(totalPower);
   };
 
@@ -159,9 +194,10 @@ function Home() {
           )}
 
           <h3>Total Server Mining Power: {formatMiningPower(totalServerMiningPower)}</h3>
-          
-          {/* Gestione dei valori non definiti con una condizione ternaria */}
-          <h3>Estimated Rewards: {estimatedRewards.tc ? estimatedRewards.tc.toFixed(2) : '0.00'} TC, {estimatedRewards.satoshi || 0} Satoshi</h3>
+
+          {/* Aggiungi il timer per la distribuzione delle ricompense */}
+          <h3>Next Rewards in: {Math.floor(timer / 60)}:{('0' + (timer % 60)).slice(-2)}</h3>
+          <h3>Estimated Rewards: {estimatedRewards.tc} TC, {estimatedRewards.satoshi} Satoshi</h3>
         </>
       )}
     </div>

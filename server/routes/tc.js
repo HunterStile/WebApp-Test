@@ -44,7 +44,8 @@ const distributeRewards = async () => {
 };
 
 // Esegui il cron job ogni 10 minuti
-cron.schedule('*/10 * * * *', distributeRewards);
+//cron.schedule('*/10 * * * *', distributeRewards);
+cron.schedule('*/10 * * * *', distributeRewards); // Esegui ogni minuto
 
 //FUNZIONI AUSILIARI//
 
@@ -75,6 +76,21 @@ const calculateTotalMiningPower = (miningZone) => {
   });
 
   return totalPower;
+};
+
+// Aggiungi questa funzione nel tuo backend
+const getTimeUntilNextRewards = async (req, res) => {
+  const currentTime = new Date();
+  const nextRewardTime = new Date();
+  
+  // Supponiamo che il cron job distribuisca ricompense ogni 10 minuti
+  nextRewardTime.setMinutes(Math.ceil(currentTime.getMinutes() / 10) * 10);
+  nextRewardTime.setSeconds(0);
+
+  const timeDiff = nextRewardTime - currentTime; // Differenza in millisecondi
+  const secondsRemaining = Math.max(Math.floor(timeDiff / 1000), 0); // Rimuovi eventuali valori negativi
+
+  res.json({ secondsRemaining });
 };
 
 //GENERAZIONE DRAGHI//
@@ -193,6 +209,9 @@ router.post('/spend', async (req, res) => {
     res.status(500).send('Error spending TC');
   }
 });
+
+// Aggiungi l'endpoint oer il calcolo del tempo da inviare al frontends
+router.get('/time-until-next-rewards', getTimeUntilNextRewards);
 
 // UOVA E DRAGHI 
 

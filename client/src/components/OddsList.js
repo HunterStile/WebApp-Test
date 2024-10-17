@@ -37,6 +37,8 @@ const bookmakerOptions = Object.keys(bookmakerMapping);
 
 // Default selected bookmakers
 const DEFAULT_BOOKMAKERS = ['betfair', '888sport'];
+// Defaul rating 
+const DEFAULT_RATING_RANGE = { min: 0, max: 200 }; // Rating può superare 100% in alcuni casi
 
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
@@ -51,6 +53,10 @@ const OddsList = () => {
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: ''
+  });
+  const [ratingRange, setRatingRange] = useState({
+    min: DEFAULT_RATING_RANGE.min,
+    max: DEFAULT_RATING_RANGE.max
   });
 
   // State to track expanded descriptions
@@ -251,8 +257,7 @@ const OddsList = () => {
     return ratedOdds;
   };
 
-  
-  // Modify the getFilteredOdds function to handle date range
+  // Modify getFilteredOdds to include rating range filter
   const getFilteredOdds = () => {
     if (!selectedBookmakers.length) return [];
 
@@ -285,8 +290,12 @@ const OddsList = () => {
       return getOddsWithRatings(filteredGame);
     });
 
+    // Filter by rating range and sort
     return allRatedOdds
-      .filter(game => game.selectedOutcome.rating > 0)
+      .filter(game =>
+        game.selectedOutcome.rating >= ratingRange.min &&
+        game.selectedOutcome.rating <= ratingRange.max
+      )
       .sort((a, b) => b.selectedOutcome.rating - a.selectedOutcome.rating);
   };
 
@@ -295,7 +304,7 @@ const OddsList = () => {
   // Add date range filter component
   const DateRangeFilter = () => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     const handleDateChange = (e) => {
       const { name, value } = e.target;
       setDateRange(prev => ({
@@ -332,7 +341,7 @@ const OddsList = () => {
               onChange={handleDateChange}
             />
           </div>
-          
+
           <div className="date-input-group">
             <label htmlFor="endDate">To:</label>
             <input
@@ -346,7 +355,7 @@ const OddsList = () => {
           </div>
 
           {(dateRange.startDate || dateRange.endDate) && (
-            <button 
+            <button
               className="clear-date-btn"
               onClick={clearDates}
             >
@@ -354,7 +363,7 @@ const OddsList = () => {
             </button>
           )}
         </div>
-        
+
         {!isDateRangeValid() && (
           <div className="date-error">
             End date must be after start date
@@ -368,7 +377,7 @@ const OddsList = () => {
               const today = new Date();
               const nextWeek = new Date();
               nextWeek.setDate(today.getDate() + 7);
-              
+
               setDateRange({
                 startDate: today.toISOString().split('T')[0],
                 endDate: nextWeek.toISOString().split('T')[0]
@@ -377,13 +386,13 @@ const OddsList = () => {
           >
             Next 7 Days
           </button>
-          
+
           <button
             onClick={() => {
               const today = new Date();
               const nextMonth = new Date();
               nextMonth.setMonth(today.getMonth() + 1);
-              
+
               setDateRange({
                 startDate: today.toISOString().split('T')[0],
                 endDate: nextMonth.toISOString().split('T')[0]
@@ -396,7 +405,111 @@ const OddsList = () => {
       </div>
     );
   };
-  
+
+  // Add Rating Range Filter component
+  const RatingRangeFilter = () => {
+    const handleRangeChange = (e) => {
+      const { name, value } = e.target;
+      setRatingRange(prev => ({
+        ...prev,
+        [name]: parseFloat(value)
+      }));
+    };
+
+    const resetRatingRange = () => {
+      setRatingRange({
+        min: DEFAULT_RATING_RANGE.min,
+        max: DEFAULT_RATING_RANGE.max
+      });
+    };
+
+    return (
+      <div className="rating-filter">
+        <h3>Filter by Rating Range</h3>
+        <div className="rating-inputs">
+          <div className="rating-slider-group">
+            <label>Minimum Rating: {ratingRange.min}%</label>
+            <input
+              type="range"
+              name="min"
+              min={DEFAULT_RATING_RANGE.min}
+              max={DEFAULT_RATING_RANGE.max}
+              value={ratingRange.min}
+              onChange={handleRangeChange}
+              className="rating-slider"
+            />
+          </div>
+
+          <div className="rating-slider-group">
+            <label>Maximum Rating: {ratingRange.max}%</label>
+            <input
+              type="range"
+              name="max"
+              min={DEFAULT_RATING_RANGE.min}
+              max={DEFAULT_RATING_RANGE.max}
+              value={ratingRange.max}
+              onChange={handleRangeChange}
+              className="rating-slider"
+            />
+          </div>
+
+          <div className="rating-inputs-numeric">
+            <div className="rating-input-group">
+              <label>Min:</label>
+              <input
+                type="number"
+                name="min"
+                value={ratingRange.min}
+                onChange={handleRangeChange}
+                min={DEFAULT_RATING_RANGE.min}
+                max={ratingRange.max}
+                step="0.1"
+              />
+            </div>
+            <div className="rating-input-group">
+              <label>Max:</label>
+              <input
+                type="number"
+                name="max"
+                value={ratingRange.max}
+                onChange={handleRangeChange}
+                min={ratingRange.min}
+                max={DEFAULT_RATING_RANGE.max}
+                step="0.1"
+              />
+            </div>
+          </div>
+
+          <button
+            className="reset-filters-btn"
+            onClick={resetRatingRange}
+          >
+            Reset Rating Range
+          </button>
+        </div>
+
+        {/* Quick select buttons for common rating ranges */}
+        <div className="quick-select-ratings">
+          <button
+            onClick={() => setRatingRange({ min: 95, max: 200 })}
+          >
+            High Value (95%+)
+          </button>
+          <button
+            onClick={() => setRatingRange({ min: 90, max: 95 })}
+          >
+            Medium Value (90-95%)
+          </button>
+          <button
+            onClick={() => setRatingRange({ min: 0, max: 90 })}
+          >
+            Low Value (&lt;90%)
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // Componente per la nuova modale
   const ArbitrageModal = ({
     isOpen,
@@ -582,31 +695,35 @@ const OddsList = () => {
 
       {/* Sezione Quote Imminenti */}
       <div className="upcoming-odds">
-        {/* Sezione Filtri Bookmaker */}
-        <div className="bookmakers-section">
-          <h2>Filter by Bookmakers</h2>
-          <ViewToggle />
+        <h2>ODDSMATCHER</h2>
+        <ViewToggle />
+        {/* Group all filters together */}
+        <div className="filters-container">
           <DateRangeFilter />
-          <div className="bookmakers-checkboxes">
-            <label className="bookmaker-checkbox">
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
-              />
-              <span>Seleziona/Deseleziona Tutto</span>
-            </label>
-            {bookmakerOptions.map((bookmaker, index) => (
-              <label key={index} className="bookmaker-checkbox">
+          <RatingRangeFilter />
+          <div className="bookmakers-section">
+            <h3>Filter by Bookmakers</h3>
+            <div className="bookmakers-checkboxes">
+              <label className="bookmaker-checkbox">
                 <input
                   type="checkbox"
-                  value={bookmaker}
-                  checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
-                  onChange={handleCheckboxChange}
+                  onChange={handleSelectAll}
+                  checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
                 />
-                <span>{bookmaker}</span>
+                <span>Seleziona/Deseleziona Tutto</span>
               </label>
-            ))}
+              {bookmakerOptions.map((bookmaker, index) => (
+                <label key={index} className="bookmaker-checkbox">
+                  <input
+                    type="checkbox"
+                    value={bookmaker}
+                    checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+                    onChange={handleCheckboxChange}
+                  />
+                  <span>{bookmaker}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
 

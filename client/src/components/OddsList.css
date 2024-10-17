@@ -1,39 +1,264 @@
-.modal {
-    position: fixed;
+/* Main container layout */
+.container-odds {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Available sports section */
+.available-sports {
+  position: fixed;
+  top: 73px;
+  width: 25rem;
+  border-right: 1px solid #e0e0e0;
+  background: white;
+  height: calc(100vh - 73px);
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.sports-list {
+  list-style: none;
+  padding: 0;
+}
+
+.sports-category {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.sports-category h3 {
+  padding: 1rem;
+  cursor: pointer;
+  background: #f8f9fa;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.sports-category h3:hover {
+  background: #e9ecef;
+}
+
+.sports-category ul {
+  list-style: none;
+  padding: 0.5rem 1rem;
+}
+
+.sports-category li {
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sports-category li:hover {
+  background-color: #f8f9fa;
+}
+
+/* Upcoming odds section */
+.upcoming-odds {
+  position: absolute;
+  top: 73px;
+  left: 26rem;
+  width: calc(100% - 26rem);
+  padding: 2rem;
+  background: #fff;
+  min-height: calc(100vh - 73px);
+}
+
+/* Bookmaker filters */
+.bookmakers-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.bookmakers-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bookmaker-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Game cards */
+.game-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.game-teams {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.game-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.bookmaker-odds {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.bookmakers-list {
+  display: ruby;
+}
+
+.odds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Modal styles */
+.modal-odds {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.input-group {
+  margin-bottom: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.modal-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .available-sports {
+    width: 20rem;
+  }
+  
+  .upcoming-odds {
+    left: 20rem;
+    width: calc(100% - 20rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .container-odds {
+    flex-direction: column;
+  }
+  
+  .available-sports {
+    position: relative;
+    width: 100%;
     top: 0;
+    height: auto;
+    max-height: 300px;
+  }
+  
+  .upcoming-odds {
+    position: relative;
     left: 0;
     width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Sfondo semi-trasparente */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000; /* Assicurati che la modale sia sopra altri contenuti */
+    top: 0;
   }
-  
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 500px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .modal-content input {
-    margin: 5px 0;
-  }
-  
-  .bookmakers-checkboxes {
-    margin-bottom: 20px;
-  }
-
-  .modal-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .modal-row:last-of-type {
-    margin-bottom: 20px;
-  }
+}

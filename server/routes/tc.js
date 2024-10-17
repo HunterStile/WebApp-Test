@@ -3,8 +3,149 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const axios = require('axios');
+const cron = require('node-cron');
+const TOTAL_REWARDS_TC = 10; // La quantità totale di TC distribuita ogni intervallo di tempo
+const TOTAL_REWARDS_SATOSHI = 500; // La quantità totale di Satoshi distribuita ogni intervallo di tempo
+
+//CRON JOB//
+
+const distributeRewards = async () => {
+  try {
+    // Calcola la potenza totale del server
+    const totalServerPowerResult = await User.aggregate([{ $group: { _id: null, total: { $sum: "$totalMiningPower" } } }]);
+    const totalServerPower = totalServerPowerResult.length > 0 ? totalServerPowerResult[0].total : 0;
+
+    if (totalServerPower === 0) {
+      console.log('Nessuna potenza di mining attiva, nessuna ricompensa distribuita.');
+      return;
+    }
+
+    // Recupera tutti gli utenti
+    const users = await User.find();
+
+    users.forEach(async (user) => {
+      if (user.totalMiningPower > 0) {
+        // Calcola la quota di ricompensa in base alla potenza di mining dell'utente
+        const rewardRatio = user.totalMiningPower / totalServerPower;
+        const rewardTc = TOTAL_REWARDS_TC * rewardRatio;
+        const rewardSatoshi = TOTAL_REWARDS_SATOSHI * rewardRatio;
+
+        // Aggiungi le ricompense all'utente
+        user.tcBalance += rewardTc;
+        user.btcBalance += rewardSatoshi;
+
+        await user.save();
+        console.log(`Ricompense distribuite a ${user.username}: ${rewardTc.toFixed(2)} TC e ${rewardSatoshi.toFixed(2)} Satoshi.`);
+      }
+    });
+  } catch (error) {
+    console.error('Errore durante la distribuzione delle ricompense:', error);
+  }
+};
+
+// Esegui il cron job ogni 10 minuti
+//cron.schedule('*/10 * * * *', distributeRewards);
+cron.schedule('*/10 * * * *', distributeRewards); // Esegui ogni minuto
+
+//FUNZIONI AUSILIARI//
+
+// Funzione per generare un valore casuale tra min e max
+const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Funzione per determinare il bonus basato su probabilità
+const getRandomBonus = () => {
+  const rand = Math.random();
+  if (rand < 0.75) return 0;
+  if (rand < 0.95) return 1;
+  return 2;
+};
+
+// Funzione per calcolare la potenza totale di mining
+const calculateTotalMiningPower = (miningZone) => {
+  let totalPower = 0;
+  let totalBonus = 0;
+
+  // Calcola il bonus totale
+  miningZone.forEach(dragon => {
+    totalBonus += dragon.bonus;
+  });
+
+  // Applica il bonus totale alla potenza di ogni drago
+  miningZone.forEach(dragon => {
+    totalPower += dragon.miningPower * (1 + totalBonus / 100);
+  });
+
+  return totalPower;
+};
+
+// Aggiungi questa funzione nel tuo backend
+const getTimeUntilNextRewards = async (req, res) => {
+  const currentTime = new Date();
+  const nextRewardTime = new Date();
+  
+  // Supponiamo che il cron job distribuisca ricompense ogni 10 minuti
+  nextRewardTime.setMinutes(Math.ceil(currentTime.getMinutes() / 10) * 10);
+  nextRewardTime.setSeconds(0);
+
+  const timeDiff = nextRewardTime - currentTime; // Differenza in millisecondi
+  const secondsRemaining = Math.max(Math.floor(timeDiff / 1000), 0); // Rimuovi eventuali valori negativi
+
+  res.json({ secondsRemaining });
+};
+
+//GENERAZIONE DRAGHI//
+
+// Genera un drago in base alla rarità dell'uovo
+const generateDragon = (eggType) => {
+  const dragons = {
+    'Common Egg': [
+      {
+        name: 'Fire Dragon',
+        resistance: getRandomInRange(4, 6),
+        miningPower: getRandomInRange(9, 11),
+        bonus: getRandomBonus(),
+        probability: 33
+      },
+      {
+        name: 'Water Dragon',
+        resistance: getRandomInRange(6, 8),
+        miningPower: getRandomInRange(7, 9),
+        bonus: getRandomBonus(),
+        probability: 33
+      },
+      {
+        name: 'Grass Dragon',
+        resistance: getRandomInRange(9, 11),
+        miningPower: getRandomInRange(4, 6),
+        bonus: getRandomBonus(),
+        probability: 34
+      }
+    ],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 1000 }],
+    'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
+    'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
+    'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
+  };
+
+  // Seleziona casualmente il drago in base alle probabilità
+  if (eggType === 'Common Egg') {
+    const randomValue = Math.random() * 100;
+    let cumulativeProbability = 0;
+    for (const dragon of dragons['Common Egg']) {
+      cumulativeProbability += dragon.probability;
+      if (randomValue <= cumulativeProbability) {
+        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower, bonus: dragon.bonus };
+      }
+    }
+  }
+
+  // Per le altre uova, restituisce il primo (unico) drago
+  return dragons[eggType]?.[0] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
+};
 
 // INIZIO ENDPONT //
+
+// AZIONI PRINCIPALI PER LA MONETA CENTRALIZZATA //
 
 // Ottieni il saldo di TC dell'utente
 router.get('/balance', async (req, res) => {
@@ -68,6 +209,11 @@ router.post('/spend', async (req, res) => {
     res.status(500).send('Error spending TC');
   }
 });
+
+// Aggiungi l'endpoint oer il calcolo del tempo da inviare al frontends
+router.get('/time-until-next-rewards', getTimeUntilNextRewards);
+
+// UOVA E DRAGHI 
 
 // Salva l'apertura di una mystery box e memorizza l'uovo
 router.post('/open-box', async (req, res) => {
@@ -426,69 +572,229 @@ router.get('/dragons', async (req, res) => {
   }
 });
 
-// FINE ENDPONT //
+// Recupera solo le uova messe in vendita dall'utente corrente
+router.get('/my-eggs-for-sale', async (req, res) => {
+  const { username } = req.query;
 
-//FUNZIONI BASE//
-
-// Funzione per generare un valore casuale tra min e max
-const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-// Funzione per determinare il bonus basato su probabilità
-const getRandomBonus = () => {
-  const rand = Math.random();
-  if (rand < 0.75) return 0;
-  if (rand < 0.95) return 1;
-  return 2;
-};
-
-//SEZIONE PER CREAZIONE DI DRAGHI//
-
-// Genera un drago in base alla rarità dell'uovo
-const generateDragon = (eggType) => {
-  const dragons = {
-    'Common Egg': [
-      { 
-        name: 'Fire Dragon', 
-        resistance: getRandomInRange(4, 6), 
-        miningPower: getRandomInRange(9, 11), 
-        bonus: getRandomBonus(),
-        probability: 33 
-      },
-      { 
-        name: 'Water Dragon', 
-        resistance: getRandomInRange(6, 8), 
-        miningPower: getRandomInRange(7, 9), 
-        bonus: getRandomBonus(),
-        probability: 33 
-      },
-      { 
-        name: 'Grass Dragon', 
-        resistance: getRandomInRange(9, 11), 
-        miningPower: getRandomInRange(4, 6), 
-        bonus: getRandomBonus(),
-        probability: 34 
-      }
-    ],
-    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
-    'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
-    'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
-    'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
-  };
-
-  // Seleziona casualmente il drago in base alle probabilità
-  if (eggType === 'Common Egg') {
-    const randomValue = Math.random() * 100;
-    let cumulativeProbability = 0;
-    for (const dragon of dragons['Common Egg']) {
-      cumulativeProbability += dragon.probability;
-      if (randomValue <= cumulativeProbability) {
-        return { name: dragon.name, resistance: dragon.resistance, miningPower: dragon.miningPower, bonus: dragon.bonus };
-      }
-    }
+  if (!username) {
+    return res.status(400).json({ error: 'Username is required' });
   }
 
-  // Per le altre uova, restituisce il primo (unico) drago
-  return dragons[eggType]?.[0] || { name: 'Unknown Dragon', resistance: 0, miningPower: 0 };
-};
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Restituisci solo le uova che l'utente ha messo in vendita
+    res.json(user.eggsForSale);
+  } catch (error) {
+    console.error('Error fetching user egg sales:', error);
+    res.status(500).json({ error: 'An error occurred while fetching user egg sales' });
+  }
+});
+
+// Rimuovi un uovo dalla vendita
+router.post('/remove-egg-sale', async (req, res) => {
+  const { username, eggType } = req.body;
+
+  if (!username || !eggType) {
+    return res.status(400).json({ error: 'Username and egg type are required' });
+  }
+
+  try {
+    // Trova l'utente
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Trova l'uovo in vendita e rimuovilo
+    const eggIndex = user.eggsForSale.findIndex((egg) => egg.eggType === eggType);
+
+    if (eggIndex === -1) {
+      return res.status(404).json({ error: 'Egg not found in user\'s sale list' });
+    }
+
+    // Aggiungi la quantità di uova di nuovo all'inventario dell'utente
+    const eggToRemove = user.eggsForSale[eggIndex];
+    user.eggs.set(eggType, (user.eggs.get(eggType) || 0) + eggToRemove.quantity);
+
+    // Rimuovi l'uovo dalla lista delle vendite
+    user.eggsForSale.splice(eggIndex, 1);
+
+    // Salva le modifiche
+    await user.save();
+
+    res.json({ message: 'Egg sale removed successfully' });
+  } catch (error) {
+    console.error('Error removing egg sale:', error);
+    res.status(500).json({ error: 'An error occurred while removing egg sale' });
+  }
+});
+
+// Endpoint per aggiungere un drago alla zona mining
+router.post('/add-to-mining-zone', async (req, res) => {
+  const { username, dragonId } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    const dragonIndex = user.dragons.findIndex(d => d._id.toString() === dragonId);
+    if (dragonIndex === -1) {
+      return res.status(404).json({ error: 'Drago non trovato' });
+    }
+
+    const dragon = user.dragons[dragonIndex];
+    user.miningZone.push(dragon);
+    user.dragons.splice(dragonIndex, 1);
+
+    // Calcola e aggiorna la potenza totale di mining
+    user.totalMiningPower = calculateTotalMiningPower(user.miningZone);
+
+    await user.save();
+
+    res.json({ message: 'Drago aggiunto alla zona mining', miningZone: user.miningZone });
+  } catch (error) {
+    console.error('Errore durante l\'aggiunta del drago alla zona mining:', error);
+    res.status(500).json({ error: 'Errore durante l\'aggiunta del drago alla zona mining' });
+  }
+});
+
+// Endpoint per recuperare i draghi nella zona mining
+router.get('/mining-zone', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    res.json({ miningZone: user.miningZone });
+  } catch (error) {
+    console.error('Errore durante il recupero della zona mining:', error);
+    res.status(500).json({ error: 'Errore durante il recupero della zona mining' });
+  }
+});
+
+// Endpoint per rimuovere un drago dalla zona mining
+router.post('/remove-from-mining-zone', async (req, res) => {
+  const { username, dragonId } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    const dragonIndex = user.miningZone.findIndex(d => d._id.toString() === dragonId);
+    if (dragonIndex === -1) {
+      return res.status(404).json({ error: 'Drago non trovato nella zona mining' });
+    }
+
+    const [removedDragon] = user.miningZone.splice(dragonIndex, 1);
+    user.dragons.push(removedDragon);
+
+    // Calcola e aggiorna la potenza totale di mining
+    user.totalMiningPower = calculateTotalMiningPower(user.miningZone);
+
+    await user.save();
+
+    res.json({ message: 'Drago rimosso dalla zona mining', miningZone: user.miningZone });
+  } catch (error) {
+    console.error('Errore durante la rimozione del drago dalla zona mining:', error);
+    res.status(500).json({ error: 'Errore durante la rimozione del drago dalla zona mining' });
+  }
+});
+
+// Endpoint per ottenere la potenza totale del server
+router.get('/server-mining-power', async (req, res) => {
+  try {
+    const users = await User.find(); // Recupera tutti gli utenti
+    let totalServerPower = 0;
+
+    users.forEach(user => {
+      // Calcola la potenza totale di mining per ogni utente
+      let userTotalPower = 0;
+      let totalBonus = 1; // Bonus totale inizia a 1 (nessun bonus)
+      
+      user.miningZone.forEach(dragon => {
+        totalBonus += dragon.bonus; // Somma tutti i bonus
+      });
+
+      user.miningZone.forEach(dragon => {
+        userTotalPower += dragon.miningPower * totalBonus; // Applica il bonus totale
+      });
+
+      totalServerPower += userTotalPower; // Aggiungi alla potenza totale del server
+    });
+
+    res.json({ totalServerPower });
+  } catch (error) {
+    console.error('Errore durante il calcolo della potenza totale del server:', error);
+    res.status(500).json({ error: 'Errore durante il calcolo della potenza totale del server' });
+  }
+});
+
+// Endpoint per calcolare la potenza totale di mining del server
+router.get('/total-mining-power', async (req, res) => {
+  try {
+    const users = await User.find({});
+    let totalServerMiningPower = 0;
+
+    // Calcola la potenza totale di mining del server
+    users.forEach(user => {
+      totalServerMiningPower += user.totalMiningPower || 0; // Assicurati di utilizzare la proprietà corretta
+    });
+
+    res.json({ totalServerMiningPower });
+  } catch (error) {
+    console.error('Errore durante il recupero della potenza totale di mining del server:', error);
+    res.status(500).json({ error: 'Errore durante il recupero della potenza totale di mining del server' });
+  }
+});
+
+// Endpoint per ottenere le ricompense stimate
+router.get('/estimated-rewards', async (req, res) => {
+  const username = req.query.username;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username non fornito' });
+  }
+
+  try {
+    // Ottieni l'utente e la sua potenza di mining
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    const userMiningPower = user.totalMiningPower;
+
+    // Ottieni la potenza totale di mining del server
+    const allUsers = await User.find({});
+    const totalServerMiningPower = allUsers.reduce((total, currentUser) => total + (currentUser.totalMiningPower || 0), 0);
+
+    // Calcola le ricompense stimate in base alla potenza di mining dell'utente
+    const tcReward = (userMiningPower / totalServerMiningPower) * TOTAL_REWARDS_TC;
+    const satoshiReward = (userMiningPower / totalServerMiningPower) * TOTAL_REWARDS_SATOSHI;
+
+    res.json({
+      tc: isNaN(tcReward) ? 0 : tcReward,
+      satoshi: isNaN(satoshiReward) ? 0 : satoshiReward,
+    });
+  } catch (error) {
+    console.error('Errore durante il calcolo delle ricompense stimate:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+// FINE ENDPONT //
 
 module.exports = router;

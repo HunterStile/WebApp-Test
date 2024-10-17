@@ -44,6 +44,7 @@ const OddsList = () => {
   const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
   const [arbitrageModalData, setArbitrageModalData] = useState(null);
   const [viewMode, setViewMode] = useState('major');
+  const [selectedDate, setSelectedDate] = useState('');
 
   // State to track expanded descriptions
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
@@ -243,11 +244,26 @@ const OddsList = () => {
     return ratedOdds;
   };
 
-  // Funzione principale di filtro
+   // Modify the getFilteredOdds function to include date filtering
   const getFilteredOdds = () => {
     if (!selectedBookmakers.length) return [];
 
     const allRatedOdds = odds.flatMap(game => {
+      // First filter by date if selected
+      if (selectedDate) {
+        const eventDate = new Date(game.commence_time);
+        const filterDate = new Date(selectedDate);
+        
+        // Compare only the date part (ignore time)
+        if (
+          eventDate.getFullYear() !== filterDate.getFullYear() ||
+          eventDate.getMonth() !== filterDate.getMonth() ||
+          eventDate.getDate() !== filterDate.getDate()
+        ) {
+          return [];
+        }
+      }
+
       // Filtra prima i bookmaker selezionati
       const filteredGame = {
         ...game,
@@ -264,7 +280,36 @@ const OddsList = () => {
       .filter(game => game.selectedOutcome.rating > 0)
       .sort((a, b) => b.selectedOutcome.rating - a.selectedOutcome.rating);
   };
+
   const filteredOdds = getFilteredOdds();
+
+   // Add date filter component
+   const DateFilter = () => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    return (
+      <div className="date-filter">
+        <label htmlFor="date-filter">Filter by Date:</label>
+        <div className="date-inputs">
+          <input
+            type="date"
+            id="date-filter"
+            value={selectedDate}
+            min={today}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+          {selectedDate && (
+            <button 
+              className="clear-date-btn"
+              onClick={() => setSelectedDate('')}
+            >
+              Clear Date
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   // Componente per la nuova modale
   const ArbitrageModal = ({
@@ -455,6 +500,7 @@ const OddsList = () => {
         <div className="bookmakers-section">
           <h2>Filter by Bookmakers</h2>
           <ViewToggle />
+          <DateFilter />
           <div className="bookmakers-checkboxes">
             <label className="bookmaker-checkbox">
               <input

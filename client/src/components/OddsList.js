@@ -33,10 +33,12 @@ const OddsList = () => {
   const [selectedBookmakers, setSelectedBookmakers] = useState([]);
   const [cachedOdds, setCachedOdds] = useState({});
   const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
+  const [arbitrageModalData, setArbitrageModalData] = useState(null);
 
   // State to track expanded descriptions
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
+  //FETCH DELLE SCOMESSE
   const fetchSports = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/odds/sports`);
@@ -82,6 +84,7 @@ const OddsList = () => {
     }
   }, [selectedSport, cachedOdds, fetchOdds]);
 
+  //GESTIONE RICERCA PARTITE
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     const bookmakerKey = bookmakerMapping[value];
@@ -96,12 +99,19 @@ const OddsList = () => {
 
   const getFilteredOdds = () => {
     if (!selectedBookmakers.length) return odds;
-    return odds.map(game => ({
-      ...game,
-      bookmakers: game.bookmakers.filter(bookmaker =>
-        selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
-      )
-    })).filter(game => game.bookmakers.length > 0);
+
+    const filteredGames = odds
+      .map(game => ({
+        ...game,
+        bookmakers: game.bookmakers.filter(bookmaker =>
+          selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
+        ),
+        rating: calculateEventRating(game)
+      }))
+      .filter(game => game.bookmakers.length > 0)
+      .sort((a, b) => b.rating - a.rating); // Ordina per rating decrescente
+
+    return filteredGames;
   };
 
   const filteredOdds = getFilteredOdds();
@@ -117,55 +127,6 @@ const OddsList = () => {
       second: '2-digit',
       timeZoneName: 'short'
     }).format(date);
-  };
-
-  const openModal = (game, market) => {
-    setModalData({
-      game,
-      market,
-      odds1: market.outcomes[0]?.price || 0,
-      oddsX: market.outcomes[2]?.price || 'N/A',
-      odds2: market.outcomes[1]?.price || 0
-    });
-    setModalIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalIsOpen(false);
-    setModalData(null);
-    setBetAmount(100);
-  };
-
-  const calculatePunta = (odds1, oddsX, odds2) => {
-    const puntaX = (betAmount * odds1) / oddsX;
-    const punta2 = (betAmount * odds1) / odds2;
-    return { puntaX, punta2 };
-  };
-
-  const TotalBetting = (betAmount, puntaX, punta2) => {
-    const totalbet = betAmount + puntaX + punta2;
-    return totalbet;
-  };
-
-  const calculateRating = (profit, totalbet) => {
-    const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
-    return (rating / 100);
-  };
-
-  const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
-    const totalBet = puntata1 + puntataX + puntata2;
-    return (quota * puntata1) - totalBet;
-  };
-
-  const handleAmountChange = (e) => {
-    setBetAmount(Number(e.target.value));
-  };
-
-  const handleOddsChange = (e, key) => {
-    setModalData(prevState => ({
-      ...prevState,
-      [key]: Number(e.target.value)
-    }));
   };
 
   const handleSportChange = (sportKey, sport) => {
@@ -184,7 +145,6 @@ const OddsList = () => {
     }
   };
 
-  // Group sports by description
   const groupedSports = sports.reduce((acc, sport) => {
     if (!acc[sport.description]) {
       acc[sport.description] = [];
@@ -200,6 +160,196 @@ const OddsList = () => {
     }));
   };
 
+  
+  //ODDSMATCHER functions
+  const calculateArbitrage = (stake, commission, bookmakerOdds, betfairOdds) => {
+    const effectiveBetfairOdds = betfairOdds - commission;
+    const lay = (bookmakerOdds / effectiveBetfairOdds) * stake;
+    const liability = (lay * betfairOdds) - lay;
+    const profit = (bookmakerOdds - 1) * stake - (betfairOdds - 1) * lay;
+    const rating = (profit / stake) * 100;
+
+    return {
+      lay: parseFloat(lay.toFixed(2)),
+      liability: parseFloat(liability.toFixed(2)),
+      profit: parseFloat(profit.toFixed(2)),
+      rating: parseFloat(rating.toFixed(2))
+    };
+  };
+
+  // Funzione per ordinare gli eventi per rating
+  const calculateEventRating = (game) => {
+    let bestRating = -Infinity;
+
+    game.bookmakers.forEach(bookmaker => {
+      if (bookmaker.title !== 'Betfair') {
+        const betfairBookmaker = game.bookmakers.find(b => b.title === 'Betfair');
+        if (betfairBookmaker) {
+          bookmaker.markets.forEach((market, index) => {
+            if (market.key === 'h2h') {
+              market.outcomes.forEach((outcome, i) => {
+                const betfairOdds = betfairBookmaker.markets[index].outcomes[i].price;
+                const { rating } = calculateArbitrage(100, 0.05, outcome.price, betfairOdds);
+                if (rating > bestRating) {
+                  bestRating = rating;
+                }
+              });
+            }
+          });
+        }
+      }
+    });
+
+    return bestRating;
+  };
+
+  // Componente per la nuova modale
+  const ArbitrageModal = ({
+    isOpen,
+    onClose,
+    game,
+    bookmakerOdds,
+    betfairOdds,
+    marketType, // '1', 'X', o '2'
+    teamNames
+  }) => {
+    const [stake, setStake] = useState(100);
+    const [commission, setCommission] = useState(0.05);
+    const [customBookmakerOdds, setCustomBookmakerOdds] = useState(bookmakerOdds);
+    const [customBetfairOdds, setCustomBetfairOdds] = useState(betfairOdds);
+
+    const calculations = calculateArbitrage(
+      stake,
+      commission,
+      customBookmakerOdds,
+      customBetfairOdds
+    );
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="modal-odds">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3>{teamNames.home} vs {teamNames.away}</h3>
+            <div className="market-type">
+              Mercato: {marketType === '1' ? 'Home' : marketType === 'X' ? 'Draw' : 'Away'}
+            </div>
+          </div>
+
+          <div className="input-section">
+            <div className="input-group">
+              <label>
+                Puntata (€):
+                <input
+                  type="number"
+                  value={stake}
+                  onChange={(e) => setStake(parseFloat(e.target.value) || 0)}
+                  className="form-input"
+                />
+              </label>
+            </div>
+
+            <div className="input-group">
+              <label>
+                Commissione Betfair:
+                <input
+                  type="number"
+                  value={commission}
+                  step="0.01"
+                  onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
+                  className="form-input"
+                />
+              </label>
+            </div>
+
+            <div className="input-group">
+              <label>
+                Quota Bookmaker:
+                <input
+                  type="number"
+                  value={customBookmakerOdds}
+                  step="0.01"
+                  onChange={(e) => setCustomBookmakerOdds(parseFloat(e.target.value) || 0)}
+                  className="form-input"
+                />
+              </label>
+            </div>
+
+            <div className="input-group">
+              <label>
+                Quota Betfair:
+                <input
+                  type="number"
+                  value={customBetfairOdds}
+                  step="0.01"
+                  onChange={(e) => setCustomBetfairOdds(parseFloat(e.target.value) || 0)}
+                  className="form-input"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="results-section">
+            <div className="result-row">
+              <span>Bancata:</span>
+              <strong>€{calculations.lay}</strong>
+            </div>
+            <div className="result-row">
+              <span>Responsabilità:</span>
+              <strong>€{calculations.liability}</strong>
+            </div>
+            <div className="result-row">
+              <span>Profit:</span>
+              <strong className={calculations.profit > 0 ? 'profit-positive' : 'profit-negative'}>
+                €{calculations.profit}
+              </strong>
+            </div>
+            <div className="result-row">
+              <span>Rating:</span>
+              <strong className={calculations.rating > 0 ? 'rating-positive' : 'rating-negative'}>
+                {calculations.rating}%
+              </strong>
+            </div>
+          </div>
+
+          <div className="modal-actions">
+            <button className="btn btn-secondary" onClick={onClose}>
+              Chiudi
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Nuova funzione per aprire la modale dell'arbitraggio
+  const openArbitrageModal = (game, market, outcome, index) => {
+    const betfairBookmaker = game.bookmakers.find(b => b.title === 'Betfair');
+    if (!betfairBookmaker) {
+      alert('Quote Betfair non disponibili per questo evento');
+      return;
+    }
+
+    const betfairMarket = betfairBookmaker.markets.find(m => m.key === market.key);
+    if (!betfairMarket) {
+      alert('Mercato non disponibile su Betfair');
+      return;
+    }
+
+    setArbitrageModalData({
+      game,
+      bookmakerOdds: outcome.price,
+      betfairOdds: betfairMarket.outcomes[index].price,
+      marketType: index === 0 ? '1' : index === 1 ? '2' : 'X',
+      teamNames: {
+        home: game.home_team,
+        away: game.away_team
+      }
+    });
+  };
+
+  //MAIN PAGE//
   return (
     <div className="container-odds">
       {/* Sezione Sport Disponibili */}
@@ -285,25 +435,30 @@ const OddsList = () => {
                   {game.bookmakers.map((bookmaker, bIndex) => (
                     <div key={bIndex} className="bookmaker-odds">
                       <h4>{bookmaker.title}</h4>
-                      <div className="odds-grid">
-                        {bookmaker.markets.map((market, mIndex) => (
-                          market.key === 'h2h' && (
-                            <div key={mIndex} className="odds-row">
+                      {bookmaker.markets.map((market, mIndex) => (
+                        market.key === 'h2h' && (
+                          <div key={mIndex} className="odds-grid">
+                            <div className="odds-row">
                               <div className="odds-values">
-                                <span> 1: {market.outcomes[0]?.price || 'N/A'}</span>
-                                <span> X: {market.outcomes[2]?.price || 'N/A'}</span>
-                                <span> 2: {market.outcomes[1]?.price || 'N/A'}</span>
+                                {market.outcomes.map((outcome, index) => (
+                                  <div key={index} className="odd-value-container">
+                                    <span className="odd-label">
+                                      {index === 0 ? '1' : index === 2 ? 'X' : '2'}:
+                                    </span>
+                                    <button
+                                      className="odd-button"
+                                      onClick={() => openArbitrageModal(game, market, outcome, index)}
+                                      disabled={bookmaker.title === 'Betfair'}
+                                    >
+                                      {outcome.price || 'N/A'}
+                                    </button>
+                                  </div>
+                                ))}
                               </div>
-                              <button
-                                className="btn btn-primary"
-                                onClick={() => openModal(game, market)}
-                              >
-                                Calcola puntate
-                              </button>
                             </div>
-                          )
-                        ))}
-                      </div>
+                          </div>
+                        )
+                      ))}
                     </div>
                   ))}
                 </div>
@@ -315,139 +470,13 @@ const OddsList = () => {
         )}
       </div>
 
-      {/* Modal per il Calcolo delle Puntate */}
-      {modalIsOpen && (
-        <div className="modal-odds">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
-            </div>
-
-            <div className="modal-row">
-              <div>
-                <strong>Totale Giocato:</strong>
-              </div>
-              <div>
-                {(() => {
-                  const { odds1, oddsX, odds2 } = modalData;
-                  const { puntaX, punta2 } = calculatePunta(odds1, oddsX, odds2);
-                  const totalBet = TotalBetting(betAmount, puntaX, punta2);
-                  return totalBet.toFixed(2);
-                })()}
-              </div>
-            </div>
-
-            <div className="modal-row">
-              <div>
-                <strong>Rating:</strong>
-              </div>
-              <div>
-                {(() => {
-                  const { odds1, oddsX, odds2 } = modalData;
-                  const { puntaX, punta2 } = calculatePunta(odds1, oddsX, odds2);
-                  const totalBet = TotalBetting(betAmount, puntaX, punta2);
-                  const profit = calculateProfit(betAmount, puntaX, punta2, odds1);
-                  const rating = calculateRating(profit, totalBet);
-                  return rating.toFixed(2) + '%';
-                })()}
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Importo puntato:
-                <input
-                  type="number"
-                  value={betAmount}
-                  onChange={handleAmountChange}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota 1:
-                <input
-                  type="number"
-                  value={modalData.odds1}
-                  onChange={(e) => handleOddsChange(e, 'odds1')}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota X:
-                <input
-                  type="number"
-                  value={modalData.oddsX}
-                  onChange={(e) => handleOddsChange(e, 'oddsX')}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota 2:
-                <input
-                  type="number"
-                  value={modalData.odds2}
-                  onChange={(e) => handleOddsChange(e, 'odds2')}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="betting-summary">
-              <div className="bet-info">
-                <p>
-                  Punta 1: {betAmount} a quota {modalData.odds1}
-                  {modalData.odds1 !== 'N/A' &&
-                    ` | Profitto: ${calculateProfit(
-                      betAmount,
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                      modalData.odds1
-                    ).toFixed(2)}`
-                  }
-                </p>
-                {modalData.oddsX !== 'N/A' && (
-                  <p>
-                    Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}
-                    {modalData.oddsX !== 'N/A' &&
-                      ` | Profitto: ${calculateProfit(
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                        betAmount,
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                        modalData.oddsX
-                      ).toFixed(2)}`
-                    }
-                  </p>
-                )}
-                <p>
-                  Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
-                  {modalData.odds2 !== 'N/A' &&
-                    ` | Profitto: ${calculateProfit(
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                      betAmount,
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                      modalData.odds2
-                    ).toFixed(2)}`
-                  }
-                </p>
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={closeModal}>
-                Chiudi
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Aggiunta della nuova modale */}
+      {arbitrageModalData && (
+        <ArbitrageModal
+          isOpen={!!arbitrageModalData}
+          onClose={() => setArbitrageModalData(null)}
+          {...arbitrageModalData}
+        />
       )}
     </div>
   );

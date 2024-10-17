@@ -99,35 +99,75 @@
 
 .date-filter {
   margin: 1rem 0;
-  padding: 1rem;
+  padding: 1.5rem;
   background: #f5f5f5;
   border-radius: 8px;
 }
 
-.date-filter label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+.date-filter h3 {
+  margin: 0 0 1rem 0;
   color: #333;
 }
 
-.date-inputs {
+.date-range-inputs {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.date-inputs input[type="date"] {
-  padding: 0.5rem;
+.date-input-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.date-input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.date-input-group input[type="date"] {
+  width: 100%;
+  padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  flex: 1;
+  background-color: white;
 }
 
 .clear-date-btn {
-  padding: 0.5rem 1rem;
+  align-self: flex-end;
+  padding: 0.75rem 1.5rem;
   background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  height: fit-content;
+}
+
+.clear-date-btn:hover {
+  background-color: #cc0000;
+}
+
+.date-error {
+  color: #ff4444;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.quick-select-dates {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.quick-select-dates button {
+  padding: 0.5rem 1rem;
+  background-color: #4a90e2;
   color: white;
   border: none;
   border-radius: 4px;
@@ -135,8 +175,8 @@
   transition: background-color 0.2s;
 }
 
-.clear-date-btn:hover {
-  background-color: #cc0000;
+.quick-select-dates button:hover {
+  background-color: #357abd;
 }
 
 /* Game cards */

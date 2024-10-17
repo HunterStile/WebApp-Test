@@ -244,27 +244,35 @@ const OddsList = () => {
     return ratedOdds;
   };
 
-   // Modify the getFilteredOdds function to include date filtering
+  // Modify date state to include start and end dates
+  const [dateRange, setDateRange] = useState({
+    startDate: '',
+    endDate: ''
+  });
+
+  // Modify the getFilteredOdds function to handle date range
   const getFilteredOdds = () => {
     if (!selectedBookmakers.length) return [];
 
     const allRatedOdds = odds.flatMap(game => {
-      // First filter by date if selected
-      if (selectedDate) {
+      // Filter by date range if either start or end date is selected
+      if (dateRange.startDate || dateRange.endDate) {
         const eventDate = new Date(game.commence_time);
-        const filterDate = new Date(selectedDate);
-        
-        // Compare only the date part (ignore time)
-        if (
-          eventDate.getFullYear() !== filterDate.getFullYear() ||
-          eventDate.getMonth() !== filterDate.getMonth() ||
-          eventDate.getDate() !== filterDate.getDate()
-        ) {
-          return [];
+
+        if (dateRange.startDate) {
+          const startDate = new Date(dateRange.startDate);
+          startDate.setHours(0, 0, 0, 0);
+          if (eventDate < startDate) return [];
+        }
+
+        if (dateRange.endDate) {
+          const endDate = new Date(dateRange.endDate);
+          endDate.setHours(23, 59, 59, 999);
+          if (eventDate > endDate) return [];
         }
       }
 
-      // Filtra prima i bookmaker selezionati
+      // Filter bookmakers
       const filteredGame = {
         ...game,
         bookmakers: game.bookmakers.filter(bookmaker =>
@@ -275,7 +283,6 @@ const OddsList = () => {
       return getOddsWithRatings(filteredGame);
     });
 
-    // Filtra le quote con rating positivo e ordina per rating
     return allRatedOdds
       .filter(game => game.selectedOutcome.rating > 0)
       .sort((a, b) => b.selectedOutcome.rating - a.selectedOutcome.rating);
@@ -283,34 +290,110 @@ const OddsList = () => {
 
   const filteredOdds = getFilteredOdds();
 
-   // Add date filter component
-   const DateFilter = () => {
+  // Add date range filter component
+  const DateRangeFilter = () => {
     const today = new Date().toISOString().split('T')[0];
     
+    const handleDateChange = (e) => {
+      const { name, value } = e.target;
+      setDateRange(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    };
+
+    const clearDates = () => {
+      setDateRange({
+        startDate: '',
+        endDate: ''
+      });
+    };
+
+    const isDateRangeValid = () => {
+      if (!dateRange.startDate || !dateRange.endDate) return true;
+      return new Date(dateRange.startDate) <= new Date(dateRange.endDate);
+    };
+
     return (
       <div className="date-filter">
-        <label htmlFor="date-filter">Filter by Date:</label>
-        <div className="date-inputs">
-          <input
-            type="date"
-            id="date-filter"
-            value={selectedDate}
-            min={today}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          {selectedDate && (
+        <h3>Filter by Date Range</h3>
+        <div className="date-range-inputs">
+          <div className="date-input-group">
+            <label htmlFor="startDate">From:</label>
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              value={dateRange.startDate}
+              min={today}
+              max={dateRange.endDate || undefined}
+              onChange={handleDateChange}
+            />
+          </div>
+          
+          <div className="date-input-group">
+            <label htmlFor="endDate">To:</label>
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              value={dateRange.endDate}
+              min={dateRange.startDate || today}
+              onChange={handleDateChange}
+            />
+          </div>
+
+          {(dateRange.startDate || dateRange.endDate) && (
             <button 
               className="clear-date-btn"
-              onClick={() => setSelectedDate('')}
+              onClick={clearDates}
             >
-              Clear Date
+              Clear Dates
             </button>
           )}
+        </div>
+        
+        {!isDateRangeValid() && (
+          <div className="date-error">
+            End date must be after start date
+          </div>
+        )}
+
+        {/* Optional: Add quick select buttons */}
+        <div className="quick-select-dates">
+          <button
+            onClick={() => {
+              const today = new Date();
+              const nextWeek = new Date();
+              nextWeek.setDate(today.getDate() + 7);
+              
+              setDateRange({
+                startDate: today.toISOString().split('T')[0],
+                endDate: nextWeek.toISOString().split('T')[0]
+              });
+            }}
+          >
+            Next 7 Days
+          </button>
+          
+          <button
+            onClick={() => {
+              const today = new Date();
+              const nextMonth = new Date();
+              nextMonth.setMonth(today.getMonth() + 1);
+              
+              setDateRange({
+                startDate: today.toISOString().split('T')[0],
+                endDate: nextMonth.toISOString().split('T')[0]
+              });
+            }}
+          >
+            Next 30 Days
+          </button>
         </div>
       </div>
     );
   };
-
   // Componente per la nuova modale
   const ArbitrageModal = ({
     isOpen,
@@ -460,7 +543,7 @@ const OddsList = () => {
   //MAIN PAGE//
   return (
     <div className="container-odds">
-      
+
       {/* Sezione Sport Disponibili */}
       <div className="available-sports">
         <h2>Available Sports</h2>
@@ -500,7 +583,7 @@ const OddsList = () => {
         <div className="bookmakers-section">
           <h2>Filter by Bookmakers</h2>
           <ViewToggle />
-          <DateFilter />
+          <DateRangeFilter />
           <div className="bookmakers-checkboxes">
             <label className="bookmaker-checkbox">
               <input
@@ -534,7 +617,7 @@ const OddsList = () => {
               <div key={index} className="game-card">
                 <div className="game-header">
                   <div className="game-teams">
-                  <strong>{viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}</strong>
+                    <strong>{viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}</strong>
                     <span> - {game.home_team} vs {game.away_team}</span>
                   </div>
                   <div className="game-date">

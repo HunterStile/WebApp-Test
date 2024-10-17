@@ -94,4 +94,48 @@ router.get('/sports', async (req, res) => {
   }
 });
 
+router.get('/major-leagues', async (req, res) => {
+  const majorLeagues = [
+    'soccer_italy_serie_a',
+    'soccer_germany_bundesliga',
+    'soccer_france_ligue_one',
+    'soccer_england_league1',
+    'soccer_spain_la_liga'
+  ];
+
+  try {
+    // Fetch parallelo per tutti i campionati
+    const leaguePromises = majorLeagues.map(async (league) => {
+      const cachedData = cache.get(`oddsData_${league}`);
+      if (cachedData) {
+        return { league, data: cachedData };
+      }
+      
+      const data = await fetchOddsData(league);
+      cache.set(`oddsData_${league}`, data);
+      return { league, data };
+    });
+
+    const results = await Promise.all(leaguePromises);
+    
+    // Combina i risultati in un unico array
+    const combinedOdds = results.flatMap(result => {
+      return result.data.map(game => ({
+        ...game,
+        league: result.league
+      }));
+    });
+
+    // Ordina per data di inizio
+    const sortedOdds = combinedOdds.sort((a, b) => 
+      new Date(a.commence_time) - new Date(b.commence_time)
+    );
+
+    res.json(sortedOdds);
+  } catch (error) {
+    console.error('Error fetching major leagues data:', error);
+    res.status(500).send('Failed to fetch major leagues data.');
+  }
+});
+
 module.exports = router;

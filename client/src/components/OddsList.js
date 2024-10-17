@@ -20,6 +20,18 @@ const bookmakerMapping = {
   'Coolbet': 'coolbet'
 };
 
+// Utility function per ottenere il nome leggibile del campionato
+const getLeagueName = (leagueKey) => {
+  const leagueNames = {
+    'soccer_italy_serie_a': 'Serie A',
+    'soccer_germany_bundesliga': 'Bundesliga',
+    'soccer_france_ligue_one': 'Ligue 1',
+    'soccer_england_league1': 'Premier League',
+    'soccer_spain_la_liga': 'La Liga'
+  };
+  return leagueNames[leagueKey] || leagueKey;
+};
+
 const bookmakerOptions = Object.keys(bookmakerMapping);
 
 const OddsList = () => {
@@ -31,6 +43,7 @@ const OddsList = () => {
   const [cachedOdds, setCachedOdds] = useState({});
   const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
   const [arbitrageModalData, setArbitrageModalData] = useState(null);
+  const [viewMode, setViewMode] = useState('major');
 
   // State to track expanded descriptions
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
@@ -48,38 +61,74 @@ const OddsList = () => {
 
   const fetchOdds = useCallback(async (sportKey) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
-        params: { sportKey }
-      });
-      const currentTime = new Date();
-      const filteredOdds = response.data.filter(game => {
-        const eventTime = new Date(game.commence_time);
-        return eventTime > currentTime;
-      });
-      setCachedOdds(prevState => ({
-        ...prevState,
-        [sportKey]: filteredOdds
-      }));
-      setOdds(filteredOdds);
+      if (viewMode === 'major') {
+        const response = await axios.get(`${API_BASE_URL}/odds/major-leagues`);
+        const currentTime = new Date();
+        const filteredOdds = response.data.filter(game => {
+          const eventTime = new Date(game.commence_time);
+          return eventTime > currentTime;
+        });
+        setOdds(filteredOdds);
+        setCachedOdds(prevState => ({
+          ...prevState,
+          majorLeagues: filteredOdds
+        }));
+      } else {
+        const currentTime = new Date();
+        const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
+          params: { sportKey }
+        });
+        const filteredOdds = response.data.filter(game => {
+          const eventTime = new Date(game.commence_time);
+          return eventTime > currentTime;
+        });
+        setOdds(filteredOdds);
+        setCachedOdds(prevState => ({
+          ...prevState,
+          [sportKey]: filteredOdds
+        }));
+      }
     } catch (error) {
       setError('Error fetching odds data');
       console.error('Error fetching odds:', error);
     }
-  }, []);
+  }, [viewMode]);
 
   useEffect(() => {
     fetchSports(); // Richiama l'API degli sport all'avvio del componente
   }, [fetchSports]);
 
   useEffect(() => {
-    if (cachedOdds[selectedSport]) {
-      // Usa i dati già in cache
+    if (viewMode === 'major') {
+      if (cachedOdds.majorLeagues) {
+        setOdds(cachedOdds.majorLeagues);
+      } else {
+        fetchOdds();
+      }
+    } else if (cachedOdds[selectedSport]) {
       setOdds(cachedOdds[selectedSport]);
     } else {
-      // Fetch data if not in cache
       fetchOdds(selectedSport);
     }
-  }, [selectedSport, cachedOdds, fetchOdds]);
+  }, [selectedSport, viewMode, cachedOdds, fetchOdds]);
+
+  // Aggiungi il componente per il toggle della vista
+  const ViewToggle = () => (
+    <div className="view-toggle">
+      <button
+        className={`toggle-btn ${viewMode === 'major' ? 'active' : ''}`}
+        onClick={() => setViewMode('major')}
+      >
+        Major Leagues
+      </button>
+      <button
+        className={`toggle-btn ${viewMode === 'upcoming' ? 'active' : ''}`}
+        onClick={() => setViewMode('upcoming')}
+      >
+        Upcoming Events
+      </button>
+    </div>
+  );
 
   //GESTIONE RICERCA PARTITE
   const handleCheckboxChange = (e) => {
@@ -366,6 +415,7 @@ const OddsList = () => {
   //MAIN PAGE//
   return (
     <div className="container-odds">
+      
       {/* Sezione Sport Disponibili */}
       <div className="available-sports">
         <h2>Available Sports</h2>
@@ -404,6 +454,7 @@ const OddsList = () => {
         {/* Sezione Filtri Bookmaker */}
         <div className="bookmakers-section">
           <h2>Filter by Bookmakers</h2>
+          <ViewToggle />
           <div className="bookmakers-checkboxes">
             <label className="bookmaker-checkbox">
               <input
@@ -427,7 +478,7 @@ const OddsList = () => {
           </div>
         </div>
 
-        <h2>{competitionTitle}</h2>
+        <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>
         {error && <p className="error-message">{error}</p>}
 
         {/* Lista delle Quote */}
@@ -437,7 +488,7 @@ const OddsList = () => {
               <div key={index} className="game-card">
                 <div className="game-header">
                   <div className="game-teams">
-                    <strong>{game.sport_title}</strong>
+                  <strong>{viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}</strong>
                     <span> - {game.home_team} vs {game.away_team}</span>
                   </div>
                   <div className="game-date">

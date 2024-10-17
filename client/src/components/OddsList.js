@@ -32,19 +32,26 @@ const getLeagueName = (leagueKey) => {
   return leagueNames[leagueKey] || leagueKey;
 };
 
+
 const bookmakerOptions = Object.keys(bookmakerMapping);
+
+// Default selected bookmakers
+const DEFAULT_BOOKMAKERS = ['betfair', '888sport'];
 
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
   const [sports, setSports] = useState([]);
   const [error, setError] = useState(null);
   const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
-  const [selectedBookmakers, setSelectedBookmakers] = useState([]);
+  const [selectedBookmakers, setSelectedBookmakers] = useState(DEFAULT_BOOKMAKERS);
   const [cachedOdds, setCachedOdds] = useState({});
   const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
   const [arbitrageModalData, setArbitrageModalData] = useState(null);
   const [viewMode, setViewMode] = useState('major');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [dateRange, setDateRange] = useState({
+    startDate: '',
+    endDate: ''
+  });
 
   // State to track expanded descriptions
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
@@ -244,12 +251,7 @@ const OddsList = () => {
     return ratedOdds;
   };
 
-  // Modify date state to include start and end dates
-  const [dateRange, setDateRange] = useState({
-    startDate: '',
-    endDate: ''
-  });
-
+  
   // Modify the getFilteredOdds function to handle date range
   const getFilteredOdds = () => {
     if (!selectedBookmakers.length) return [];
@@ -394,6 +396,7 @@ const OddsList = () => {
       </div>
     );
   };
+  
   // Componente per la nuova modale
   const ArbitrageModal = ({
     isOpen,

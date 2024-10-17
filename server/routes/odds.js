@@ -11,7 +11,7 @@ const markets = 'h2h';
 const oddsFormat = 'decimal';
 const dateFormat = 'iso';
 
-// Configura il caching con un tempo di scadenza di 1 minuto (60 secondi)
+// Configura il caching con un tempo di scadenza di 15 minuti
 const cache = new NodeCache({ stdTTL: 1000, checkperiod: 10 });
 
 const fetchOddsData = async (sportKey) => {
@@ -126,12 +126,7 @@ router.get('/major-leagues', async (req, res) => {
       }));
     });
 
-    // Ordina per data di inizio
-    const sortedOdds = combinedOdds.sort((a, b) => 
-      new Date(a.commence_time) - new Date(b.commence_time)
-    );
-
-    res.json(sortedOdds);
+    res.json(combinedOdds);
   } catch (error) {
     console.error('Error fetching major leagues data:', error);
     res.status(500).send('Failed to fetch major leagues data.');

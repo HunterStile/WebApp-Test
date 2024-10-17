@@ -1,9 +1,12 @@
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    background-color: lightgreen;
-    padding: 10px;
-  }
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  background-color: #90ee90;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
   
   .navbar-logo a {
     color: #fff;

@@ -168,7 +168,7 @@ const OddsList = () => {
     }));
   };
 
-  const handleSportChange = (sportKey,sport) => {
+  const handleSportChange = (sportKey, sport) => {
     setSelectedSport(sportKey);
     setCompetitionTitle(sport.title);
   };
@@ -202,20 +202,26 @@ const OddsList = () => {
 
   return (
     <div className="container-odds">
+      {/* Sezione Sport Disponibili */}
       <div className="available-sports">
         <h2>Available Sports</h2>
-        {error && <p>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
         {Object.keys(groupedSports).length > 0 ? (
           <div>
             {Object.entries(groupedSports).map(([description, sports]) => (
-              <div key={description}>
-                <h3 onClick={() => toggleDescription(description)} style={{ cursor: 'pointer', color: 'blue' }}>
-                  {description} {expandedDescriptions[description] ? '▲' : '▼'}
+              <div key={description} className="sports-category">
+                <h3 onClick={() => toggleDescription(description)}>
+                  <span>{description}</span>
+                  <span>{expandedDescriptions[description] ? '▲' : '▼'}</span>
                 </h3>
                 {expandedDescriptions[description] && (
-                  <ul>
+                  <ul className="sports-list">
                     {sports.map((sport) => (
-                      <li key={sport.key} onClick={() => handleSportChange(sport.key,sport)}>
+                      <li
+                        key={sport.key}
+                        onClick={() => handleSportChange(sport.key, sport)}
+                        className="sport-item"
+                      >
                         <strong>{sport.title}</strong>
                       </li>
                     ))}
@@ -225,73 +231,98 @@ const OddsList = () => {
             ))}
           </div>
         ) : (
-          <p>No sports available.</p>
+          <p className="no-data">No sports available.</p>
         )}
       </div>
+
+      {/* Sezione Quote Imminenti */}
       <div className="upcoming-odds">
-        <h2>Filter by Bookmakers</h2>
-        <div className="bookmakers-checkboxes">
-          <label>
-            <input
-              type="checkbox"
-              onChange={handleSelectAll}
-              checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
-            />
-            Seleziona/Deseleziona Tutto
-          </label>
-          {bookmakerOptions.map((bookmaker, index) => (
-            <label key={index}>
+        {/* Sezione Filtri Bookmaker */}
+        <div className="bookmakers-section">
+          <h2>Filter by Bookmakers</h2>
+          <div className="bookmakers-checkboxes">
+            <label className="bookmaker-checkbox">
               <input
                 type="checkbox"
-                value={bookmaker}
-                checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
-                onChange={handleCheckboxChange}
+                onChange={handleSelectAll}
+                checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
               />
-              {bookmaker}
+              <span>Seleziona/Deseleziona Tutto</span>
             </label>
-          ))}
+            {bookmakerOptions.map((bookmaker, index) => (
+              <label key={index} className="bookmaker-checkbox">
+                <input
+                  type="checkbox"
+                  value={bookmaker}
+                  checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+                  onChange={handleCheckboxChange}
+                />
+                <span>{bookmaker}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         <h2>{competitionTitle}</h2>
-        {error && <p>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
+
+        {/* Lista delle Quote */}
         {filteredOdds.length > 0 ? (
-          <ul>
+          <div className="games-list">
             {filteredOdds.map((game, index) => (
-              <li key={index}>
-                <strong>{game.sport_title}</strong> - {game.home_team} vs {game.away_team}
-                <br />
-                <strong>Date:</strong> {formatDate(game.commence_time)}
-                <ul>
+              <div key={index} className="game-card">
+                <div className="game-header">
+                  <div className="game-teams">
+                    <strong>{game.sport_title}</strong>
+                    <span> - {game.home_team} vs {game.away_team}</span>
+                  </div>
+                  <div className="game-date">
+                    {formatDate(game.commence_time)}
+                  </div>
+                </div>
+
+                <div className="bookmakers-list">
                   {game.bookmakers.map((bookmaker, bIndex) => (
-                    <li key={bIndex}>
-                      {bookmaker.title}:
-                      <ul>
+                    <div key={bIndex} className="bookmaker-odds">
+                      <h4>{bookmaker.title}</h4>
+                      <div className="odds-grid">
                         {bookmaker.markets.map((market, mIndex) => (
                           market.key === 'h2h' && (
-                            <li key={mIndex}>
-                              1 (Home Win): {market.outcomes[1]?.price || 'N/A'} |
-                              X (Draw): {market.outcomes[2]?.price || 'N/A'} |
-                              2 (Away Win): {market.outcomes[0]?.price || 'N/A'}
-                              <button onClick={() => openModal(game, market)}>Calcola puntate</button>
-                            </li>
+                            <div key={mIndex} className="odds-row">
+                              <div className="odds-values">
+                                <span> 1: {market.outcomes[0]?.price || 'N/A'}</span>
+                                <span> X: {market.outcomes[2]?.price || 'N/A'}</span>
+                                <span> 2: {market.outcomes[1]?.price || 'N/A'}</span>
+                              </div>
+                              <button
+                                className="btn btn-primary"
+                                onClick={() => openModal(game, market)}
+                              >
+                                Calcola puntate
+                              </button>
+                            </div>
                           )
                         ))}
-                      </ul>
-                    </li>
+                      </div>
+                    </div>
                   ))}
-                </ul>
-              </li>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p>No odds available.</p>
+          <p className="no-data">No odds available.</p>
         )}
       </div>
 
+      {/* Modal per il Calcolo delle Puntate */}
       {modalIsOpen && (
         <div className="modal-odds">
           <div className="modal-content">
-            <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
+            <div className="modal-header">
+              <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
+            </div>
+
             <div className="modal-row">
               <div>
                 <strong>Totale Giocato:</strong>
@@ -305,6 +336,7 @@ const OddsList = () => {
                 })()}
               </div>
             </div>
+
             <div className="modal-row">
               <div>
                 <strong>Rating:</strong>
@@ -320,61 +352,100 @@ const OddsList = () => {
                 })()}
               </div>
             </div>
-            <label>
-              Importo puntato:
-              <input
-                type="number"
-                value={betAmount}
-                onChange={handleAmountChange}
-              />
-            </label>
-            <div>
+
+            <div className="input-group">
+              <label>
+                Importo puntato:
+                <input
+                  type="number"
+                  value={betAmount}
+                  onChange={handleAmountChange}
+                  className="form-input"
+                />
+              </label>
+            </div>
+
+            <div className="input-group">
               <label>
                 Quota 1:
                 <input
                   type="number"
                   value={modalData.odds1}
                   onChange={(e) => handleOddsChange(e, 'odds1')}
+                  className="form-input"
                 />
               </label>
             </div>
-            <div>
+
+            <div className="input-group">
               <label>
                 Quota X:
                 <input
                   type="number"
                   value={modalData.oddsX}
                   onChange={(e) => handleOddsChange(e, 'oddsX')}
+                  className="form-input"
                 />
               </label>
             </div>
-            <div>
+
+            <div className="input-group">
               <label>
                 Quota 2:
                 <input
                   type="number"
                   value={modalData.odds2}
                   onChange={(e) => handleOddsChange(e, 'odds2')}
+                  className="form-input"
                 />
               </label>
             </div>
-            <div>
-              <p>
-                Punta 1: {betAmount} a quota {modalData.odds1}
-                {modalData.odds1 !== 'N/A' && ` | Profitto: ${calculateProfit(betAmount, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, modalData.odds1).toFixed(2)}`}
-              </p>
-              {modalData.oddsX !== 'N/A' && (
+
+            <div className="betting-summary">
+              <div className="bet-info">
                 <p>
-                  Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}
-                  {modalData.oddsX !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, betAmount, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, modalData.oddsX).toFixed(2)}`}
+                  Punta 1: {betAmount} a quota {modalData.odds1}
+                  {modalData.odds1 !== 'N/A' &&
+                    ` | Profitto: ${calculateProfit(
+                      betAmount,
+                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
+                      modalData.odds1
+                    ).toFixed(2)}`
+                  }
                 </p>
-              )}
-              <p>
-                Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
-                {modalData.odds2 !== 'N/A' && ` | Profitto: ${calculateProfit(calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2, betAmount, calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX, modalData.odds2).toFixed(2)}`}
-              </p>
+                {modalData.oddsX !== 'N/A' && (
+                  <p>
+                    Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}
+                    {modalData.oddsX !== 'N/A' &&
+                      ` | Profitto: ${calculateProfit(
+                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                        betAmount,
+                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
+                        modalData.oddsX
+                      ).toFixed(2)}`
+                    }
+                  </p>
+                )}
+                <p>
+                  Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
+                  {modalData.odds2 !== 'N/A' &&
+                    ` | Profitto: ${calculateProfit(
+                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
+                      betAmount,
+                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                      modalData.odds2
+                    ).toFixed(2)}`
+                  }
+                </p>
+              </div>
             </div>
-            <button onClick={closeModal}>Chiudi</button>
+
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={closeModal}>
+                Chiudi
+              </button>
+            </div>
           </div>
         </div>
       )}

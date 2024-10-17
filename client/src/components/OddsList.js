@@ -32,7 +32,6 @@ const getLeagueName = (leagueKey) => {
   return leagueNames[leagueKey] || leagueKey;
 };
 
-
 const bookmakerOptions = Object.keys(bookmakerMapping);
 
 // Default selected bookmakers
@@ -151,18 +150,6 @@ const OddsList = () => {
   );
 
   //GESTIONE RICERCA PARTITE
-  const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    const bookmakerKey = bookmakerMapping[value];
-    setSelectedBookmakers(prevState => {
-      if (checked) {
-        return [...prevState, bookmakerKey];
-      } else {
-        return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
-      }
-    });
-  };
-
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     return new Intl.DateTimeFormat('default', {
@@ -179,17 +166,6 @@ const OddsList = () => {
   const handleSportChange = (sportKey, sport) => {
     setSelectedSport(sportKey);
     setCompetitionTitle(sport.title);
-  };
-
-  const handleSelectAll = (e) => {
-    const isChecked = e.target.checked;
-    if (isChecked) {
-      // Seleziona tutti i bookmaker
-      setSelectedBookmakers(Object.values(bookmakerMapping));
-    } else {
-      // Deseleziona tutti i bookmaker
-      setSelectedBookmakers([]);
-    }
   };
 
   const groupedSports = sports.reduce((acc, sport) => {
@@ -300,8 +276,8 @@ const OddsList = () => {
       .filter(game =>
         game.selectedOutcome.rating >= ratingRange.min &&
         game.selectedOutcome.rating <= ratingRange.max &&
-        game.selectedOutcome.odds >= oddsRange.min && 
-        game.selectedOutcome.odds <= oddsRange.max     
+        game.selectedOutcome.odds >= oddsRange.min &&
+        game.selectedOutcome.odds <= oddsRange.max
       )
       .sort((a, b) => b.selectedOutcome.rating - a.selectedOutcome.rating);
   };
@@ -622,6 +598,67 @@ const OddsList = () => {
     );
   };
 
+  // Prima definiamo il componente BookmakersFilter
+  const BookmakersFilter = ({
+    selectedBookmakers,
+    setSelectedBookmakers,
+    bookmakerMapping,
+    bookmakerOptions
+  }) => {
+    const handleCheckboxChange = (e) => {
+      const { value, checked } = e.target;
+      const bookmakerKey = bookmakerMapping[value];
+      setSelectedBookmakers(prevState => {
+        if (checked) {
+          return [...prevState, bookmakerKey];
+        } else {
+          return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+        }
+      });
+    };
+
+    const handleSelectAll = (e) => {
+      const isChecked = e.target.checked;
+      if (isChecked) {
+        setSelectedBookmakers(Object.values(bookmakerMapping));
+      } else {
+        setSelectedBookmakers([]);
+      }
+    };
+
+    return (
+      <div className="bookmakers-filter">
+        <h3>Filter by Bookmakers</h3>
+        <div className="bookmakers-content">
+          <div className="bookmakers-select-all">
+            <label className="bookmaker-checkbox">
+              <input
+                type="checkbox"
+                onChange={handleSelectAll}
+                checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
+              />
+              <span>Select/Deselect All</span>
+            </label>
+          </div>
+
+          <div className="bookmakers-grid">
+            {bookmakerOptions.map((bookmaker, index) => (
+              <label key={index} className="bookmaker-checkbox">
+                <input
+                  type="checkbox"
+                  value={bookmaker}
+                  checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+                  onChange={handleCheckboxChange}
+                />
+                <span>{bookmaker}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Modale di arbitraggio
   const ArbitrageModal = ({
     isOpen,
@@ -813,30 +850,12 @@ const OddsList = () => {
           <DateRangeFilter />
           <RatingRangeFilter />
           <OddsRangeFilter />
-          <div className="bookmakers-section">
-            <h3>Filter by Bookmakers</h3>
-            <div className="bookmakers-checkboxes">
-              <label className="bookmaker-checkbox">
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAll}
-                  checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
-                />
-                <span>Seleziona/Deseleziona Tutto</span>
-              </label>
-              {bookmakerOptions.map((bookmaker, index) => (
-                <label key={index} className="bookmaker-checkbox">
-                  <input
-                    type="checkbox"
-                    value={bookmaker}
-                    checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
-                    onChange={handleCheckboxChange}
-                  />
-                  <span>{bookmaker}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <BookmakersFilter
+            selectedBookmakers={selectedBookmakers}
+            setSelectedBookmakers={setSelectedBookmakers}
+            bookmakerMapping={bookmakerMapping}
+            bookmakerOptions={bookmakerOptions}
+          />
         </div>
 
         <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>

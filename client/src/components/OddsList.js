@@ -26,9 +26,6 @@ const OddsList = () => {
   const [odds, setOdds] = useState([]);
   const [sports, setSports] = useState([]);
   const [error, setError] = useState(null);
-  const [modalData, setModalData] = useState(null);
-  const [betAmount, setBetAmount] = useState(100);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
   const [selectedBookmakers, setSelectedBookmakers] = useState([]);
   const [cachedOdds, setCachedOdds] = useState({});
@@ -96,25 +93,6 @@ const OddsList = () => {
       }
     });
   };
-
-  const getFilteredOdds = () => {
-    if (!selectedBookmakers.length) return odds;
-
-    const filteredGames = odds
-      .map(game => ({
-        ...game,
-        bookmakers: game.bookmakers.filter(bookmaker =>
-          selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
-        ),
-        rating: calculateEventRating(game)
-      }))
-      .filter(game => game.bookmakers.length > 0)
-      .sort((a, b) => b.rating - a.rating); // Ordina per rating decrescente
-
-    return filteredGames;
-  };
-
-  const filteredOdds = getFilteredOdds();
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -202,6 +180,25 @@ const OddsList = () => {
 
     return bestRating;
   };
+
+  const getFilteredOdds = () => {
+    if (!selectedBookmakers.length) return odds;
+
+    const filteredGames = odds
+      .map(game => ({
+        ...game,
+        bookmakers: game.bookmakers.filter(bookmaker =>
+          selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
+        ),
+        rating: calculateEventRating(game)
+      }))
+      .filter(game => game.bookmakers.length > 0)
+      .sort((a, b) => b.rating - a.rating); // Ordina per rating decrescente
+
+    return filteredGames;
+  };
+
+  const filteredOdds = getFilteredOdds();
 
   // Componente per la nuova modale
   const ArbitrageModal = ({

@@ -138,14 +138,13 @@ const OddsList = () => {
     }));
   };
 
-  
   //ODDSMATCHER functions
   const calculateArbitrage = (stake, commission, bookmakerOdds, betfairOdds) => {
     const effectiveBetfairOdds = betfairOdds - commission;
     const lay = (bookmakerOdds / effectiveBetfairOdds) * stake;
     const liability = (lay * betfairOdds) - lay;
     const profit = (bookmakerOdds - 1) * stake - (betfairOdds - 1) * lay;
-    const rating = (profit / stake) * 100;
+    const rating = 100 + (profit / stake) * 100;
 
     return {
       lay: parseFloat(lay.toFixed(2)),
@@ -155,49 +154,67 @@ const OddsList = () => {
     };
   };
 
-  // Funzione per ordinare gli eventi per rating
-  const calculateEventRating = (game) => {
-    let bestRating = -Infinity;
+  // Funzione per calcolare il rating di ogni singola quota
+  const calculateSingleOddRating = (bookmakerOdd, betfairOdd, stake = 100, commission = 0.05) => {
+    const { rating } = calculateArbitrage(stake, commission, bookmakerOdd, betfairOdd);
+    return rating;
+  };
+
+  // Funzione per ottenere tutte le quote con i loro rating
+  const getOddsWithRatings = (game) => {
+    const ratedOdds = [];
+
+    const betfairBookmaker = game.bookmakers.find(b => b.title === 'Betfair');
+    if (!betfairBookmaker) return ratedOdds;
 
     game.bookmakers.forEach(bookmaker => {
       if (bookmaker.title !== 'Betfair') {
-        const betfairBookmaker = game.bookmakers.find(b => b.title === 'Betfair');
-        if (betfairBookmaker) {
-          bookmaker.markets.forEach((market, index) => {
-            if (market.key === 'h2h') {
-              market.outcomes.forEach((outcome, i) => {
-                const betfairOdds = betfairBookmaker.markets[index].outcomes[i].price;
-                const { rating } = calculateArbitrage(100, 0.05, outcome.price, betfairOdds);
-                if (rating > bestRating) {
-                  bestRating = rating;
+        bookmaker.markets.forEach((market, marketIndex) => {
+          if (market.key === 'h2h') {
+            market.outcomes.forEach((outcome, outcomeIndex) => {
+              const betfairOdd = betfairBookmaker.markets[marketIndex].outcomes[outcomeIndex].price;
+              const rating = calculateSingleOddRating(outcome.price, betfairOdd);
+
+              ratedOdds.push({
+                ...game,
+                selectedOutcome: {
+                  type: outcomeIndex === 0 ? '1' : outcomeIndex === 2 ? 'X' : '2',
+                  bookmaker: bookmaker.title,
+                  odds: outcome.price,
+                  betfairOdds: betfairOdd,
+                  rating: rating
                 }
               });
-            }
-          });
-        }
+            });
+          }
+        });
       }
     });
 
-    return bestRating;
+    return ratedOdds;
   };
 
+  // Funzione principale di filtro
   const getFilteredOdds = () => {
-    if (!selectedBookmakers.length) return odds;
+    if (!selectedBookmakers.length) return [];
 
-    const filteredGames = odds
-      .map(game => ({
+    const allRatedOdds = odds.flatMap(game => {
+      // Filtra prima i bookmaker selezionati
+      const filteredGame = {
         ...game,
         bookmakers: game.bookmakers.filter(bookmaker =>
           selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
-        ),
-        rating: calculateEventRating(game)
-      }))
-      .filter(game => game.bookmakers.length > 0)
-      .sort((a, b) => b.rating - a.rating); // Ordina per rating decrescente
+        )
+      };
 
-    return filteredGames;
+      return getOddsWithRatings(filteredGame);
+    });
+
+    // Filtra le quote con rating positivo e ordina per rating
+    return allRatedOdds
+      .filter(game => game.selectedOutcome.rating > 0)
+      .sort((a, b) => b.selectedOutcome.rating - a.selectedOutcome.rating);
   };
-
   const filteredOdds = getFilteredOdds();
 
   // Componente per la nuova modale
@@ -426,38 +443,50 @@ const OddsList = () => {
                   <div className="game-date">
                     {formatDate(game.commence_time)}
                   </div>
+                  <div className="outcome-rating">
+                    Rating: {game.selectedOutcome.rating.toFixed(2)}%
+                  </div>
                 </div>
 
-                <div className="bookmakers-list">
-                  {game.bookmakers.map((bookmaker, bIndex) => (
-                    <div key={bIndex} className="bookmaker-odds">
-                      <h4>{bookmaker.title}</h4>
-                      {bookmaker.markets.map((market, mIndex) => (
-                        market.key === 'h2h' && (
-                          <div key={mIndex} className="odds-grid">
-                            <div className="odds-row">
-                              <div className="odds-values">
-                                {market.outcomes.map((outcome, index) => (
-                                  <div key={index} className="odd-value-container">
-                                    <span className="odd-label">
-                                      {index === 0 ? '1' : index === 2 ? 'X' : '2'}:
-                                    </span>
-                                    <button
-                                      className="odd-button"
-                                      onClick={() => openArbitrageModal(game, market, outcome, index)}
-                                      disabled={bookmaker.title === 'Betfair'}
-                                    >
-                                      {outcome.price || 'N/A'}
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      ))}
+                <div className="bookmaker-odds-single">
+                  <h4>{game.selectedOutcome.bookmaker}</h4>
+                  <div className="odds-grid">
+                    <div className="odds-row">
+                      <div className="odds-values">
+                        <div className="odd-value-container">
+                          <span className="odd-label">
+                            {game.selectedOutcome.type}:
+                          </span>
+                          <button
+                            className="odd-button"
+                            onClick={() => {
+                              const market = game.bookmakers
+                                .find(b => b.title === game.selectedOutcome.bookmaker)
+                                ?.markets.find(m => m.key === 'h2h');
+                              const outcome = market?.outcomes[
+                                game.selectedOutcome.type === '1' ? 0 :
+                                  game.selectedOutcome.type === '2' ? 1 : 2
+                              ];
+                              if (market && outcome) {
+                                openArbitrageModal(
+                                  game,
+                                  market,
+                                  outcome,
+                                  game.selectedOutcome.type === '1' ? 0 :
+                                    game.selectedOutcome.type === '2' ? 1 : 2
+                                );
+                              }
+                            }}
+                          >
+                            {game.selectedOutcome.odds}
+                          </button>
+                          <span className="betfair-odd">
+                            (Betfair: {game.selectedOutcome.betfairOdds})
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             ))}

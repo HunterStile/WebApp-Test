@@ -39,6 +39,8 @@ const bookmakerOptions = Object.keys(bookmakerMapping);
 const DEFAULT_BOOKMAKERS = ['betfair', '888sport'];
 // Defaul rating 
 const DEFAULT_RATING_RANGE = { min: 0, max: 200 }; // Rating può superare 100% in alcuni casi
+// Prima aggiungi il nuovo state per il range delle quote
+const DEFAULT_ODDS_RANGE = { min: 1.01, max: 1000 }; // Quote tipiche vanno da 1.01 a valori molto alti
 
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
@@ -57,6 +59,10 @@ const OddsList = () => {
   const [ratingRange, setRatingRange] = useState({
     min: DEFAULT_RATING_RANGE.min,
     max: DEFAULT_RATING_RANGE.max
+  });
+  const [oddsRange, setOddsRange] = useState({
+    min: DEFAULT_ODDS_RANGE.min,
+    max: DEFAULT_ODDS_RANGE.max
   });
 
   // State to track expanded descriptions
@@ -201,7 +207,9 @@ const OddsList = () => {
     }));
   };
 
-  //ODDSMATCHER functions
+  // ODDSMATCHER FUNCTIONS //
+
+  //Funzione per calcolare l'arbitraggio
   const calculateArbitrage = (stake, commission, bookmakerOdds, betfairOdds) => {
     const effectiveBetfairOdds = betfairOdds - commission;
     const lay = (bookmakerOdds / effectiveBetfairOdds) * stake;
@@ -257,12 +265,11 @@ const OddsList = () => {
     return ratedOdds;
   };
 
-  // Modify getFilteredOdds to include rating range filter
+  // APPLICAZIONE DEI FILTRI //
   const getFilteredOdds = () => {
     if (!selectedBookmakers.length) return [];
 
     const allRatedOdds = odds.flatMap(game => {
-      // Filter by date range if either start or end date is selected
       if (dateRange.startDate || dateRange.endDate) {
         const eventDate = new Date(game.commence_time);
 
@@ -279,7 +286,6 @@ const OddsList = () => {
         }
       }
 
-      // Filter bookmakers
       const filteredGame = {
         ...game,
         bookmakers: game.bookmakers.filter(bookmaker =>
@@ -290,11 +296,12 @@ const OddsList = () => {
       return getOddsWithRatings(filteredGame);
     });
 
-    // Filter by rating range and sort
     return allRatedOdds
       .filter(game =>
         game.selectedOutcome.rating >= ratingRange.min &&
-        game.selectedOutcome.rating <= ratingRange.max
+        game.selectedOutcome.rating <= ratingRange.max &&
+        game.selectedOutcome.odds >= oddsRange.min && 
+        game.selectedOutcome.odds <= oddsRange.max     
       )
       .sort((a, b) => b.selectedOutcome.rating - a.selectedOutcome.rating);
   };
@@ -510,7 +517,112 @@ const OddsList = () => {
     );
   };
 
-  // Componente per la nuova modale
+  // Componente per il filtro delle quote
+  const OddsRangeFilter = () => {
+    const handleRangeChange = (e) => {
+      const { name, value } = e.target;
+      setOddsRange(prev => ({
+        ...prev,
+        [name]: parseFloat(value)
+      }));
+    };
+
+    const resetOddsRange = () => {
+      setOddsRange({
+        min: DEFAULT_ODDS_RANGE.min,
+        max: DEFAULT_ODDS_RANGE.max
+      });
+    };
+
+    return (
+      <div className="odds-filter">
+        <h3>Filter by Odds Range</h3>
+        <div className="odds-inputs">
+          <div className="odds-slider-group">
+            <label>Minimum Odds: {oddsRange.min}</label>
+            <input
+              type="range"
+              name="min"
+              min={DEFAULT_ODDS_RANGE.min}
+              max={10} // Limitiamo lo slider a 10 per una migliore usabilità
+              step="0.01"
+              value={oddsRange.min}
+              onChange={handleRangeChange}
+              className="odds-slider"
+            />
+          </div>
+
+          <div className="odds-slider-group">
+            <label>Maximum Odds: {oddsRange.max}</label>
+            <input
+              type="range"
+              name="max"
+              min={oddsRange.min}
+              max={20} // Limitiamo lo slider a 20 per una migliore usabilità
+              step="0.01"
+              value={Math.min(oddsRange.max, 20)}
+              onChange={handleRangeChange}
+              className="odds-slider"
+            />
+          </div>
+
+          <div className="odds-inputs-numeric">
+            <div className="odds-input-group">
+              <label>Min:</label>
+              <input
+                type="number"
+                name="min"
+                value={oddsRange.min}
+                onChange={handleRangeChange}
+                min={DEFAULT_ODDS_RANGE.min}
+                max={oddsRange.max}
+                step="0.01"
+              />
+            </div>
+            <div className="odds-input-group">
+              <label>Max:</label>
+              <input
+                type="number"
+                name="max"
+                value={oddsRange.max}
+                onChange={handleRangeChange}
+                min={oddsRange.min}
+                max={DEFAULT_ODDS_RANGE.max}
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          <button
+            className="reset-filters-btn"
+            onClick={resetOddsRange}
+          >
+            Reset Odds Range
+          </button>
+        </div>
+
+        <div className="quick-select-odds">
+          <button
+            onClick={() => setOddsRange({ min: 1.01, max: 2 })}
+          >
+            Low Odds (1.01-2.00)
+          </button>
+          <button
+            onClick={() => setOddsRange({ min: 2, max: 5 })}
+          >
+            Medium Odds (2.00-5.00)
+          </button>
+          <button
+            onClick={() => setOddsRange({ min: 5, max: 1000 })}
+          >
+            High Odds (5.00+)
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Modale di arbitraggio
   const ArbitrageModal = ({
     isOpen,
     onClose,
@@ -630,7 +742,7 @@ const OddsList = () => {
     );
   };
 
-  // Nuova funzione per aprire la modale dell'arbitraggio
+  //Funzione per aprire la modale dell'arbitraggio
   const openArbitrageModal = (game, market, outcome, index) => {
     const betfairBookmaker = game.bookmakers.find(b => b.title === 'Betfair');
     if (!betfairBookmaker) {
@@ -659,7 +771,6 @@ const OddsList = () => {
   //MAIN PAGE//
   return (
     <div className="container-odds">
-
       {/* Sezione Sport Disponibili */}
       <div className="available-sports">
         <h2>Available Sports</h2>
@@ -693,7 +804,7 @@ const OddsList = () => {
         )}
       </div>
 
-      {/* Sezione Quote Imminenti */}
+      {/* Sezione Quote */}
       <div className="upcoming-odds">
         <h2>ODDSMATCHER</h2>
         <ViewToggle />
@@ -701,6 +812,7 @@ const OddsList = () => {
         <div className="filters-container">
           <DateRangeFilter />
           <RatingRangeFilter />
+          <OddsRangeFilter />
           <div className="bookmakers-section">
             <h3>Filter by Bookmakers</h3>
             <div className="bookmakers-checkboxes">

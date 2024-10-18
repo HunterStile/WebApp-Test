@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
+import { ChevronDown } from 'lucide-react';
 
 const bookmakerMapping = {
   'Unibet': 'unibet',
@@ -150,7 +151,6 @@ const OddsList = () => {
     </div>
   );
 
-  //GESTIONE RICERCA PARTITE
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     return new Intl.DateTimeFormat('default', {
@@ -162,26 +162,6 @@ const OddsList = () => {
       second: '2-digit',
       timeZoneName: 'short'
     }).format(date);
-  };
-
-  const handleSportChange = (sportKey, sport) => {
-    setSelectedSport(sportKey);
-    setCompetitionTitle(sport.title);
-  };
-
-  const groupedSports = sports.reduce((acc, sport) => {
-    if (!acc[sport.description]) {
-      acc[sport.description] = [];
-    }
-    acc[sport.description].push(sport);
-    return acc;
-  }, {});
-
-  const toggleDescription = (description) => {
-    setExpandedDescriptions(prevState => ({
-      ...prevState,
-      [description]: !prevState[description]
-    }));
   };
 
   // ODDSMATCHER FUNCTIONS //
@@ -599,16 +579,46 @@ const OddsList = () => {
     );
   };
 
-  // Prima definiamo il componente BookmakersFilter
-  const BookmakersFilter = ({
-    selectedBookmakers,
-    setSelectedBookmakers,
-    bookmakerMapping,
-    bookmakerOptions
+  const BookmakersFilter = ({ 
+    selectedBookmakers, 
+    setSelectedBookmakers, 
+    bookmakerMapping, 
+    bookmakerOptions 
   }) => {
-    const handleCheckboxChange = (e) => {
+    const [isBookmakersOpen, setIsBookmakersOpen] = useState(false);
+    const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+  
+    // Separa i bookmaker tra normali ed exchange
+    const exchangeOptions = bookmakerOptions.filter(book => 
+      book.toLowerCase().includes('betfair')
+    );
+    const regularBookmakers = bookmakerOptions.filter(book => 
+      !book.toLowerCase().includes('betfair')
+    );
+  
+    // Crea mapping separati
+    const exchangeMapping = Object.fromEntries(
+      Object.entries(bookmakerMapping).filter(([key]) => 
+        key.toLowerCase().includes('betfair')
+      )
+    );
+    const regularMapping = Object.fromEntries(
+      Object.entries(bookmakerMapping).filter(([key]) => 
+        !key.toLowerCase().includes('betfair')
+      )
+    );
+  
+    // Filtra le selezioni correnti
+    const selectedExchange = selectedBookmakers.filter(book => 
+      Object.values(exchangeMapping).includes(book)
+    );
+    const selectedRegular = selectedBookmakers.filter(book => 
+      Object.values(regularMapping).includes(book)
+    );
+  
+    const handleRegularBookmakerChange = (e) => {
       const { value, checked } = e.target;
-      const bookmakerKey = bookmakerMapping[value];
+      const bookmakerKey = regularMapping[value];
       setSelectedBookmakers(prevState => {
         if (checked) {
           return [...prevState, bookmakerKey];
@@ -617,48 +627,124 @@ const OddsList = () => {
         }
       });
     };
-
-    const handleSelectAll = (e) => {
+  
+    const handleExchangeChange = (e) => {
+      const { value, checked } = e.target;
+      const bookmakerKey = exchangeMapping[value];
+      setSelectedBookmakers(prevState => {
+        if (checked) {
+          return [...prevState, bookmakerKey];
+        } else {
+          return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+        }
+      });
+    };
+  
+    const handleSelectAllRegular = (e) => {
       const isChecked = e.target.checked;
       if (isChecked) {
-        setSelectedBookmakers(Object.values(bookmakerMapping));
+        setSelectedBookmakers(prev => [
+          ...prev.filter(book => Object.values(exchangeMapping).includes(book)),
+          ...Object.values(regularMapping)
+        ]);
       } else {
-        setSelectedBookmakers([]);
+        setSelectedBookmakers(prev => 
+          prev.filter(book => Object.values(exchangeMapping).includes(book))
+        );
       }
     };
-
+  
+    const handleSelectAllExchange = (e) => {
+      const isChecked = e.target.checked;
+      if (isChecked) {
+        setSelectedBookmakers(prev => [
+          ...prev.filter(book => Object.values(regularMapping).includes(book)),
+          ...Object.values(exchangeMapping)
+        ]);
+      } else {
+        setSelectedBookmakers(prev => 
+          prev.filter(book => Object.values(regularMapping).includes(book))
+        );
+      }
+    };
+  
     return (
       <div className="bookmakers-filter">
-        <h3>Filter by Bookmakers</h3>
         <div className="bookmakers-content">
-          <div className="bookmakers-select-all">
-            <label className="bookmaker-checkbox">
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
-              />
-              <span>Select/Deselect All</span>
-            </label>
-          </div>
-
-          <div className="bookmakers-grid">
-            {bookmakerOptions.map((bookmaker, index) => (
-              <label key={index} className="bookmaker-checkbox">
+          {/* Regular Bookmakers Select */}
+          <div className="bookmakers-section">
+            <h3 className="bookmakers-title">Bookmakers ({selectedRegular.length})</h3>
+            <div 
+              className="select-all-button"
+              onClick={() => setIsBookmakersOpen(!isBookmakersOpen)}
+            >
+              <label className="bookmaker-checkbox">
                 <input
                   type="checkbox"
-                  value={bookmaker}
-                  checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
-                  onChange={handleCheckboxChange}
+                  onChange={handleSelectAllRegular}
+                  checked={selectedRegular.length === Object.values(regularMapping).length}
                 />
-                <span>{bookmaker}</span>
+                <span>Select/Deselect All</span>
               </label>
-            ))}
+              <ChevronDown className={`chevron-icon ${isBookmakersOpen ? 'rotate' : ''}`} />
+            </div>
+            
+            {isBookmakersOpen && (
+              <div className="dropdown-menu">
+                {regularBookmakers.map((bookmaker, index) => (
+                  <label key={index} className="bookmaker-checkbox">
+                    <input
+                      type="checkbox"
+                      value={bookmaker}
+                      checked={selectedBookmakers.includes(regularMapping[bookmaker])}
+                      onChange={handleRegularBookmakerChange}
+                    />
+                    <span>{bookmaker}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+  
+          {/* Exchange Select */}
+          <div className="bookmakers-section">
+            <h3 className="bookmakers-title">Exchange ({selectedExchange.length})</h3>
+            <div 
+              className="select-all-button"
+              onClick={() => setIsExchangeOpen(!isExchangeOpen)}
+            >
+              <label className="bookmaker-checkbox">
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAllExchange}
+                  checked={selectedExchange.length === Object.values(exchangeMapping).length}
+                />
+                <span>Select/Deselect All</span>
+              </label>
+              <ChevronDown className={`chevron-icon ${isExchangeOpen ? 'rotate' : ''}`} />
+            </div>
+            
+            {isExchangeOpen && (
+              <div className="dropdown-menu">
+                {exchangeOptions.map((bookmaker, index) => (
+                  <label key={index} className="bookmaker-checkbox">
+                    <input
+                      type="checkbox"
+                      value={bookmaker}
+                      checked={selectedBookmakers.includes(exchangeMapping[bookmaker])}
+                      onChange={handleExchangeChange}
+                    />
+                    <span>{bookmaker}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
   };
+  
 
   // Modale di arbitraggio
   const ArbitrageModal = ({
@@ -809,39 +895,6 @@ const OddsList = () => {
   //MAIN PAGE//
   return (
     <div className="container-odds">
-      {/* Sezione Sport Disponibili */}
-      <div className="available-sports">
-        <h2>Available Sports</h2>
-        {error && <p className="error-message">{error}</p>}
-        {Object.keys(groupedSports).length > 0 ? (
-          <div>
-            {Object.entries(groupedSports).map(([description, sports]) => (
-              <div key={description} className="sports-category">
-                <h3 onClick={() => toggleDescription(description)}>
-                  <span>{description}</span>
-                  <span>{expandedDescriptions[description] ? '▲' : '▼'}</span>
-                </h3>
-                {expandedDescriptions[description] && (
-                  <ul className="sports-list">
-                    {sports.map((sport) => (
-                      <li
-                        key={sport.key}
-                        onClick={() => handleSportChange(sport.key, sport)}
-                        className="sport-item"
-                      >
-                        <strong>{sport.title}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="no-data">No sports available.</p>
-        )}
-      </div>
-
       {/* Sezione Quote */}
       <div className="upcoming-odds">
         <h2>ODDSMATCHER</h2>
@@ -851,13 +904,14 @@ const OddsList = () => {
           <DateRangeFilter />
           <RatingRangeFilter />
           <OddsRangeFilter />
-        </div>
-        <BookmakersFilter
+          <BookmakersFilter
             selectedBookmakers={selectedBookmakers}
             setSelectedBookmakers={setSelectedBookmakers}
             bookmakerMapping={bookmakerMapping}
             bookmakerOptions={bookmakerOptions}
           />
+        </div>
+        
         <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>
         {error && <p className="error-message">{error}</p>}
 

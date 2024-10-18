@@ -65,7 +65,6 @@
 .upcoming-odds {
   position: absolute;
   top: 73px;
-  left: 26rem;
   width: calc(100% - 26rem);
   padding: 2rem;
   background: #fff;
@@ -73,61 +72,107 @@
 }
 
 /* Bookmaker filters */
+
 .bookmakers-filter {
-  background-color: #f5f5f5;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  width: 100%;
 }
 
 .bookmakers-content {
   display: flex;
-  flex-direction: column;
   gap: 1rem;
 }
 
-.bookmakers-select-all {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ddd;
+.bookmakers-section {
+  position: relative;
+  min-width: 200px;
+  /* Aggiungiamo questa proprietà per creare un contesto di posizionamento */
+  isolation: isolate;
 }
 
-.bookmakers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.5rem;
+.bookmakers-title {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.select-all-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  /* Aggiungiamo z-index per assicurarci che stia sopra il dropdown */
+  position: relative;
+  z-index: 2;
 }
 
 .bookmaker-checkbox {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.bookmaker-checkbox:hover {
-  background-color: #f0f0f0;
 }
 
 .bookmaker-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
+  margin: 0;
 }
 
-.bookmaker-checkbox span {
-  font-size: 0.9rem;
-  color: #333;
+.chevron-icon {
+  transition: transform 0.2s ease-in-out;
 }
 
-/* Stile per i checkbox selezionati */
-.bookmaker-checkbox input[type="checkbox"]:checked+span {
-  font-weight: 500;
-  color: #000;
+.chevron-icon.rotate {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  width: 100%;
+  background-color: #f5f5f5;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  /* Modifichiamo il posizionamento per restare nel contesto */
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  z-index: 1;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* Aggiungiamo un'ombra per dare profondità */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.dropdown-menu .bookmaker-checkbox {
+  padding: 0.25rem;
+}
+
+.dropdown-menu .bookmaker-checkbox:hover {
+  background-color: #e2e8f0;
+  border-radius: 0.25rem;
+}
+
+/* Stile per la scrollbar */
+.dropdown-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
 }
 
 /* Responsive design */

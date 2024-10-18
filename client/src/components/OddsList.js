@@ -17,7 +17,8 @@ const bookmakerMapping = {
   'William Hill': 'williamhill',
   'Matchbook': 'matchbook',
   'BetOnline.ag': 'betonlineag',
-  'Coolbet': 'coolbet'
+  'Coolbet': 'coolbet',
+  'Betclic': 'betclic',
 };
 
 // Utility function per ottenere il nome leggibile del campionato
@@ -850,14 +851,13 @@ const OddsList = () => {
           <DateRangeFilter />
           <RatingRangeFilter />
           <OddsRangeFilter />
-          <BookmakersFilter
+        </div>
+        <BookmakersFilter
             selectedBookmakers={selectedBookmakers}
             setSelectedBookmakers={setSelectedBookmakers}
             bookmakerMapping={bookmakerMapping}
             bookmakerOptions={bookmakerOptions}
           />
-        </div>
-
         <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>
         {error && <p className="error-message">{error}</p>}
 

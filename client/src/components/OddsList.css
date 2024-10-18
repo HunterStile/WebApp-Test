@@ -140,7 +140,6 @@
 /* Data Filters */
 
 .date-filter {
-  margin: 1rem 0;
   padding: 1.5rem;
   background: #f5f5f5;
   border-radius: 8px;
@@ -225,7 +224,7 @@
 
 .filters-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1.5rem;
   margin: 1rem 0;
 }

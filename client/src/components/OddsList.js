@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown,Search,X } from 'lucide-react';
 
 // VARIABILI
 const bookmakerMapping = {
@@ -67,6 +67,9 @@ const OddsList = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
 
   //FETCH DELLE SCOMESSE
   const fetchOdds = useCallback(async () => {
@@ -169,6 +172,14 @@ const OddsList = () => {
     if (!selectedBookmakers.length) return [];
 
     const allRatedOdds = odds.flatMap(game => {
+      // Applica il filtro di ricerca
+      if (searchTerm) {
+        const matchString = `${game.home_team} vs ${game.away_team}`.toLowerCase();
+        if (!matchString.includes(searchTerm.toLowerCase())) {
+          return [];
+        }
+      }
+
       if (dateRange.startDate || dateRange.endDate) {
         const eventDate = new Date(game.commence_time);
 
@@ -279,63 +290,80 @@ const OddsList = () => {
     );
   };
 
-  // Add Rating Range Filter component
   const RatingRangeFilter = () => {
+    const [localRatingRange, setLocalRatingRange] = useState(ratingRange);
+  
     const handleRangeChange = (e) => {
       const { name, value } = e.target;
-      setRatingRange(prev => ({
-        ...prev,
+      const newRange = {
+        ...localRatingRange,
         [name]: parseFloat(value)
-      }));
+      };
+      setLocalRatingRange(newRange);
+      
+      // Aggiorna immediatamente per gli slider
+      if (e.target.type === 'range') {
+        setRatingRange(newRange);
+      }
     };
-
+  
+    // handleBlur solo per gli input numerici
+    const handleBlur = (e) => {
+      if (e.target.type === 'number') {
+        setRatingRange(localRatingRange);
+      }
+    };
+  
     const resetRatingRange = () => {
-      setRatingRange({
+      const defaultRange = {
         min: DEFAULT_RATING_RANGE.min,
         max: DEFAULT_RATING_RANGE.max
-      });
+      };
+      setLocalRatingRange(defaultRange);
+      setRatingRange(defaultRange);
     };
-
+  
     return (
       <div className="rating-filter">
         <h3>Filter by Rating Range</h3>
         <div className="rating-inputs">
           <div className="rating-slider-group">
-            <label>Minimum Rating: {ratingRange.min}%</label>
+            <label>Minimum Rating: {localRatingRange.min}%</label>
             <input
               type="range"
               name="min"
               min={DEFAULT_RATING_RANGE.min}
               max={DEFAULT_RATING_RANGE.max}
-              value={ratingRange.min}
+              value={localRatingRange.min}
               onChange={handleRangeChange}
               className="rating-slider"
             />
           </div>
-
+  
           <div className="rating-slider-group">
-            <label>Maximum Rating: {ratingRange.max}%</label>
+            <label>Maximum Rating: {localRatingRange.max}%</label>
             <input
               type="range"
               name="max"
               min={DEFAULT_RATING_RANGE.min}
               max={DEFAULT_RATING_RANGE.max}
-              value={ratingRange.max}
+              value={localRatingRange.max}
               onChange={handleRangeChange}
               className="rating-slider"
             />
           </div>
-
+  
           <div className="rating-inputs-numeric">
             <div className="rating-input-group">
               <label>Min:</label>
               <input
                 type="number"
                 name="min"
-                value={ratingRange.min}
+                value={localRatingRange.min}
                 onChange={handleRangeChange}
+                onBlur={handleBlur}
                 min={DEFAULT_RATING_RANGE.min}
-                max={ratingRange.max}
+                max={localRatingRange.max}
                 step="0.1"
               />
             </div>
@@ -344,15 +372,16 @@ const OddsList = () => {
               <input
                 type="number"
                 name="max"
-                value={ratingRange.max}
+                value={localRatingRange.max}
                 onChange={handleRangeChange}
-                min={ratingRange.min}
+                onBlur={handleBlur}
+                min={localRatingRange.min}
                 max={DEFAULT_RATING_RANGE.max}
                 step="0.1"
               />
             </div>
           </div>
-
+  
           <button
             className="reset-filters-btn"
             onClick={resetRatingRange}
@@ -363,66 +392,83 @@ const OddsList = () => {
       </div>
     );
   };
-
-  // Componente per il filtro delle quote
+  
   const OddsRangeFilter = () => {
+    const [localOddsRange, setLocalOddsRange] = useState(oddsRange);
+  
     const handleRangeChange = (e) => {
       const { name, value } = e.target;
-      setOddsRange(prev => ({
-        ...prev,
+      const newRange = {
+        ...localOddsRange,
         [name]: parseFloat(value)
-      }));
+      };
+      setLocalOddsRange(newRange);
+      
+      // Aggiorna immediatamente per gli slider
+      if (e.target.type === 'range') {
+        setOddsRange(newRange);
+      }
     };
-
+  
+    // handleBlur solo per gli input numerici
+    const handleBlur = (e) => {
+      if (e.target.type === 'number') {
+        setOddsRange(localOddsRange);
+      }
+    };
+  
     const resetOddsRange = () => {
-      setOddsRange({
+      const defaultRange = {
         min: DEFAULT_ODDS_RANGE.min,
         max: DEFAULT_ODDS_RANGE.max
-      });
+      };
+      setLocalOddsRange(defaultRange);
+      setOddsRange(defaultRange);
     };
-
+  
     return (
       <div className="odds-filter">
         <h3>Filter by Odds Range</h3>
         <div className="odds-inputs">
           <div className="odds-slider-group">
-            <label>Minimum Odds: {oddsRange.min}</label>
+            <label>Minimum Odds: {localOddsRange.min}</label>
             <input
               type="range"
               name="min"
               min={DEFAULT_ODDS_RANGE.min}
-              max={10} // Limitiamo lo slider a 10 per una migliore usabilità
+              max={10}
               step="0.01"
-              value={oddsRange.min}
+              value={localOddsRange.min}
               onChange={handleRangeChange}
               className="odds-slider"
             />
           </div>
-
+  
           <div className="odds-slider-group">
-            <label>Maximum Odds: {oddsRange.max}</label>
+            <label>Maximum Odds: {localOddsRange.max}</label>
             <input
               type="range"
               name="max"
-              min={oddsRange.min}
-              max={20} // Limitiamo lo slider a 20 per una migliore usabilità
+              min={localOddsRange.min}
+              max={20}
               step="0.01"
-              value={Math.min(oddsRange.max, 20)}
+              value={Math.min(localOddsRange.max, 20)}
               onChange={handleRangeChange}
               className="odds-slider"
             />
           </div>
-
+  
           <div className="odds-inputs-numeric">
             <div className="odds-input-group">
               <label>Min:</label>
               <input
                 type="number"
                 name="min"
-                value={oddsRange.min}
+                value={localOddsRange.min}
                 onChange={handleRangeChange}
+                onBlur={handleBlur}
                 min={DEFAULT_ODDS_RANGE.min}
-                max={oddsRange.max}
+                max={localOddsRange.max}
                 step="0.01"
               />
             </div>
@@ -431,15 +477,16 @@ const OddsList = () => {
               <input
                 type="number"
                 name="max"
-                value={oddsRange.max}
+                value={localOddsRange.max}
                 onChange={handleRangeChange}
-                min={oddsRange.min}
+                onBlur={handleBlur}
+                min={localOddsRange.min}
                 max={DEFAULT_ODDS_RANGE.max}
                 step="0.01"
               />
             </div>
           </div>
-
+  
           <button
             className="reset-filters-btn"
             onClick={resetOddsRange}
@@ -447,7 +494,6 @@ const OddsList = () => {
             Reset Odds Range
           </button>
         </div>
-
       </div>
     );
   };
@@ -614,6 +660,76 @@ const OddsList = () => {
             )}
           </div>
         </div>
+      </div>
+    );
+  };
+
+  // Funzione per ottenere tutte le partite uniche dal dataset
+  const getUniqueMatches = () => {
+    return Array.from(new Set(odds.map(game => `${game.home_team} vs ${game.away_team}`)));
+  };
+
+  // Componente SearchFilter
+  const SearchFilter = () => {
+    const handleSearchChange = (e) => {
+      const value = e.target.value;
+      setSearchTerm(value);
+      
+      if (value.trim()) {
+        const matchSuggestions = getUniqueMatches().filter(match =>
+          match.toLowerCase().includes(value.toLowerCase())
+        );
+        setSuggestions(matchSuggestions);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+      setSearchTerm(suggestion);
+      setShowSuggestions(false);
+    };
+
+    const clearSearch = () => {
+      setSearchTerm('');
+      setSuggestions([]);
+      setShowSuggestions(false);
+    };
+
+    return (
+      <div className="search-filter">
+        <h3>Search Matches</h3>
+        <div className="search-input-container">
+          <Search className="search-icon" size={20} />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Search for matches..."
+            className="search-input"
+          />
+          {searchTerm && (
+            <button className="clear-search-btn" onClick={clearSearch}>
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="suggestions-container">
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                className="suggestion-item"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -794,7 +910,7 @@ const OddsList = () => {
             bookmakerOptions={bookmakerOptions}
           />
         </div>
-
+        <SearchFilter />
         <h2>Elenco Partite</h2>
         {error && <p className="error-message">{error}</p>}
 

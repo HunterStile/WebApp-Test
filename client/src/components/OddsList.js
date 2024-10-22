@@ -39,13 +39,14 @@ const bookmakerOptions = Object.keys(bookmakerMapping);
 // Default selected bookmakers
 const DEFAULT_BOOKMAKERS = ['betfair', '888sport'];
 // Defaul rating 
-const DEFAULT_RATING_RANGE = { min: 0, max: 200 }; // Rating può superare 100% in alcuni casi
-// Prima aggiungi il nuovo state per il range delle quote
-const DEFAULT_ODDS_RANGE = { min: 1.01, max: 1000 }; // Quote tipiche vanno da 1.01 a valori molto alti
+const DEFAULT_RATING_RANGE = { min: 0, max: 200 }; 
+// Default del filtro quote
+const DEFAULT_ODDS_RANGE = { min: 1.01, max: 1000 };
+// Max partite per pagina
+const ITEMS_PER_PAGE = 10;
 
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
-  const [sports, setSports] = useState([]);
   const [error, setError] = useState(null);
   const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
   const [selectedBookmakers, setSelectedBookmakers] = useState(DEFAULT_BOOKMAKERS);
@@ -65,21 +66,10 @@ const OddsList = () => {
     min: DEFAULT_ODDS_RANGE.min,
     max: DEFAULT_ODDS_RANGE.max
   });
-
-  // State to track expanded descriptions
-  const [expandedDescriptions, setExpandedDescriptions] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   //FETCH DELLE SCOMESSE
-  const fetchSports = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/odds/sports`);
-      setSports(response.data);
-    } catch (error) {
-      setError('Error fetching sports data');
-      console.error('Error fetching sports:', error);
-    }
-  }, []);
-
   const fetchOdds = useCallback(async (sportKey) => {
     try {
       if (viewMode === 'major') {
@@ -114,26 +104,14 @@ const OddsList = () => {
       console.error('Error fetching odds:', error);
     }
   }, [viewMode]);
+  
+  // Funzione per ottenere le quote della pagina corrente
+  const getCurrentPageOdds = () => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredOdds.slice(startIndex, endIndex);
+  };
 
-  useEffect(() => {
-    fetchSports(); // Richiama l'API degli sport all'avvio del componente
-  }, [fetchSports]);
-
-  useEffect(() => {
-    if (viewMode === 'major') {
-      if (cachedOdds.majorLeagues) {
-        setOdds(cachedOdds.majorLeagues);
-      } else {
-        fetchOdds();
-      }
-    } else if (cachedOdds[selectedSport]) {
-      setOdds(cachedOdds[selectedSport]);
-    } else {
-      fetchOdds(selectedSport);
-    }
-  }, [selectedSport, viewMode, cachedOdds, fetchOdds]);
-
-  // Aggiungi il componente per il toggle della vista
   const ViewToggle = () => (
     <div className="view-toggle">
       <button
@@ -510,43 +488,43 @@ const OddsList = () => {
     );
   };
 
-  const BookmakersFilter = ({ 
-    selectedBookmakers, 
-    setSelectedBookmakers, 
-    bookmakerMapping, 
-    bookmakerOptions 
+  const BookmakersFilter = ({
+    selectedBookmakers,
+    setSelectedBookmakers,
+    bookmakerMapping,
+    bookmakerOptions
   }) => {
     const [isBookmakersOpen, setIsBookmakersOpen] = useState(false);
     const [isExchangeOpen, setIsExchangeOpen] = useState(false);
-  
+
     // Separa i bookmaker tra normali ed exchange
-    const exchangeOptions = bookmakerOptions.filter(book => 
+    const exchangeOptions = bookmakerOptions.filter(book =>
       book.toLowerCase().includes('betfair')
     );
-    const regularBookmakers = bookmakerOptions.filter(book => 
+    const regularBookmakers = bookmakerOptions.filter(book =>
       !book.toLowerCase().includes('betfair')
     );
-  
+
     // Crea mapping separati
     const exchangeMapping = Object.fromEntries(
-      Object.entries(bookmakerMapping).filter(([key]) => 
+      Object.entries(bookmakerMapping).filter(([key]) =>
         key.toLowerCase().includes('betfair')
       )
     );
     const regularMapping = Object.fromEntries(
-      Object.entries(bookmakerMapping).filter(([key]) => 
+      Object.entries(bookmakerMapping).filter(([key]) =>
         !key.toLowerCase().includes('betfair')
       )
     );
-  
+
     // Filtra le selezioni correnti
-    const selectedExchange = selectedBookmakers.filter(book => 
+    const selectedExchange = selectedBookmakers.filter(book =>
       Object.values(exchangeMapping).includes(book)
     );
-    const selectedRegular = selectedBookmakers.filter(book => 
+    const selectedRegular = selectedBookmakers.filter(book =>
       Object.values(regularMapping).includes(book)
     );
-  
+
     const handleRegularBookmakerChange = (e) => {
       const { value, checked } = e.target;
       const bookmakerKey = regularMapping[value];
@@ -558,7 +536,7 @@ const OddsList = () => {
         }
       });
     };
-  
+
     const handleExchangeChange = (e) => {
       const { value, checked } = e.target;
       const bookmakerKey = exchangeMapping[value];
@@ -570,7 +548,7 @@ const OddsList = () => {
         }
       });
     };
-  
+
     const handleSelectAllRegular = (e) => {
       const isChecked = e.target.checked;
       if (isChecked) {
@@ -579,12 +557,12 @@ const OddsList = () => {
           ...Object.values(regularMapping)
         ]);
       } else {
-        setSelectedBookmakers(prev => 
+        setSelectedBookmakers(prev =>
           prev.filter(book => Object.values(exchangeMapping).includes(book))
         );
       }
     };
-  
+
     const handleSelectAllExchange = (e) => {
       const isChecked = e.target.checked;
       if (isChecked) {
@@ -593,19 +571,19 @@ const OddsList = () => {
           ...Object.values(exchangeMapping)
         ]);
       } else {
-        setSelectedBookmakers(prev => 
+        setSelectedBookmakers(prev =>
           prev.filter(book => Object.values(regularMapping).includes(book))
         );
       }
     };
-  
+
     return (
       <div className="bookmakers-filter">
         <div className="bookmakers-content">
           {/* Regular Bookmakers Select */}
           <div className="bookmakers-section">
             <h3 className="bookmakers-title">Bookmakers ({selectedRegular.length})</h3>
-            <div 
+            <div
               className="select-all-button"
               onClick={() => setIsBookmakersOpen(!isBookmakersOpen)}
             >
@@ -619,7 +597,7 @@ const OddsList = () => {
               </label>
               <ChevronDown className={`chevron-icon ${isBookmakersOpen ? 'rotate' : ''}`} />
             </div>
-            
+
             {isBookmakersOpen && (
               <div className="dropdown-menu">
                 {regularBookmakers.map((bookmaker, index) => (
@@ -636,11 +614,11 @@ const OddsList = () => {
               </div>
             )}
           </div>
-  
+
           {/* Exchange Select */}
           <div className="bookmakers-section">
             <h3 className="bookmakers-title">Exchange ({selectedExchange.length})</h3>
-            <div 
+            <div
               className="select-all-button"
               onClick={() => setIsExchangeOpen(!isExchangeOpen)}
             >
@@ -654,7 +632,7 @@ const OddsList = () => {
               </label>
               <ChevronDown className={`chevron-icon ${isExchangeOpen ? 'rotate' : ''}`} />
             </div>
-            
+
             {isExchangeOpen && (
               <div className="dropdown-menu">
                 {exchangeOptions.map((bookmaker, index) => (
@@ -675,7 +653,6 @@ const OddsList = () => {
       </div>
     );
   };
-  
 
   // Modale di arbitraggio
   const ArbitrageModal = ({
@@ -823,6 +800,25 @@ const OddsList = () => {
     });
   };
 
+  useEffect(() => {
+    if (viewMode === 'major') {
+      if (cachedOdds.majorLeagues) {
+        setOdds(cachedOdds.majorLeagues);
+      } else {
+        fetchOdds();
+      }
+    } else if (cachedOdds[selectedSport]) {
+      setOdds(cachedOdds[selectedSport]);
+    } else {
+      fetchOdds(selectedSport);
+    }
+  }, [selectedSport, viewMode, cachedOdds, fetchOdds]);
+
+  // Calcola il totale delle pagine quando filteredOdds cambia
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredOdds.length / ITEMS_PER_PAGE));
+  }, [filteredOdds]);
+
   //MAIN PAGE//
   return (
     <div className="container-odds">
@@ -841,80 +837,144 @@ const OddsList = () => {
             bookmakerOptions={bookmakerOptions}
           />
         </div>
-        
+
         <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>
         {error && <p className="error-message">{error}</p>}
-  
+
         {/* Lista delle Quote in formato tabella */}
         {filteredOdds.length > 0 ? (
-          <table className="odds-table">
-            <thead>
-              <tr>
-                <th>Data e Ora</th>
-                <th>Partita</th>
-                <th>Tipo</th>
-                <th>Rating</th>
-                <th>Calcolatore</th>
-                <th>Bookmaker</th>
-                <th>Quota</th>
-                <th>Exchange</th>
-                <th>Quota Exchange</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOdds.map((game, index) => (
-                <tr key={index}>
-                  <td>{formatDate(game.commence_time)}</td>
-                  <td>
-                    <div className="match-info">
-                      <span className="league-name">
-                        {viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}
-                      </span>
-                      <span className="team-names">
-                        {game.home_team} vs {game.away_team}
-                      </span>
-                    </div>
-                  </td>
-                  <td>{game.selectedOutcome.type}</td>
-                  <td>{game.selectedOutcome.rating.toFixed(2)}%</td>
-                  <td>
-                    <button
-                      className="calculator-btn"
-                      onClick={() => {
-                        const market = game.bookmakers
-                          .find(b => b.title === game.selectedOutcome.bookmaker)
-                          ?.markets.find(m => m.key === 'h2h');
-                        const outcome = market?.outcomes[
-                          game.selectedOutcome.type === '1' ? 0 :
-                            game.selectedOutcome.type === '2' ? 1 : 2
-                        ];
-                        if (market && outcome) {
-                          openArbitrageModal(
-                            game,
-                            market,
-                            outcome,
+          <>
+            <table className="odds-table">
+              <thead>
+                <tr>
+                  <th>Data e Ora</th>
+                  <th>Partita</th>
+                  <th>Tipo</th>
+                  <th>Rating</th>
+                  <th>Calcolatore</th>
+                  <th>Bookmaker</th>
+                  <th>Quota</th>
+                  <th>Exchange</th>
+                  <th>Quota Exchange</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getCurrentPageOdds().map((game, index) => (
+                  <tr key={index}>
+                    <td>{formatDate(game.commence_time)}</td>
+                    <td>
+                      <div className="match-info">
+                        <span className="league-name">
+                          {viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}
+                        </span>
+                        <span className="team-names">
+                          {game.home_team} vs {game.away_team}
+                        </span>
+                      </div>
+                    </td>
+                    <td>{game.selectedOutcome.type}</td>
+                    <td>{game.selectedOutcome.rating.toFixed(2)}%</td>
+                    <td>
+                      <button
+                        className="calculator-btn"
+                        onClick={() => {
+                          const market = game.bookmakers
+                            .find(b => b.title === game.selectedOutcome.bookmaker)
+                            ?.markets.find(m => m.key === 'h2h');
+                          const outcome = market?.outcomes[
                             game.selectedOutcome.type === '1' ? 0 :
                               game.selectedOutcome.type === '2' ? 1 : 2
-                          );
-                        }
-                      }}
-                    >
-                      Calcola
-                    </button>
-                  </td>
-                  <td>{game.selectedOutcome.bookmaker}</td>
-                  <td className="odds-value">{game.selectedOutcome.odds}</td>
-                  <td>Betfair</td>
-                  <td className="exchange-odds">{game.selectedOutcome.betfairOdds}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                          ];
+                          if (market && outcome) {
+                            openArbitrageModal(
+                              game,
+                              market,
+                              outcome,
+                              game.selectedOutcome.type === '1' ? 0 :
+                                game.selectedOutcome.type === '2' ? 1 : 2
+                            );
+                          }
+                        }}
+                      >
+                        Calcola
+                      </button>
+                    </td>
+                    <td>{game.selectedOutcome.bookmaker}</td>
+                    <td className="odds-value">{game.selectedOutcome.odds}</td>
+                    <td>Betfair</td>
+                    <td className="exchange-odds">{game.selectedOutcome.betfairOdds}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Controlli Paginazione */}
+            <div className="pagination-controls">
+              <div className="pagination-info">
+                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
+              </div>
+              <div className="pagination-buttons">
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(1)}
+                >
+                  First
+                </button>
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                >
+                  Previous
+                </button>
+
+                <div className="pagination-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(pageNum => {
+                      return (
+                        pageNum === 1 ||
+                        pageNum === totalPages ||
+                        Math.abs(pageNum - currentPage) <= 1
+                      );
+                    })
+                    .map((pageNum, index, array) => (
+                      <React.Fragment key={pageNum}>
+                        {index > 0 && array[index - 1] !== pageNum - 1 && (
+                          <span className="pagination-ellipsis">...</span>
+                        )}
+                        <button
+                          className={`pagination-number ${pageNum === currentPage ? 'active' : ''}`}
+                          onClick={() => setCurrentPage(pageNum)}
+                        >
+                          {pageNum}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                </div>
+
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                >
+                  Next
+                </button>
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          </>
         ) : (
           <p className="no-data">No odds available.</p>
         )}
       </div>
-  
+
       {/* Modal per l'arbitraggio */}
       {arbitrageModalData && (
         <ArbitrageModal

@@ -830,7 +830,6 @@ const OddsList = () => {
       <div className="upcoming-odds">
         <h2>ODDSMATCHER</h2>
         <ViewToggle />
-        {/* Group all filters together */}
         <div className="filters-container">
           <DateRangeFilter />
           <RatingRangeFilter />
@@ -845,74 +844,78 @@ const OddsList = () => {
         
         <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>
         {error && <p className="error-message">{error}</p>}
-
-        {/* Lista delle Quote */}
+  
+        {/* Lista delle Quote in formato tabella */}
         {filteredOdds.length > 0 ? (
-          <div className="games-list">
-            {filteredOdds.map((game, index) => (
-              <div key={index} className="game-card">
-                <div className="game-header">
-                  <div className="game-teams">
-                    <strong>{viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}</strong>
-                    <span> - {game.home_team} vs {game.away_team}</span>
-                  </div>
-                  <div className="game-date">
-                    {formatDate(game.commence_time)}
-                  </div>
-                  <div className="outcome-rating">
-                    Rating: {game.selectedOutcome.rating.toFixed(2)}%
-                  </div>
-                </div>
-
-                <div className="bookmaker-odds-single">
-                  <h4>{game.selectedOutcome.bookmaker}</h4>
-                  <div className="odds-grid">
-                    <div className="odds-row">
-                      <div className="odds-values">
-                        <div className="odd-value-container">
-                          <span className="odd-label">
-                            {game.selectedOutcome.type}:
-                          </span>
-                          <button
-                            className="odd-button"
-                            onClick={() => {
-                              const market = game.bookmakers
-                                .find(b => b.title === game.selectedOutcome.bookmaker)
-                                ?.markets.find(m => m.key === 'h2h');
-                              const outcome = market?.outcomes[
-                                game.selectedOutcome.type === '1' ? 0 :
-                                  game.selectedOutcome.type === '2' ? 1 : 2
-                              ];
-                              if (market && outcome) {
-                                openArbitrageModal(
-                                  game,
-                                  market,
-                                  outcome,
-                                  game.selectedOutcome.type === '1' ? 0 :
-                                    game.selectedOutcome.type === '2' ? 1 : 2
-                                );
-                              }
-                            }}
-                          >
-                            {game.selectedOutcome.odds}
-                          </button>
-                          <span className="betfair-odd">
-                            (Betfair: {game.selectedOutcome.betfairOdds})
-                          </span>
-                        </div>
-                      </div>
+          <table className="odds-table">
+            <thead>
+              <tr>
+                <th>Data e Ora</th>
+                <th>Partita</th>
+                <th>Tipo</th>
+                <th>Rating</th>
+                <th>Calcolatore</th>
+                <th>Bookmaker</th>
+                <th>Quota</th>
+                <th>Exchange</th>
+                <th>Quota Exchange</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOdds.map((game, index) => (
+                <tr key={index}>
+                  <td>{formatDate(game.commence_time)}</td>
+                  <td>
+                    <div className="match-info">
+                      <span className="league-name">
+                        {viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}
+                      </span>
+                      <span className="team-names">
+                        {game.home_team} vs {game.away_team}
+                      </span>
                     </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  </td>
+                  <td>{game.selectedOutcome.type}</td>
+                  <td>{game.selectedOutcome.rating.toFixed(2)}%</td>
+                  <td>
+                    <button
+                      className="calculator-btn"
+                      onClick={() => {
+                        const market = game.bookmakers
+                          .find(b => b.title === game.selectedOutcome.bookmaker)
+                          ?.markets.find(m => m.key === 'h2h');
+                        const outcome = market?.outcomes[
+                          game.selectedOutcome.type === '1' ? 0 :
+                            game.selectedOutcome.type === '2' ? 1 : 2
+                        ];
+                        if (market && outcome) {
+                          openArbitrageModal(
+                            game,
+                            market,
+                            outcome,
+                            game.selectedOutcome.type === '1' ? 0 :
+                              game.selectedOutcome.type === '2' ? 1 : 2
+                          );
+                        }
+                      }}
+                    >
+                      Calcola
+                    </button>
+                  </td>
+                  <td>{game.selectedOutcome.bookmaker}</td>
+                  <td className="odds-value">{game.selectedOutcome.odds}</td>
+                  <td>Betfair</td>
+                  <td className="exchange-odds">{game.selectedOutcome.betfairOdds}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <p className="no-data">No odds available.</p>
         )}
       </div>
-
-      {/* Aggiunta della nuova modale */}
+  
+      {/* Modal per l'arbitraggio */}
       {arbitrageModalData && (
         <ArbitrageModal
           isOpen={!!arbitrageModalData}

@@ -4,6 +4,7 @@ import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
 import { ChevronDown } from 'lucide-react';
 
+// VARIABILI
 const bookmakerMapping = {
   'Unibet': 'unibet',
   'LiveScore Bet (EU)': 'livescorebeteu',
@@ -45,15 +46,13 @@ const DEFAULT_ODDS_RANGE = { min: 1.01, max: 1000 };
 // Max partite per pagina
 const ITEMS_PER_PAGE = 10;
 
+// INZIO COMPONENTE
 const OddsList = () => {
   const [odds, setOdds] = useState([]);
   const [error, setError] = useState(null);
-  const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
   const [selectedBookmakers, setSelectedBookmakers] = useState(DEFAULT_BOOKMAKERS);
   const [cachedOdds, setCachedOdds] = useState({});
-  const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
   const [arbitrageModalData, setArbitrageModalData] = useState(null);
-  const [viewMode, setViewMode] = useState('major');
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: ''
@@ -70,40 +69,22 @@ const OddsList = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   //FETCH DELLE SCOMESSE
-  const fetchOdds = useCallback(async (sportKey) => {
+  const fetchOdds = useCallback(async () => {
     try {
-      if (viewMode === 'major') {
-        const response = await axios.get(`${API_BASE_URL}/odds/major-leagues`);
-        const currentTime = new Date();
-        const filteredOdds = response.data.filter(game => {
-          const eventTime = new Date(game.commence_time);
-          return eventTime > currentTime;
-        });
-        setOdds(filteredOdds);
-        setCachedOdds(prevState => ({
-          ...prevState,
-          majorLeagues: filteredOdds
-        }));
-      } else {
-        const currentTime = new Date();
-        const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
-          params: { sportKey }
-        });
-        const filteredOdds = response.data.filter(game => {
-          const eventTime = new Date(game.commence_time);
-          return eventTime > currentTime;
-        });
-        setOdds(filteredOdds);
-        setCachedOdds(prevState => ({
-          ...prevState,
-          [sportKey]: filteredOdds
-        }));
-      }
+      const response = await axios.get(`${API_BASE_URL}/odds/major-leagues`);
+      const currentTime = new Date();
+      const filteredOdds = response.data.filter(game => {
+        const eventTime = new Date(game.commence_time);
+        return eventTime > currentTime;
+      });
+      
+      setOdds(filteredOdds);
+      setCachedOdds(filteredOdds); // Ora la cache è un array semplice invece di un oggetto
     } catch (error) {
       setError('Error fetching odds data');
       console.error('Error fetching odds:', error);
     }
-  }, [viewMode]);
+  }, []);
   
   // Funzione per ottenere le quote della pagina corrente
   const getCurrentPageOdds = () => {
@@ -111,23 +92,6 @@ const OddsList = () => {
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return filteredOdds.slice(startIndex, endIndex);
   };
-
-  const ViewToggle = () => (
-    <div className="view-toggle">
-      <button
-        className={`toggle-btn ${viewMode === 'major' ? 'active' : ''}`}
-        onClick={() => setViewMode('major')}
-      >
-        Major Leagues
-      </button>
-      <button
-        className={`toggle-btn ${viewMode === 'upcoming' ? 'active' : ''}`}
-        onClick={() => setViewMode('upcoming')}
-      >
-        Upcoming Events
-      </button>
-    </div>
-  );
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -801,18 +765,12 @@ const OddsList = () => {
   };
 
   useEffect(() => {
-    if (viewMode === 'major') {
-      if (cachedOdds.majorLeagues) {
-        setOdds(cachedOdds.majorLeagues);
-      } else {
-        fetchOdds();
-      }
-    } else if (cachedOdds[selectedSport]) {
-      setOdds(cachedOdds[selectedSport]);
+    if (cachedOdds.length > 0) {
+      setOdds(cachedOdds);
     } else {
-      fetchOdds(selectedSport);
+      fetchOdds();
     }
-  }, [selectedSport, viewMode, cachedOdds, fetchOdds]);
+  }, [cachedOdds, fetchOdds]);
 
   // Calcola il totale delle pagine quando filteredOdds cambia
   useEffect(() => {
@@ -825,7 +783,6 @@ const OddsList = () => {
       {/* Sezione Quote */}
       <div className="upcoming-odds">
         <h2>ODDSMATCHER</h2>
-        <ViewToggle />
         <div className="filters-container">
           <DateRangeFilter />
           <RatingRangeFilter />
@@ -838,7 +795,7 @@ const OddsList = () => {
           />
         </div>
 
-        <h2>{viewMode === 'major' ? 'Major League' : competitionTitle}</h2>
+        <h2>Elenco Partite</h2>
         {error && <p className="error-message">{error}</p>}
 
         {/* Lista delle Quote in formato tabella */}
@@ -865,7 +822,7 @@ const OddsList = () => {
                     <td>
                       <div className="match-info">
                         <span className="league-name">
-                          {viewMode === 'major' ? getLeagueName(game.league) : game.sport_title}
+                          {getLeagueName(game.league)}
                         </span>
                         <span className="team-names">
                           {game.home_team} vs {game.away_team}

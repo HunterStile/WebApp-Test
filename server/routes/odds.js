@@ -3,8 +3,8 @@ const express = require('express');
 const axios = require('axios');
 const NodeCache = require('node-cache');
 const router = express.Router();
-
-const API_KEY = '934a387b72ea34f5a437446fdf4f5e9b';
+//const API_KEY = '934a387b72ea34f5a437446fdf4f5e9b';
+const API_KEY = 'b1fcc38dcdc480dd4de62b0e0e730f08';
 const BASE_URL = 'https://api.the-odds-api.com/v4/sports';
 const regions = 'eu';
 const markets = 'h2h';

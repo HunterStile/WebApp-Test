@@ -7,7 +7,7 @@ import Home from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
 import About from './components/About';
-import Marketplace from './components/Marketplace';
+import BetfairExchange from './components/BetfairExchange';
 import Inventory from './components/Inventory';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './components/Profile';
@@ -30,11 +30,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/oddslist" element={<OddsList />} />
+            <Route path="/betfairexchange" element={<BetfairExchange />} />
             
             {/* Rotte protette */}
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/casino" element={<Casino />} />

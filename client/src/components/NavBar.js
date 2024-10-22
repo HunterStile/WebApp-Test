@@ -16,6 +16,7 @@ function Navbar() {
         <li><Link to="/">Home</Link></li>
         <li><Link to="/about">About</Link></li>
         <li><Link to="/oddslist">OddsList</Link></li>
+        <li><Link to="/betfairexchange">Betfairtest</Link></li>
         {user ? (
           <>
             <li><Link to="/dashboard">Dashboard</Link></li>

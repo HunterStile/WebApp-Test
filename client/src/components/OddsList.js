@@ -333,39 +333,6 @@ const OddsList = () => {
             End date must be after start date
           </div>
         )}
-
-        {/* Optional: Add quick select buttons */}
-        <div className="quick-select-dates">
-          <button
-            onClick={() => {
-              const today = new Date();
-              const nextWeek = new Date();
-              nextWeek.setDate(today.getDate() + 7);
-
-              setDateRange({
-                startDate: today.toISOString().split('T')[0],
-                endDate: nextWeek.toISOString().split('T')[0]
-              });
-            }}
-          >
-            Next 7 Days
-          </button>
-
-          <button
-            onClick={() => {
-              const today = new Date();
-              const nextMonth = new Date();
-              nextMonth.setMonth(today.getMonth() + 1);
-
-              setDateRange({
-                startDate: today.toISOString().split('T')[0],
-                endDate: nextMonth.toISOString().split('T')[0]
-              });
-            }}
-          >
-            Next 30 Days
-          </button>
-        </div>
       </div>
     );
   };
@@ -449,25 +416,6 @@ const OddsList = () => {
             onClick={resetRatingRange}
           >
             Reset Rating Range
-          </button>
-        </div>
-
-        {/* Quick select buttons for common rating ranges */}
-        <div className="quick-select-ratings">
-          <button
-            onClick={() => setRatingRange({ min: 95, max: 200 })}
-          >
-            High Value (95%+)
-          </button>
-          <button
-            onClick={() => setRatingRange({ min: 90, max: 95 })}
-          >
-            Medium Value (90-95%)
-          </button>
-          <button
-            onClick={() => setRatingRange({ min: 0, max: 90 })}
-          >
-            Low Value (&lt;90%)
           </button>
         </div>
       </div>
@@ -558,23 +506,6 @@ const OddsList = () => {
           </button>
         </div>
 
-        <div className="quick-select-odds">
-          <button
-            onClick={() => setOddsRange({ min: 1.01, max: 2 })}
-          >
-            Low Odds (1.01-2.00)
-          </button>
-          <button
-            onClick={() => setOddsRange({ min: 2, max: 5 })}
-          >
-            Medium Odds (2.00-5.00)
-          </button>
-          <button
-            onClick={() => setOddsRange({ min: 5, max: 1000 })}
-          >
-            High Odds (5.00+)
-          </button>
-        </div>
       </div>
     );
   };

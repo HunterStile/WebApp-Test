@@ -110,14 +110,14 @@ router.get('/major-leagues', async (req, res) => {
       if (cachedData) {
         return { league, data: cachedData };
       }
-      
+
       const data = await fetchOddsData(league);
       cache.set(`oddsData_${league}`, data);
       return { league, data };
     });
 
     const results = await Promise.all(leaguePromises);
-    
+
     // Combina i risultati in un unico array
     const combinedOdds = results.flatMap(result => {
       return result.data.map(game => ({

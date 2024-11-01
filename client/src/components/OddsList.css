@@ -65,84 +65,10 @@
 .upcoming-odds {
   position: absolute;
   top: 73px;
+  width: calc(100% - 26rem);
   padding: 2rem;
   background: #fff;
   min-height: calc(100vh - 73px);
-}
-
-/* Search Filter autocomplete */
-.search-filter {
-  margin-bottom: 1.5rem;
-  width: 100%;
-}
-
-.search-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  color: #6b7280;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 2.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.clear-search-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.clear-search-btn:hover {
-  color: #4b5563;
-}
-
-.suggestions-container {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  margin-top: 0.25rem;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.suggestion-item {
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.suggestion-item:hover {
-  background-color: #f3f4f6;
 }
 
 /* Bookmaker filters */

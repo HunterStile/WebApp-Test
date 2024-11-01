@@ -20,7 +20,7 @@ app.use(cors({
 
 // Connessione a MongoDB
 //mongoose.connect('mongodb://localhost:27017/webapp', {
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webapp', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/WebApp-Test', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })

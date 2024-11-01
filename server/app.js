@@ -3,16 +3,24 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth'); // Importa le route di autenticazione
+const cors = require('cors'); // Aggiungi cors se non l'hai già fatto
 const tcRoutes = require('./routes/tc'); // Importa le rotte per TC
 const cryptoRoutes = require('./routes/crypto'); // Importa le rotte per le criptovalute
 const oddsRoutes = require('./routes/odds');
 
 require('dotenv').config();
 const app = express();
-const port = process.env.PORT || 3000; // Utilizza una variabile d'ambiente per la porta
+const port = process.env.PORT || 5000; // Utilizza una variabile d'ambiente per la porta
+
+// Abilita CORS
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
 // Connessione a MongoDB
-mongoose.connect('mongodb://localhost:27017/webapp', {
+//mongoose.connect('mongodb://localhost:27017/webapp', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webapp', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -37,6 +45,6 @@ app.get('*', (req, res) => {
 });
 
 // Avvio del server
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

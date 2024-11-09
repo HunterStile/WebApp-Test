@@ -14,7 +14,7 @@ const port = process.env.PORT || 5000; // Utilizza una variabile d'ambiente per 
 
 // Abilita CORS
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://192.168.56.10:3000',
   credentials: true
 }));
 

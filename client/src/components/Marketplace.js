@@ -6,6 +6,8 @@ import eggImages from '../utils/eggImages';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 import './Game.css';
+import eggImages from '../utils/eggImages';
+import dragonImages from '../utils/dragonImages';
 
 function Marketplace() {
   const { user, tcBalance, spendTc, fetchTcBalance } = useContext(AuthContext);

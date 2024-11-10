@@ -126,26 +126,99 @@ button {
 
 
 /* Stili per la home e zona mining */
-.home {
+.home-container {
   padding: 20px;
 }
 
-.dragon-list,
-.mining-zone {
-  margin: 20px 0;
-}
-
-.dragon-item,
-.mining-dragon-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
-  border-radius: 5px;
-}
-
-.mining-zone h3 {
-  margin-top: 20px;
+.title {
+  font-size: 24px;
   font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.auth-buttons {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+}
+
+.button-primary {
+  background-color: #3b82f6;
+}
+
+.button-secondary {
+  background-color: #10b981;
+}
+
+.button-danger {
+  background-color: #ef4444;
+}
+
+.button-gray {
+  background-color: #6b7280;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.dragon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dragon-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.dragon-image {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.dragon-info {
+  flex-grow: 1;
+}
+
+.dragon-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stats-box {
+  background-color: #f3f4f6;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.stats-item {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.stats-item:last-child {
+  margin-bottom: 0;
 }

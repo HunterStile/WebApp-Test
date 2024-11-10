@@ -6,8 +6,6 @@ import eggImages from '../utils/eggImages';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 import './Game.css';
-import eggImages from '../utils/eggImages';
-import dragonImages from '../utils/dragonImages';
 
 function Marketplace() {
   const { user, tcBalance, spendTc, fetchTcBalance } = useContext(AuthContext);
@@ -215,7 +213,8 @@ function Marketplace() {
 
   return (
     <div className="marketplace">
-      <h2>Marketplace</h2>
+      <h2 className="section-title">Marketplace</h2>
+      
       <div className="mystery-box">
         {!boxOpened ? (
           <>
@@ -226,18 +225,27 @@ function Marketplace() {
         ) : (
           <>
             <h3>You got a {result}!</h3>
-            {eggImage && <img src={eggImage} alt={result} />}
+            {result && (
+              <img 
+                src={eggImages[`${result.toLowerCase().replace(/ /g, '-')}.png`]} 
+                alt={result} 
+              />
+            )}
             <button onClick={resetBox}>Open a new Mystery Box</button>
           </>
         )}
       </div>
-  
-      <h3>Sell Eggs</h3>
+
+      <h3 className="section-title">Sell Eggs</h3>
       {Object.keys(inventory).some(eggType => inventory[eggType] > 0) ? (
         Object.keys(inventory)
           .filter(eggType => inventory[eggType] > 0)
           .map((eggType) => (
             <div className="egg-item" key={eggType}>
+              <img 
+                src={eggImages[`${eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
+                alt={eggType} 
+              />
               <span>{eggType} (x{inventory[eggType]})</span>
               <input
                 type="number"
@@ -254,49 +262,57 @@ function Marketplace() {
                 onChange={(e) => setSellPrice(e.target.value)}
                 placeholder="Set price"
               />
-              <button onClick={() => handleSellEgg(eggType)}>Sell</button>
+              <button className="sell" onClick={() => handleSellEgg(eggType)}>Sell</button>
             </div>
           ))
       ) : (
         <p>You have no eggs to sell.</p>
       )}
-  
-      <h3>Eggs for Sale</h3>
+
+      <h3 className="section-title">Eggs for Sale</h3>
       {Array.isArray(eggsForSale) && eggsForSale.length > 0 ? (
         eggsForSale.map((egg, index) => (
           <div className="egg-item" key={index}>
+            <img 
+              src={eggImages[`${egg.eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
+              alt={egg.eggType} 
+            />
             <span>{egg.eggType}</span>
             <span> - {egg.totalQuantity} available</span>
             <span> - Average Price: {egg.averagePrice ? egg.averagePrice.toFixed(2) : 'N/A'} TC</span>
             <span> - Floor Price: {egg.floorPrice ? egg.floorPrice.toFixed(2) : 'N/A'} TC</span>
-            <button onClick={() => handleOpenModal(egg)}>Anteprima</button>
+            <button className="preview" onClick={() => handleOpenModal(egg)}>Preview</button>
           </div>
         ))
       ) : (
         <p>No eggs for sale.</p>
       )}
-  
-      <h3>My Eggs for Sale</h3>
+
+      <h3 className="section-title">My Eggs for Sale</h3>
       {Array.isArray(eggsForSaleUser) && eggsForSaleUser.length > 0 ? (
         eggsForSaleUser.map((egg, index) => (
           <div className="egg-item" key={index}>
+            <img 
+              src={eggImages[`${egg.eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
+              alt={egg.eggType} 
+            />
             <span>{egg.eggType}</span>
             <span> - {egg.quantity} available</span>
             <span> - Price: {egg.price ? egg.price.toFixed(2) : 'N/A'} TC</span>
-            <button onClick={() => handleRemoveEggSale(egg.eggType)}>Remove</button>
+            <button className="remove" onClick={() => handleRemoveEggSale(egg.eggType)}>Remove</button>
           </div>
         ))
       ) : (
         <p>No eggs for sale.</p>
       )}
-  
-      {/* Modale */}
-      <div className="modal">
+
+      {/* Modal */}
+      <div className={`modal ${selectedEgg ? 'active' : ''}`}>
         <div className="modal-content">
           <span className="close" onClick={handleCloseModal}>&times;</span>
           {selectedEgg && (
             <div>
-              <h3>Compra Uova di tipo: {selectedEgg.eggType}</h3>
+              <h3>Buy Eggs: {selectedEgg.eggType}</h3>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{ width: '60%' }}>
                   <h4>Items for Sale:</h4>
@@ -325,7 +341,10 @@ function Marketplace() {
                 </div>
                 <div className="selected-egg-details">
                   <h4>Selected Egg Details:</h4>
-                  {eggImage && <img src={eggImage} alt={selectedEgg.eggType} />}
+                  <img 
+                    src={eggImages[`${selectedEgg.eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
+                    alt={selectedEgg.eggType} 
+                  />
                   <div>
                     <label>Quantity: </label>
                     <input
@@ -337,10 +356,10 @@ function Marketplace() {
                     />
                   </div>
                   <div>
-                    <label>Price: </label>
+                    <label>Total Price: </label>
                     <span>{(selectedEgg.floorPrice * quantity).toFixed(2)} TC</span>
                   </div>
-                  <button onClick={handleBuy}>Buy</button>
+                  <button onClick={handleBuy}>Buy Now</button>
                 </div>
               </div>
             </div>
@@ -349,6 +368,6 @@ function Marketplace() {
       </div>
     </div>
   );
-}
+};
 
 export default Marketplace;

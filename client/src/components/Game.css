@@ -1,22 +1,6 @@
 /* Game.css */
 
-/* Container del Marketplace */
-.marketplace {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-
 /* Titoli e bottoni base */
-.marketplace h2 {
-  text-align: center;
-}
-
-.marketplace h3 {
-  margin: 10px 0;
-}
-
 button {
   padding: 5px 10px;
   margin: 5px 0;
@@ -38,90 +22,79 @@ button {
   cursor: pointer;
 }
 
-/* Mystery Box */
-.mystery-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.mystery-box img {
-  width: 200px;
-  height: 200px;
-}
-
-.sell-eggs,
-.eggs-for-sale,
-.my-eggs-for-sale {
-  margin-top: 20px;
-}
-
-.egg-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-/* Input fields */
-.egg-item input {
-  margin: 0 5px;
-  padding: 3px;
-}
-
 /* Modal */
 .modal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal.active {
+  display: block;
 }
 
 .modal-content {
+  position: relative;
   background-color: white;
-  margin: 15% auto;
+  margin: 10% auto;
   padding: 20px;
-  border: 1px solid #888;
   width: 80%;
-  max-width: 400px;
+  max-width: 800px;
+  border-radius: 8px;
 }
 
-
-.modal-content .close {
-  float: right;
+.close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 24px;
   cursor: pointer;
 }
 
-.modal-content table {
+.selected-egg-details {
+  width: 35%;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.selected-egg-details img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin: 10px 0;
+}
+
+.selected-egg-details button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 15px;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 10px;
 }
 
-.modal-content th,
-.modal-content td {
-  border: 1px solid #ddd;
+th, td {
   padding: 8px;
-}
-
-.modal-content th {
-  background-color: #f2f2f2;
   text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
-.modal-content img {
-  width: 50px;
-  height: 50px;
-}
-
-.selected-egg-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+th {
+  background-color: #f5f5f5;
 }
 
 
@@ -221,4 +194,78 @@ button {
 
 .stats-item:last-child {
   margin-bottom: 0;
+}
+
+/*Marketplace*/
+.marketplace {
+  padding: 20px;
+}
+
+.mystery-box {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.mystery-box img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  margin: 15px 0;
+}
+
+.mystery-box button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.egg-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.egg-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.egg-item input[type="number"] {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.egg-item button {
+  padding: 5px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.egg-item button.sell {
+  background-color: #2196F3;
+  color: white;
+}
+
+.egg-item button.remove {
+  background-color: #f44336;
+  color: white;
+}
+
+.egg-item button.preview {
+  background-color: #9c27b0;
+  color: white;
 }

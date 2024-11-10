@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
+import dragonImages from '../utils/dragonImages';
 
 function Home() {
   const { user } = useContext(AuthContext);
@@ -146,62 +147,121 @@ function Home() {
   };
 
   return (
-    <div>
-      <h1>Home Page</h1>
+    <div className="home-container">
+      <h1 className="title">Home Page</h1>
+      
       {!user && (
-        <>
+        <div className="auth-buttons">
           <Link to="/register">
-            <button>Register</button>
+            <button className="button button-primary">Register</button>
           </Link>
           <Link to="/login">
-            <button>Login</button>
+            <button className="button button-secondary">Login</button>
           </Link>
-        </>
+        </div>
       )}
+      
       <Link to="/about">
-        <button>Go to About Page</button>
+        <button className="button button-gray">Go to About Page</button>
       </Link>
 
       {user && (
-        <>
-          <h2>Your Dragons</h2>
-          {dragons.length > 0 ? (
-            dragons.map(dragon => (
-              <div key={dragon._id}>
-                <span>{dragon.name} - Power: {formatMiningPower(dragon.miningPower)}, Bonus: {dragon.bonus}%</span>
-                <button onClick={() => addToMiningZone(dragon._id)}>
-                  Add to Mining Zone
-                </button>
+        <div>
+          <section className="section">
+            <h2 className="section-title">Your Dragons</h2>
+            {dragons.length > 0 ? (
+              <div className="dragon-list">
+                {dragons.map(dragon => {
+                  const imageName = dragon.name
+                    ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
+                    : 'default-dragon.png';
+                  const image = dragonImages[imageName];
+                  
+                  return (
+                    <div key={dragon._id} className="dragon-card">
+                      <img 
+                        src={image} 
+                        alt={dragon.name || 'Unknown Dragon'} 
+                        className="dragon-image"
+                      />
+                      <div className="dragon-info">
+                        <p className="dragon-name">{dragon.name}</p>
+                        <p>Power: {formatMiningPower(dragon.miningPower)}</p>
+                        <p>Bonus: {dragon.bonus}%</p>
+                      </div>
+                      <button 
+                        onClick={() => addToMiningZone(dragon._id)}
+                        className="button button-primary"
+                      >
+                        Add to Mining Zone
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
-            ))
-          ) : (
-            <p>No dragons available.</p>
-          )}
+            ) : (
+              <p>No dragons available.</p>
+            )}
+          </section>
 
-          <h2>Mining Zone</h2>
-          {miningZone.length > 0 ? (
-            <>
-              {miningZone.map(dragon => (
-                <div key={dragon._id}>
-                  <span>{dragon.name} - Mining Power: {formatMiningPower(dragon.miningPower)}, Bonus: {dragon.bonus}%</span>
-                  <button onClick={() => removeFromMiningZone(dragon._id)}>Remove from Mining Zone</button>
+          <section className="section">
+            <h2 className="section-title">Mining Zone</h2>
+            {miningZone.length > 0 ? (
+              <div className="dragon-list">
+                {miningZone.map(dragon => {
+                  const imageName = dragon.name
+                    ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
+                    : 'default-dragon.png';
+                  const image = dragonImages[imageName];
+                  
+                  return (
+                    <div key={dragon._id} className="dragon-card">
+                      <img 
+                        src={image} 
+                        alt={dragon.name || 'Unknown Dragon'} 
+                        className="dragon-image"
+                      />
+                      <div className="dragon-info">
+                        <p className="dragon-name">{dragon.name}</p>
+                        <p>Mining Power: {formatMiningPower(dragon.miningPower)}</p>
+                        <p>Bonus: {dragon.bonus}%</p>
+                      </div>
+                      <button 
+                        onClick={() => removeFromMiningZone(dragon._id)}
+                        className="button button-danger"
+                      >
+                        Remove from Mining Zone
+                      </button>
+                    </div>
+                  );
+                })}
+                
+                <div className="stats-box">
+                  <p className="stats-item">
+                    Total Mining Power: {formatMiningPower(totalMiningPower)}
+                  </p>
                 </div>
-              ))}
-              <h3>Total Mining Power: {formatMiningPower(totalMiningPower)}</h3>
-            </>
-          ) : (
-            <p>No dragons in the mining zone.</p>
-          )}
+              </div>
+            ) : (
+              <p>No dragons in the mining zone.</p>
+            )}
+          </section>
 
-          <h3>Total Server Mining Power: {formatMiningPower(totalServerMiningPower)}</h3>
-
-          {/* Aggiungi il timer per la distribuzione delle ricompense */}
-          <h3>Next Rewards in: {Math.floor(timer / 60)}:{('0' + (timer % 60)).slice(-2)}</h3>
-          <h3>Estimated Rewards: {estimatedRewards.tc} TC, {estimatedRewards.satoshi} Satoshi</h3>
-        </>
+          <div className="stats-box">
+            <p className="stats-item">
+              Total Server Mining Power: {formatMiningPower(totalServerMiningPower)}
+            </p>
+            <p className="stats-item">
+              Next Rewards in: {Math.floor(timer / 60)}:{('0' + (timer % 60)).slice(-2)}
+            </p>
+            <p className="stats-item">
+              Estimated Rewards: {estimatedRewards.tc} TC, {estimatedRewards.satoshi} Satoshi
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );
-}
+};
 
 export default Home;

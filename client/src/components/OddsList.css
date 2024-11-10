@@ -1,8 +1,11 @@
 /* Main container layout */
 .container-odds {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  width: 100%;
   position: relative;
+  padding-top: 73px; /* Height of the header */
 }
 
 /* Available sports section */
@@ -63,11 +66,12 @@
 
 /* Upcoming odds section */
 .upcoming-odds {
-  position: absolute;
-  top: 73px;
-  padding: 2rem;
-  background: #fff;
-  min-height: calc(100vh - 73px);
+  background: #303030;
+  flex: 1;
+  width: 100%;
+  padding: 0.6rem;
+  overflow-y: auto;
+  height: calc(100vh - 73px);
 }
 
 /* Search Filter autocomplete */
@@ -92,7 +96,7 @@
 .search-input {
   width: 100%;
   padding: 0.75rem 2.5rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #A3A3A3;
   border-radius: 0.375rem;
   font-size: 1rem;
   outline: none;
@@ -122,7 +126,7 @@
 
 .suggestions-container {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #A3A3A3;
   border-radius: .375rem;
   box-shadow: 0 4px 6px -1px #0000001a;
   margin-top: .25rem;
@@ -198,7 +202,7 @@
 .dropdown-menu {
   position: absolute;
   width: 100%;
-  background-color: #f5f5f5;
+  background-color: #A3A3A3;
   border: 1px solid #e2e8f0;
   border-radius: 0.375rem;
   /* Modifichiamo il posizionamento per restare nel contesto */
@@ -255,7 +259,7 @@
 
 .date-filter {
   padding: 1.5rem;
-  background: #f5f5f5;
+  background: #A3A3A3;
   border-radius: 8px;
 }
 
@@ -338,13 +342,14 @@
 
 .filters-container {
   display: flex;
-  flex-direction: row;
-  gap: 1.5rem;
-  margin: 1rem 0;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 .rating-filter {
-  background: #f5f5f5;
+  background: #A3A3A3;
   padding: 1.5rem;
   border-radius: 8px;
 }
@@ -449,7 +454,7 @@
 /* Odds Filters */
 
 .odds-filter {
-  background-color: #f5f5f5;
+  background-color: #A3A3A3;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -530,14 +535,14 @@
 /* Table Layout */
 .odds-table {
   width: 100%;
-  background: white;
+  margin-top: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 1.5rem;
+  border-collapse: collapse;
 }
 
 .odds-table thead th {
-  background-color: #f8f9fa;
   padding: 1rem;
   font-weight: 600;
   text-align: left;
@@ -775,7 +780,7 @@
 
 .bookmaker-odds-single {
   padding: 1rem;
-  background-color: #f5f5f5;
+  background-color: #A3A3A3;
   border-radius: 4px;
   margin-top: 0.5rem;
 }

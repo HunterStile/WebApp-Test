@@ -1,23 +1,27 @@
 {
   "files": {
-    "main.css": "/static/css/main.4d0b1458.css",
-    "main.js": "/static/js/main.a1981f9f.js",
+    "main.css": "/static/css/main.8cca413a.css",
+    "main.js": "/static/js/main.366ec022.js",
     "static/js/453.419a5d54.chunk.js": "/static/js/453.419a5d54.chunk.js",
     "static/media/fire-dragon.png": "/static/media/fire-dragon.2bd09addfcbbccb4f0d4.png",
     "static/media/water-dragon.png": "/static/media/water-dragon.692b8517e2b459462148.png",
     "static/media/grass-dragon.png": "/static/media/grass-dragon.63c197b0aa0ecb43f836.png",
+    "static/media/epic-dragon.png": "/static/media/epic-dragon.60fa225646a259d96bda.png",
+    "static/media/uncommon-dragon.png": "/static/media/uncommon-dragon.68e640e6e1aa9eaaebd6.png",
+    "static/media/legendary-dragon.png": "/static/media/legendary-dragon.c9e7e72c0029ce3d2992.png",
+    "static/media/rare-dragon.png": "/static/media/rare-dragon.d41c5219da9fa27ef15a.png",
     "static/media/mystery-box.png": "/static/media/mystery-box.ad7c42aa4047a4ef8db0.png",
     "static/media/epic-egg.png": "/static/media/epic-egg.17f7317b848758a4a860.png",
     "static/media/uncommon-egg.png": "/static/media/uncommon-egg.285ca968fe5ad1a9030d.png",
     "static/media/common-egg.png": "/static/media/common-egg.edc62e6d8d11468f1085.png",
     "static/media/legendary-egg.png": "/static/media/legendary-egg.21f28f1224a367f707cd.png",
     "index.html": "/index.html",
-    "main.4d0b1458.css.map": "/static/css/main.4d0b1458.css.map",
-    "main.a1981f9f.js.map": "/static/js/main.a1981f9f.js.map",
+    "main.8cca413a.css.map": "/static/css/main.8cca413a.css.map",
+    "main.366ec022.js.map": "/static/js/main.366ec022.js.map",
     "453.419a5d54.chunk.js.map": "/static/js/453.419a5d54.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.4d0b1458.css",
-    "static/js/main.a1981f9f.js"
+    "static/css/main.8cca413a.css",
+    "static/js/main.366ec022.js"
   ]
 }

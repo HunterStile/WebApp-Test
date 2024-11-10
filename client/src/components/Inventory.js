@@ -130,75 +130,113 @@ function Inventory() {
   };
 
   return (
-    <div>
-      <h2>Your Egg Inventory</h2>
-      {message && <p>{message}</p>}
-      <h3>Eggs in Inventory</h3>
-      {Object.keys(eggs).length > 0 ? (
-        <ul>
-          {Object.entries(eggs).map(([eggType, count]) => {
-            const imageName = `${eggType.toLowerCase().replace(/ /g, '-')}.png`;
-            const image = eggImages[imageName];
-            return (
-              <li key={eggType}>
-                <img src={image} alt={eggType} style={{ width: '50px', height: '50px' }} />
-                {eggType}: {count}
-                <button onClick={() => handleIncubate(eggType)} disabled={count <= 0}>
-                  Incubate
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p>You have no eggs in your inventory.</p>
-      )}
-
-      <h3>Incubated Eggs</h3>
-      {incubators.length > 0 ? (
-        <ul>
-          {incubators.map((incubator, index) => {
-            const { eggType, incubationEndTime, timeLeft } = incubator;
-            const imageName = `${eggType.toLowerCase().replace(/ /g, '-')}.png`;
-            const image = eggImages[imageName];
-            const isReady = timeLeft?.hours <= 0 && timeLeft?.minutes <= 0 && timeLeft?.seconds <= 0;
-
-            return (
-              <li key={index}>
-                <img src={image} alt={eggType} style={{ width: '50px', height: '50px' }} />
-                {eggType}: {isReady ? 'Ready to Open' : `Time Left: ${timeLeft?.hours}h ${timeLeft?.minutes}m ${timeLeft?.seconds}s`}
-                <button onClick={() => handleOpen(index)} disabled={!isReady}>
-                  Open
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p>No eggs are currently incubating.</p>
-      )}
-      <h3>Your Dragons</h3>
-      {dragons.length > 0 ? (
-        <ul>
-          {dragons.map((dragon, index) => {
-            const imageName = dragon.name
-              ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
-              : 'default-dragon.png'; // Usa un'immagine di default se `dragon.name` è undefined
-            const image = dragonImages[imageName];
-            return (
-              <li key={index}>
-                <img src={image} alt={dragon.name || 'Unknown Dragon'} style={{ width: '200px', height: '200px' }} />
-                <p>Name: {dragon.name}</p>
-                <p>Resistance: {dragon.resistance}</p>
-                <p>Mining Power: {dragon.miningPower}</p>
-                <p>bonus: {dragon.bonus}</p>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p>You have no dragons.</p>
-      )}
+    <div className="inventory-container">
+      <h2 className="inventory-title">Your Egg Inventory</h2>
+      {message && <p className="message">{message}</p>}
+      
+      <div className="inventory-section">
+        <h3 className="section-heading">Eggs in Inventory</h3>
+        {Object.keys(eggs).length > 0 ? (
+          <div className="egg-list">
+            {Object.entries(eggs).map(([eggType, count]) => {
+              const imageName = `${eggType.toLowerCase().replace(/ /g, '-')}.png`;
+              const image = eggImages[imageName];
+              return (
+                <div key={eggType} className="egg-list-item">
+                  <img src={image} alt={eggType} className="egg-image" />
+                  <div className="egg-info">
+                    <span className="egg-name">{eggType}</span>
+                    <span className="egg-count">Quantity: {count}</span>
+                  </div>
+                  <button 
+                    className="incubate-button"
+                    onClick={() => handleIncubate(eggType)} 
+                    disabled={count <= 0}
+                  >
+                    Incubate
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="empty-state">You have no eggs in your inventory.</p>
+        )}
+      </div>
+  
+      <div className="inventory-section">
+        <h3 className="section-heading">Incubated Eggs</h3>
+        {incubators.length > 0 ? (
+          <div className="incubator-list">
+            {incubators.map((incubator, index) => {
+              const { eggType, timeLeft } = incubator;
+              const imageName = `${eggType.toLowerCase().replace(/ /g, '-')}.png`;
+              const image = eggImages[imageName];
+              const isReady = timeLeft?.hours <= 0 && timeLeft?.minutes <= 0 && timeLeft?.seconds <= 0;
+  
+              return (
+                <div key={index} className="incubator-item">
+                  <img src={image} alt={eggType} className="egg-image" />
+                  <div className="egg-info">
+                    <span className="egg-name">{eggType}</span>
+                    <span className="timer">
+                      {isReady ? 'Ready to Open' : `Time Left: ${timeLeft?.hours}h ${timeLeft?.minutes}m ${timeLeft?.seconds}s`}
+                    </span>
+                  </div>
+                  <button 
+                    className="open-button"
+                    onClick={() => handleOpen(index)} 
+                    disabled={!isReady}
+                  >
+                    Open
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="empty-state">No eggs are currently incubating.</p>
+        )}
+      </div>
+  
+      <div className="inventory-section">
+        <h3 className="section-heading">Your Dragons</h3>
+        {dragons.length > 0 ? (
+          <div className="dragon-inventory-list">
+            {dragons.map((dragon, index) => {
+              const imageName = dragon.name
+                ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
+                : 'default-dragon.png';
+              const image = dragonImages[imageName];
+              return (
+                <div key={index} className="dragon-inventory-card">
+                  <img src={image} alt={dragon.name || 'Unknown Dragon'} className="dragon-inventory-image" />
+                  <div className="dragon-inventory-stats">
+                    <div className="dragon-stat">
+                      <span className="stat-label">Name:</span>
+                      <span className="stat-value">{dragon.name}</span>
+                    </div>
+                    <div className="dragon-stat">
+                      <span className="stat-label">Resistance:</span>
+                      <span className="stat-value">{dragon.resistance}</span>
+                    </div>
+                    <div className="dragon-stat">
+                      <span className="stat-label">Mining Power:</span>
+                      <span className="stat-value">{dragon.miningPower}</span>
+                    </div>
+                    <div className="dragon-stat">
+                      <span className="stat-label">Bonus:</span>
+                      <span className="stat-value">{dragon.bonus}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="empty-state">You have no dragons.</p>
+        )}
+      </div>
     </div>
   );
 }

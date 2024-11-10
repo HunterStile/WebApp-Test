@@ -700,7 +700,7 @@ const OddsList = () => {
 
     return (
       <div className="search-filter">
-        <h3>Search Matches</h3>
+        <h3>Search Matches!</h3>
         <div className="search-input-container">
           <Search className="search-icon" size={20} />
           <input

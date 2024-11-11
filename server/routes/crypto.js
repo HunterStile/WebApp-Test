@@ -17,7 +17,7 @@ const API_BASE_URL = 'https://www.talkchain.xyz/api/crypto/webhook';
 
 // Funzione aggiornata per crittografare la chiave privata
 function encryptPrivateKey(privateKey) {
-  const secret = process.env.SECRET_KEY || '4fb405f1f8b4e1e669c4c7b10d8f0e6aa625a5146738f0591eccc401e16b75c4';
+  const secret = process.env.SECRET_KEY;
   const iv = crypto.randomBytes(16);  // Inizializzazione IV per AES
   const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(secret, 'hex'), iv);
   let encrypted = cipher.update(privateKey, 'utf8', 'hex');
@@ -27,7 +27,7 @@ function encryptPrivateKey(privateKey) {
 
 // Funzione aggiornata per decrittare la chiave privata
 function decryptPrivateKey(encryptedPrivateKey) {
-  const secret = process.env.SECRET_KEY || '4fb405f1f8b4e1e669c4c7b10d8f0e6aa625a5146738f0591eccc401e16b75c4';
+  const secret = process.env.SECRET_KEY;
   const parts = encryptedPrivateKey.split(':');
   const iv = Buffer.from(parts[0], 'hex');
   const encryptedText = Buffer.from(parts[1], 'hex');
@@ -73,7 +73,7 @@ router.post('/create-address', async (req, res) => {
     }
 
     res.json({ btcAddress });
-    console.log('Secret Key:', process.env.SECRET_KEY || '4fb405f1f8b4e1e669c4c7b10d8f0e6aa625a5146738f0591eccc401e16b75c4');
+    console.log('Secret Key:', process.env.SECRET_KEY);
   } catch (error) {
     console.error('Error creating BTC address:', error.message);
     res.status(500).send('Error creating BTC address');

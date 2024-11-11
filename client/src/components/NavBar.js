@@ -2,10 +2,27 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import './NavBar.css'; // Assicurati di importare il CSS
+import './NavBar.css';
 
 function Navbar() {
   const { user, tcBalance, btcBalance, logout } = useContext(AuthContext);
+
+  // Funzione per formattare il saldo TC con massimo 6 decimali
+  const formatTcBalance = (balance) => {
+    return Number(balance).toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 6
+    });
+  };
+
+  // Funzione per convertire i satoshi in BTC e formattare con massimo 8 decimali
+  const formatBtcBalance = (satoshiBalance) => {
+    const btcValue = satoshiBalance / 100000000; // Converti satoshi in BTC
+    return btcValue.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 8
+    });
+  };
 
   return (
     <nav className="navbar">
@@ -24,8 +41,8 @@ function Navbar() {
             <li><Link to="/profile">Profile</Link></li>
             <li><Link to="/casino">Casino</Link></li>
             <li>Welcome, {user}</li>
-            <li>Your TC Balance: {tcBalance}</li>
-            <li>Your BTC Balance: {btcBalance} Satoshi</li> {/* Aggiungi il saldo BTC */}
+            <li>TC Balance: {formatTcBalance(tcBalance)}</li>
+            <li>BTC Balance: {formatBtcBalance(btcBalance)} BTC</li>
             <li><button className="logout-button" onClick={logout}>Logout</button></li>
           </>
         ) : (

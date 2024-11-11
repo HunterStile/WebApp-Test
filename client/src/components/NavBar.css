@@ -8,7 +8,7 @@
 }
   
   .navbar-logo a {
-    color: #fff;
+    color: rgb(255, 81, 0);
     text-decoration: none;
     font-size: 24px;
   }
@@ -20,10 +20,11 @@
   
   .navbar-links li {
     margin: 0 10px;
+    color: blue;
   }
   
   .navbar-links a {
-    color: blue;
+    color: rgb(15, 123, 211);
     text-decoration: none;
   }
   

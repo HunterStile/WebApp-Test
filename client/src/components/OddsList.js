@@ -246,29 +246,31 @@ const OddsList = () => {
       <div className="date-filter">
         <h3>Filter by Date Range</h3>
         <div className="date-range-inputs">
-          <div className="date-input-group">
-            <label htmlFor="startDate">From:</label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={dateRange.startDate}
-              min={today}
-              max={dateRange.endDate || undefined}
-              onChange={handleDateChange}
-            />
-          </div>
+          <div className="date-inputs-wrapper">
+            <div className="date-input-group">
+              <label htmlFor="startDate">From:</label>
+              <input
+                type="date"
+                id="startDate"
+                name="startDate"
+                value={dateRange.startDate}
+                min={today}
+                max={dateRange.endDate || undefined}
+                onChange={handleDateChange}
+              />
+            </div>
 
-          <div className="date-input-group">
-            <label htmlFor="endDate">To:</label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={dateRange.endDate}
-              min={dateRange.startDate || today}
-              onChange={handleDateChange}
-            />
+            <div className="date-input-group">
+              <label htmlFor="endDate">To:</label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                value={dateRange.endDate}
+                min={dateRange.startDate || today}
+                onChange={handleDateChange}
+              />
+            </div>
           </div>
 
           {(dateRange.startDate || dateRange.endDate) && (

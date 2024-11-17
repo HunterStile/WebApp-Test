@@ -11,7 +11,7 @@
   display: block;
 }
 
-/*css di base*/
+/* CSS di base */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: 1.6;
@@ -38,12 +38,102 @@ h3 {
 }
 
 input[type="number"] {
-  background-color:#d5d5d5
+  background-color: #d5d5d5;
 }
 
 input.search-input {
-  background-color:#d5d5d5
+  background-color: #d5d5d5;
 }
+
+/* Regole responsive aggiunte */
+
+/* Imposta box-sizing universale */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Previene overflow orizzontale */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Rende le immagini responsive */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Rende le tabelle responsive */
+table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+/* Media query per schermi mobili */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  /* Riduce i margini e i padding su mobile */
+  h1, h2, h3 {
+    margin: 15px 0;
+  }
+
+  /* Adatta input e form per mobile */
+  input, 
+  select, 
+  textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Sistema il font-size per una migliore leggibilità su mobile */
+  body {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 18px;
+  }
+}
+
+/* Media query per schermi molto piccoli */
+@media screen and (max-width: 480px) {
+  body {
+    padding: 8px;
+  }
+
+  /* Ulteriori riduzioni per schermi molto piccoli */
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+}
+
 /*applicazione per guida*/
 code {
   background-color: #2e3440;

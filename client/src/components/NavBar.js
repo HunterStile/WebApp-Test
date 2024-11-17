@@ -61,7 +61,6 @@ function Navbar() {
           ) : (
             <>
               <li><Link to="/login2">Login</Link></li>
-              <li><Link to="/register">Register</Link></li>
             </>
           )}
         </ul>

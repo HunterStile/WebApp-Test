@@ -1,31 +1,36 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import API_BASE_URL from '../config'; // Importa l'URL di base
+import API_BASE_URL from '../config';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(localStorage.getItem('user') || null);
   const [tcBalance, setTcBalance] = useState(0);
-  const [btcBalance, setBtcBalance] = useState(0); // Aggiungi il saldo BTC
+  const [btcBalance, setBtcBalance] = useState(0);
 
-  // Funzione per il login dell'utente
+  // Funzione per effettuare il login
   const login = async (username, password) => {
     try {
-      await axios.post(`${API_BASE_URL}/auth/login`, { username, password }); // Usa i backticks qui
+      // Chiamata all'API per il login
+      await axios.post(`${API_BASE_URL}/auth/login`, { username, password });
+      // Imposta l'utente nel contesto e nel localStorage
       setUser(username);
+      localStorage.setItem('user', username);
+      // Aggiorna i bilanci
       fetchTcBalance(username);
-      fetchBtcBalance(username); // Aggiungi la funzione per aggiornare il saldo BTC
+      fetchBtcBalance(username);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login fallito:', error);
     }
   };
 
-  // Funzione per il logout dell'utente
+  // Funzione per effettuare il logout
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
     setTcBalance(0);
-    setBtcBalance(0); // Resetta il saldo BTC al logout
+    setBtcBalance(0);
   };
 
   // Funzione per spendere TC
@@ -49,19 +54,19 @@ export const AuthProvider = ({ children }) => {
         const response = await axios.get(`${API_BASE_URL}/tc/balance?username=${username}`);
         setTcBalance(response.data.tcBalance);
       } catch (error) {
-        console.error('Error fetching TC balance:', error);
+        console.error('Errore nel recupero del saldo TC:', error);
       }
     }
   };
 
-  // Funzione per aggiornare il bilancio BTC dal server
+  // Funzione per ottenere il saldo BTC dal server
   const fetchBtcBalance = async (username = user) => {
     if (username) {
       try {
         const response = await axios.get(`${API_BASE_URL}/crypto/balance/${username}`);
         setBtcBalance(response.data.balance);
       } catch (error) {
-        console.error('Error fetching BTC balance:', error);
+        console.error('Errore nel recupero del saldo BTC:', error);
       }
     }
   };

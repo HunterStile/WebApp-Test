@@ -28,7 +28,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/login2" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route path="/oddslist" element={<OddsList />} />
             
             {/* Rotte protette */}

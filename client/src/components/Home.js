@@ -155,7 +155,7 @@ function Home() {
           <Link to="/register">
             <button className="button button-primary">Register</button>
           </Link>
-          <Link to="/login">
+          <Link to="/login2">
             <button className="button button-secondary">Login</button>
           </Link>
         </div>

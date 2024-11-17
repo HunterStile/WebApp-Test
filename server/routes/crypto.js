@@ -13,7 +13,7 @@ const CREATE_ADDRESS_URL = `${BASE_URL}/addrs?token=cdd434bbb074468ab1fa2bc2956a
 const SEND_TX_URL = `${BASE_URL}/txs/send?token=cdd434bbb074468ab1fa2bc2956ac0e4`;
 const WEBHOOK_URL = `${BASE_URL}/hooks?token=cdd434bbb074468ab1fa2bc2956ac0e4`;
 const FAUCET_URL = 'https://api.blockcypher.com/v1/bcy/test/faucet?token=cdd434bbb074468ab1fa2bc2956ac0e4';
-const API_BASE_URL = 'https://87ba-82-57-91-108.ngrok-free.app/api/crypto/webhook';
+const API_BASE_URL = 'https://www.talkchain.xyz/api/crypto/webhook';
 
 // Funzione aggiornata per crittografare la chiave privata
 function encryptPrivateKey(privateKey) {

@@ -4,6 +4,10 @@ import { Trophy, RotateCcw } from "lucide-react";
 const FlappyBeard = () => {
   // ==================== CONFIGURAZIONE DEL GIOCO ====================
   
+  // DIMENSIONI DEL GIOCO
+  const GAME_WIDTH = 800;     // Larghezza fissa del gioco
+  const GAME_HEIGHT = 600;    // Altezza fissa del gioco
+  
   // FISICA DEL GIOCO
   const GRAVITY = 0.6;        // Forza di gravità (più alto = cade più velocemente)
   const JUMP_FORCE = -12;     // Forza del salto (più negativo = salta più in alto)
@@ -13,8 +17,8 @@ const FlappyBeard = () => {
   // DIMENSIONI DEL GIOCATORE
   const BIRD_WIDTH = 40;      // Larghezza del personaggio
   const BIRD_HEIGHT = 40;     // Altezza del personaggio
-  const BIRD_START_Y = 150;   // Posizione verticale iniziale
-  const BIRD_X_POSITION = 4;  // Posizione orizzontale (il gioco divide la width per questo numero)
+  const BIRD_START_Y = GAME_HEIGHT / 4; // Posizionato a 1/4 dell'altezza del gioco
+  const BIRD_X_POSITION = 8;  // Posizione orizzontale (il gioco divide la width per questo numero)
   
   // CONFIGURAZIONE DELLE PIPE (OSTACOLI)
   const INITIAL_PIPE_GAP = 250;     // Distanza verticale iniziale tra le pipe
@@ -87,7 +91,7 @@ const FlappyBeard = () => {
         // Bird physics
         setBirdY(prevY => {
           const newY = prevY + birdVelocity;
-          return Math.max(0, Math.min(newY, window.innerHeight - BIRD_HEIGHT));
+          return Math.max(0, Math.min(newY, GAME_HEIGHT - BIRD_HEIGHT));
         });
         setBirdVelocity(prevVelocity => prevVelocity + GRAVITY);
         
@@ -97,13 +101,13 @@ const FlappyBeard = () => {
         // Spawn pipes at current interval
         if (frameCountRef.current - lastPipeSpawnRef.current >= currentSpawnInterval) {
           const minY = currentPipeGap + 50;
-          const maxY = window.innerHeight - currentPipeGap - 50;
+          const maxY = GAME_HEIGHT - currentPipeGap - 50;
           const newPipeY = Math.floor(Math.random() * (maxY - minY) + minY);
           
           setPipes(prevPipes => [
             ...prevPipes,
             { 
-              x: window.innerWidth, 
+              x: GAME_WIDTH,
               y: newPipeY, 
               scored: false,
               width: currentPipeWidth,
@@ -126,7 +130,7 @@ const FlappyBeard = () => {
 
         // Collision detection
         const birdRect = {
-          x: window.innerWidth / BIRD_X_POSITION,
+          x: GAME_WIDTH / BIRD_X_POSITION,
           y: birdY,
           width: BIRD_WIDTH,
           height: BIRD_HEIGHT
@@ -144,20 +148,20 @@ const FlappyBeard = () => {
             x: pipe.x,
             y: pipe.y + pipe.gap / 2,
             width: pipe.width,
-            height: window.innerHeight - (pipe.y + pipe.gap / 2)
+            height: GAME_HEIGHT - (pipe.y + pipe.gap / 2)
           };
 
           if (checkCollision(birdRect, topPipeRect) || 
               checkCollision(birdRect, bottomPipeRect) ||
               birdY <= 0 || 
-              birdY + BIRD_HEIGHT >= window.innerHeight) {
+              birdY + BIRD_HEIGHT >= GAME_HEIGHT) {
             handleGameOver();
           }
         });
 
         // Score update
         pipes.forEach(pipe => {
-          if (pipe.x + pipe.width < window.innerWidth / BIRD_X_POSITION && !pipe.scored) {
+          if (pipe.x + pipe.width < GAME_WIDTH / BIRD_X_POSITION && !pipe.scored) {
             setScore(prevScore => {
               const newScore = prevScore + 1;
               setHighScore(current => Math.max(current, newScore));
@@ -204,86 +208,92 @@ const FlappyBeard = () => {
   };
 
   return (
-    <div 
-      className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-blue-400 to-blue-600"
-      onClick={handleClick}
-    >
-      {/* Bird */}
-      <div
-        className="absolute transition-transform"
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4">
+      <div 
+        className="relative overflow-hidden bg-gradient-to-b from-blue-400 to-blue-600 rounded-lg shadow-2xl"
         style={{
-          top: birdY,
-          left: `${window.innerWidth / BIRD_X_POSITION}px`,
-          width: BIRD_WIDTH,
-          height: BIRD_HEIGHT,
-          transform: `translateX(-50%) rotate(${birdRotation}deg)`,
+          width: GAME_WIDTH,
+          height: GAME_HEIGHT,
         }}
+        onClick={handleClick}
       >
-        <div className="w-full h-full bg-yellow-400 rounded-full relative overflow-hidden">
-          <div className="absolute w-3/4 h-1/2 bg-yellow-500 bottom-0 left-1/2 transform -translate-x-1/2" />
-          <div className="absolute w-2 h-2 bg-black rounded-full top-1/3 right-1/4" />
+        {/* Bird */}
+        <div
+          className="absolute transition-transform"
+          style={{
+            top: birdY,
+            left: `${GAME_WIDTH / BIRD_X_POSITION}px`,
+            width: BIRD_WIDTH,
+            height: BIRD_HEIGHT,
+            transform: `translateX(-50%) rotate(${birdRotation}deg)`,
+          }}
+        >
+          <div className="w-full h-full bg-yellow-400 rounded-full relative overflow-hidden">
+            <div className="absolute w-3/4 h-1/2 bg-yellow-500 bottom-0 left-1/2 transform -translate-x-1/2" />
+            <div className="absolute w-2 h-2 bg-black rounded-full top-1/3 right-1/4" />
+          </div>
         </div>
+
+        {/* Pipes */}
+        {pipes.map((pipe, index) => (
+          <div key={index}>
+            <div
+              className="absolute bg-green-600 border-4 border-green-700"
+              style={{
+                top: 0,
+                left: pipe.x,
+                width: pipe.width,
+                height: pipe.y - pipe.gap / 2,
+              }}
+            >
+              <div className="absolute bottom-0 left-0 w-full h-4 bg-green-500" />
+            </div>
+            <div
+              className="absolute bg-green-600 border-4 border-green-700"
+              style={{
+                top: pipe.y + pipe.gap / 2,
+                left: pipe.x,
+                width: pipe.width,
+                height: GAME_HEIGHT - (pipe.y + pipe.gap / 2),
+              }}
+            >
+              <div className="absolute top-0 left-0 w-full h-4 bg-green-500" />
+            </div>
+          </div>
+        ))}
+
+        {/* Score */}
+        <div className="absolute top-4 left-4 text-white text-xl font-bold">
+          <div className="flex items-center gap-2">
+            <Trophy size={24} />
+            <span>{score}</span>
+          </div>
+          <div className="text-sm opacity-75">Best: {highScore}</div>
+        </div>
+
+        {/* Start/Game Over Screen */}
+        {(!gameStarted || isGameOver) && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="text-center text-white p-8 rounded-lg">
+              <h2 className="text-4xl font-bold mb-4">
+                {isGameOver ? 'Game Over!' : 'Flappy Beard'}
+              </h2>
+              <p className="text-xl mb-4">
+                {isGameOver ? `Score: ${score}` : 'Click to start'}
+              </p>
+              {isGameOver && (
+                <button 
+                  className="flex items-center gap-2 mx-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                  onClick={handleClick}
+                >
+                  <RotateCcw size={20} />
+                  Play Again
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Pipes */}
-      {pipes.map((pipe, index) => (
-        <div key={index}>
-          <div
-            className="absolute bg-green-600 border-4 border-green-700"
-            style={{
-              top: 0,
-              left: pipe.x,
-              width: pipe.width,
-              height: pipe.y - pipe.gap / 2,
-            }}
-          >
-            <div className="absolute bottom-0 left-0 w-full h-4 bg-green-500" />
-          </div>
-          <div
-            className="absolute bg-green-600 border-4 border-green-700"
-            style={{
-              top: pipe.y + pipe.gap / 2,
-              left: pipe.x,
-              width: pipe.width,
-              height: window.innerHeight - (pipe.y + pipe.gap / 2),
-            }}
-          >
-            <div className="absolute top-0 left-0 w-full h-4 bg-green-500" />
-          </div>
-        </div>
-      ))}
-
-      {/* Score */}
-      <div className="absolute top-4 left-4 text-white text-xl font-bold">
-        <div className="flex items-center gap-2">
-          <Trophy size={24} />
-          <span>{score}</span>
-        </div>
-        <div className="text-sm opacity-75">Best: {highScore}</div>
-      </div>
-
-      {/* Start/Game Over Screen */}
-      {(!gameStarted || isGameOver) && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="text-center text-white p-8 rounded-lg">
-            <h2 className="text-4xl font-bold mb-4">
-              {isGameOver ? 'Game Over!' : 'Flappy Beard'}
-            </h2>
-            <p className="text-xl mb-4">
-              {isGameOver ? `Score: ${score}` : 'Click to start'}
-            </p>
-            {isGameOver && (
-              <button 
-                className="flex items-center gap-2 mx-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                onClick={handleClick}
-              >
-                <RotateCcw size={20} />
-                Play Again
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

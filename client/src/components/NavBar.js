@@ -1,23 +1,12 @@
+// NavBar.js
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import './NavBar.css';
+import { ChevronDown } from 'lucide-react';
 
 function Navbar() {
   const { user, tcBalance, btcBalance, logout } = useContext(AuthContext);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-    // Previene lo scroll del body quando la sidebar è aperta
-    document.body.style.overflow = !isSidebarOpen ? 'hidden' : 'unset';
-  };
-
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-    document.body.style.overflow = 'unset';
-  };
+  const [isBalanceOpen, setIsBalanceOpen] = useState(false);
 
   const formatTcBalance = (balance) => {
     return Number(balance).toLocaleString('en-US', {
@@ -35,90 +24,95 @@ function Navbar() {
   };
 
   return (
-    <>
-      <nav className="navbar">
-        <div className="navbar-logo">
-          <Link to="/">MyApp</Link>
+    <div className="fixed top-0 left-0 w-64 bg-gray-800 text-white flex flex-col h-screen">
+      <div className="p-4">
+        <Link to="/" className="text-2xl font-bold text-orange-500">MyApp</Link>
+      </div>
+      
+      <nav className="flex-1">
+        <div className="px-4 space-y-2">
+          <Link to="/" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            Home
+          </Link>
+          <Link to="/games" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            Games
+          </Link>
+          <Link to="/marketplace" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            MarketPlace
+          </Link>
+          <Link to="/inventory" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            Inventario
+          </Link>
+          <Link to="/casino" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            Casino
+          </Link>
+          <Link to="/profile" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            Profilo
+          </Link>
+          <Link to="/dashboard" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            dashboard
+          </Link>
+          
+          
+          {/* Expandable sections */}
+          <div className="py-2">
+            <h3 className="px-4 text-xs font-semibold text-gray-400 uppercase">More</h3>
+            <Link to="/expedition" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+              Expedition
+            </Link>
+            <Link to="/events" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+              Events
+            </Link>
+            <Link to="/store" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+              Store
+            </Link>
+          </div>
         </div>
-
-        {/* Menu desktop */}
-        <ul className="navbar-links-desktop">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/oddslist">OddsList</Link></li>
-          {user ? (
-            <>
-              <li><Link to="/dashboard">Dashboard</Link></li>
-              <li><Link to="/marketplace">Marketplace</Link></li>
-              <li><Link to="/inventory">Inventory</Link></li>
-              <li><Link to="/profile">Profile</Link></li>
-              <li><Link to="/casino">Casino</Link></li>
-              <li className="user-info">Welcome, {user}</li>
-              <li className="balance-info">TC: {formatTcBalance(tcBalance)}</li>
-              <li className="balance-info">BTC: {formatBtcBalance(btcBalance)}</li>
-              <li><button className="logout-button" onClick={logout}>Logout</button></li>
-            </>
-          ) : (
-            <>
-              <li><Link to="/login2">Login</Link></li>
-              <li><Link to="/register">Register</Link></li>
-            </>
-          )}
-        </ul>
-
-        {/* Hamburger per mobile */}
-        <button className="menu-toggle" onClick={toggleSidebar}>
-          <Menu size={24} />
-        </button>
       </nav>
 
-      {/* Overlay scuro quando la sidebar è aperta */}
-      {isSidebarOpen && (
-        <div className="sidebar-overlay" onClick={closeSidebar} />
-      )}
+      {/* User info section at bottom */}
+      <div className="p-4 border-t border-gray-700">
+        {user ? (
+          <div className="space-y-2">
+            {/* Balance Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsBalanceOpen(!isBalanceOpen)}
+                className="w-full flex items-center justify-between bg-gray-700 px-3 py-2 rounded hover:bg-gray-600"
+              >
+                <span>Balance</span>
+                <ChevronDown size={16} />
+              </button>
+              
+              {isBalanceOpen && (
+                <div className="absolute bottom-full left-0 w-full mb-2 bg-gray-700 rounded shadow-lg py-1">
+                  <div className="px-4 py-2 text-sm">
+                    <div>TC: {formatTcBalance(tcBalance)}</div>
+                    <div>BTC: {formatBtcBalance(btcBalance)}</div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-      {/* Sidebar mobile */}
-      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <button className="close-sidebar" onClick={closeSidebar}>
-            <X size={24} />
-          </button>
-        </div>
-
-        <ul className="sidebar-links">
-          <li><Link to="/" onClick={closeSidebar}>Home</Link></li>
-          <li><Link to="/about" onClick={closeSidebar}>About</Link></li>
-          <li><Link to="/oddslist" onClick={closeSidebar}>OddsList</Link></li>
-          {user ? (
-            <>
-              <li><Link to="/dashboard" onClick={closeSidebar}>Dashboard</Link></li>
-              <li><Link to="/marketplace" onClick={closeSidebar}>Marketplace</Link></li>
-              <li><Link to="/inventory" onClick={closeSidebar}>Inventory</Link></li>
-              <li><Link to="/profile" onClick={closeSidebar}>Profile</Link></li>
-              <li><Link to="/casino" onClick={closeSidebar}>Casino</Link></li>
-              <li className="sidebar-user-info">
-                <div>Welcome, {user}</div>
-                <div>TC Balance: {formatTcBalance(tcBalance)}</div>
-                <div>BTC Balance: {formatBtcBalance(btcBalance)} BTC</div>
-              </li>
-              <li>
-                <button 
-                  className="sidebar-logout-button" 
-                  onClick={() => { logout(); closeSidebar(); }}
-                >
-                  Logout
-                </button>
-              </li>
-            </>
-          ) : (
-            <>
-              <li><Link to="/login2" onClick={closeSidebar}>Login</Link></li>
-              <li><Link to="/register" onClick={closeSidebar}>Register</Link></li>
-            </>
-          )}
-        </ul>
+            {/* User Info */}
+            <div className="flex flex-col space-y-2">
+              <span className="text-sm">{user}</span>
+              <button
+                onClick={logout}
+                className="w-full bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col space-y-2">
+            <Link to="/login2" className="text-center text-gray-300 hover:text-white py-1">Login</Link>
+            <Link to="/register" className="text-center bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">Register</Link>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 

@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
-import dragonImages from '../utils/dragonImages';
+import { getDragonImage } from '../utils/dragonImages';
 
 function Home() {
   const { user } = useContext(AuthContext);
@@ -13,6 +12,7 @@ function Home() {
   const [totalServerMiningPower, setTotalServerMiningPower] = useState(0);
   const [estimatedRewards, setEstimatedRewards] = useState({ tc: 0, satoshi: 0 });
   const [timer, setTimer] = useState(0); // Aggiungi lo stato per il timer
+  const [selectedTab, setSelectedTab] = useState('daily');
 
   useEffect(() => {
     if (user) {
@@ -147,116 +147,129 @@ function Home() {
   };
 
   return (
-    <div className="home-container">
-      <h1 className="title">Home Page</h1>
-      
-      {!user && (
-        <div className="auth-buttons">
-          <Link to="/register">
-            <button className="button button-primary">Register</button>
-          </Link>
-          <Link to="/login2">
-            <button className="button button-secondary">Login</button>
-          </Link>
+    <div className="min-h-screen bg-slate-900 text-white p-6">
+      {!user ? (
+        <div className="flex flex-col items-center gap-4 mt-10">
+          <h1 className="text-3xl font-bold text-purple-400">Dragon Mining Valley</h1>
+          <div className="flex gap-4">
+            <a href="/login2">
+              <button className="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg">
+                Entra nel magnifico mondo dei draghi!
+              </button>
+            </a>
+          </div>
         </div>
-      )}
-      
-      <Link to="/about">
-        <button className="button button-gray">Go to About Page</button>
-      </Link>
-
-      {user && (
-        <div>
-          <section className="section">
-            <h2 className="section-title">Your Dragons</h2>
-            {dragons.length > 0 ? (
-              <div className="dragon-list">
-                {dragons.map(dragon => {
-                  const imageName = dragon.name
-                    ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
-                    : 'default-dragon.png';
-                  const image = dragonImages[imageName];
-                  
-                  return (
-                    <div key={dragon._id} className="dragon-card">
-                      <img 
-                        src={image} 
-                        alt={dragon.name || 'Unknown Dragon'} 
-                        className="dragon-image"
-                      />
-                      <div className="dragon-info">
-                        <p className="dragon-name">{dragon.name}</p>
-                        <p>Power: {formatMiningPower(dragon.miningPower)}</p>
-                        <p>Bonus: {dragon.bonus}%</p>
-                      </div>
-                      <button 
-                        onClick={() => addToMiningZone(dragon._id)}
-                        className="button button-primary"
-                      >
-                        Add to Mining Zone
-                      </button>
-                    </div>
-                  );
-                })}
+      ) : (
+        <div className="max-w-7xl mx-auto">
+          {/* Stats Panel */}
+          <div className="bg-slate-800 rounded-lg p-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-700 p-4 rounded-lg">
+                <h3 className="text-sm text-slate-400">My Power</h3>
+                <p className="text-xl text-cyan-400">{formatMiningPower(totalMiningPower)}</p>
               </div>
-            ) : (
-              <p>No dragons available.</p>
-            )}
-          </section>
-
-          <section className="section">
-            <h2 className="section-title">Mining Zone</h2>
-            {miningZone.length > 0 ? (
-              <div className="dragon-list">
-                {miningZone.map(dragon => {
-                  const imageName = dragon.name
-                    ? `${dragon.name.toLowerCase().replace(/ /g, '-')}.png`
-                    : 'default-dragon.png';
-                  const image = dragonImages[imageName];
-                  
-                  return (
-                    <div key={dragon._id} className="dragon-card">
-                      <img 
-                        src={image} 
-                        alt={dragon.name || 'Unknown Dragon'} 
-                        className="dragon-image"
-                      />
-                      <div className="dragon-info">
-                        <p className="dragon-name">{dragon.name}</p>
-                        <p>Mining Power: {formatMiningPower(dragon.miningPower)}</p>
-                        <p>Bonus: {dragon.bonus}%</p>
-                      </div>
-                      <button 
-                        onClick={() => removeFromMiningZone(dragon._id)}
-                        className="button button-danger"
-                      >
-                        Remove from Mining Zone
-                      </button>
-                    </div>
-                  );
-                })}
-                
-                <div className="stats-box">
-                  <p className="stats-item">
-                    Total Mining Power: {formatMiningPower(totalMiningPower)}
-                  </p>
-                </div>
+              <div className="bg-slate-700 p-4 rounded-lg">
+                <h3 className="text-sm text-slate-400">Network Power</h3>
+                <p className="text-xl text-green-400">{formatMiningPower(totalServerMiningPower)}</p>
               </div>
-            ) : (
-              <p>No dragons in the mining zone.</p>
-            )}
-          </section>
+              <div className="bg-slate-700 p-4 rounded-lg">
+                <h3 className="text-sm text-slate-400">Your Reward</h3>
+                <p className="text-xl text-pink-400">{estimatedRewards.tc} TC</p>
+              </div>
+            </div>
+          </div>
 
-          <div className="stats-box">
-            <p className="stats-item">
-              Total Server Mining Power: {formatMiningPower(totalServerMiningPower)}
-            </p>
-            <p className="stats-item">
-              Next Rewards in: {Math.floor(timer / 60)}:{('0' + (timer % 60)).slice(-2)}
-            </p>
-            <p className="stats-item">
-              Estimated Rewards: {estimatedRewards.tc} TC, {estimatedRewards.satoshi} Satoshi
-            </p>
+          {/* Timer and Tabs */}
+          <div className="bg-slate-800 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex gap-4">
+                <button
+                  className={`px-4 py-2 rounded-lg ${selectedTab === 'daily' ? 'bg-purple-500' : 'bg-slate-700'}`}
+                  onClick={() => setSelectedTab('daily')}
+                >
+                  Daily 4/7
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-lg ${selectedTab === 'weekly' ? 'bg-purple-500' : 'bg-slate-700'}`}
+                  onClick={() => setSelectedTab('weekly')}
+                >
+                  Weekly 4/5
+                </button>
+              </div>
+              <div className="text-cyan-400">
+                Next reward in: {Math.floor(timer / 60)}:{('0' + (timer % 60)).slice(-2)}
+              </div>
+            </div>
+          </div>
+
+          {/* Dragons Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Available Dragons */}
+            <div className="bg-slate-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold mb-4">Available Dragons</h2>
+              <div className="grid gap-4">
+                {dragons.map(dragon => (
+                  <div key={dragon._id} className="bg-slate-700 rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-slate-600 rounded-lg overflow-hidden">
+                        <img
+                          src={getDragonImage(dragon.name)}
+                          alt={dragon.name || 'Unknown Dragon'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-bold">{dragon.name}</h3>
+                        <p className="text-sm text-cyan-400">{formatMiningPower(dragon.miningPower)}</p>
+                        <p className="text-sm text-green-400">+{dragon.bonus}% Bonus</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => addToMiningZone(dragon._id)}
+                      className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg"
+                    >
+                      Add to Mining
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mining Zone */}
+            <div className="bg-slate-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold mb-4">Mining Zone</h2>
+              <div className="grid gap-4">
+                {miningZone.map(dragon => (
+                  <div key={dragon._id} className="bg-slate-700 rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-slate-600 rounded-lg overflow-hidden">
+                        <img
+                          src={getDragonImage(dragon.name)}
+                          alt={dragon.name || 'Unknown Dragon'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-bold">{dragon.name}</h3>
+                        <p className="text-sm text-cyan-400">{formatMiningPower(dragon.miningPower)}</p>
+                        <p className="text-sm text-green-400">+{dragon.bonus}% Bonus</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeFromMiningZone(dragon._id)}
+                      className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                {miningZone.length === 0 && (
+                  <div className="text-center text-slate-400 py-8">
+                    No dragons mining yet
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

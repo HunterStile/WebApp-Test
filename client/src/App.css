@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,15 +12,30 @@
   display: block;
 }
 
+.modal-buy {
+  background-color: #1a283f;
+  border-radius: 8px;
+  margin: 10% auto;
+  max-width: 600px;
+  padding: 20px;
+  position: relative;
+  width: 80%;
+}
+
 /* CSS di base */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: 1.6;
   color: #e1e1e1;
   background-color: #1a1a1a;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  margin: 0; /* Rimosso margin auto */
+  min-height: 100vh; /* Assicura che il body copra almeno tutta l'altezza della viewport */
+  width: 100%; /* Assicura che il body copra tutta la larghezza */
+}
+
+.App {
+  width: 100%;
+  min-height: 100vh;
 }
 
 h1 {
@@ -45,16 +61,14 @@ input.search-input {
   background-color: #d5d5d5;
 }
 
-/* Regole responsive aggiunte */
-
-/* Imposta box-sizing universale */
+/* Regole responsive */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Previene overflow orizzontale */
+/* Previene overflow orizzontale ma permette lo scroll verticale */
 html, body {
   overflow-x: hidden;
   width: 100%;
@@ -71,23 +85,27 @@ img {
 /* Rende le tabelle responsive */
 table {
   width: 100%;
-  max-width: 100%;
   overflow-x: auto;
   display: block;
 }
 
+/* Stile per il contenitore principale delle pagine */
+.main-content {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+}
+
 /* Media query per schermi mobili */
 @media screen and (max-width: 768px) {
-  body {
+  .main-content {
     padding: 10px;
   }
 
-  /* Riduce i margini e i padding su mobile */
   h1, h2, h3 {
     margin: 15px 0;
   }
 
-  /* Adatta input e form per mobile */
   input, 
   select, 
   textarea {
@@ -96,7 +114,6 @@ table {
     margin-bottom: 10px;
   }
 
-  /* Sistema il font-size per una migliore leggibilità su mobile */
   body {
     font-size: 16px;
   }
@@ -116,11 +133,10 @@ table {
 
 /* Media query per schermi molto piccoli */
 @media screen and (max-width: 480px) {
-  body {
+  .main-content {
     padding: 8px;
   }
 
-  /* Ulteriori riduzioni per schermi molto piccoli */
   h1 {
     font-size: 22px;
   }
@@ -133,6 +149,8 @@ table {
     font-size: 16px;
   }
 }
+
+
 
 /*applicazione per guida*/
 code {
@@ -227,6 +245,127 @@ th {
     max-width: 100%;
     overflow-x: scroll;
   }
+}
+
+/* AUTH ZONE */
+/* Styles for the outer container */
+.container-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1a202c; /* bg-gray-900 */
+  padding: 3rem 1rem;
+}
+
+/* Styles for the form wrapper */
+.form-wrapper {
+  max-width: 400px;
+  width: 100%;
+  background-color: #2d3748; /* bg-gray-800 */
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* shadow-xl */
+}
+
+/* Styles for the title */
+.form-title {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: white;
+}
+
+/* Styles for the form */
+.form {
+  margin-top: 2rem;
+}
+
+/* Styles for the input group */
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Styles for each input wrapper */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Styles for the icons */
+.icon {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a0aec0; /* text-gray-400 */
+}
+
+/* Styles for the input fields */
+.input {
+  appearance: none;
+  border-radius: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 2.5rem;
+  border: 1px solid #4a5568; /* border-gray-600 */
+  background-color: #4a5568; /* bg-gray-700 */
+  color: white;
+  placeholder-color: #a0aec0; /* placeholder-gray-400 */
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  border-color: #4299e1; /* focus:border-blue-500 */
+  box-shadow: 0 0 0 2px #4299e1; /* focus:ring-2 */
+  z-index: 10;
+}
+
+/* Styles for the submit button */
+.submit-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: #3182ce; /* bg-blue-600 */
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #2b6cb0; /* hover:bg-blue-700 */
+}
+
+.submit-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4299e1; /* focus:ring-2 */
+}
+
+/* Styles for the toggle text and button */
+.toggle-text {
+  text-align: center;
+  color: #a0aec0; /* text-gray-400 */
+}
+
+.toggle-button {
+  font-weight: 500;
+  color: #4299e1; /* text-blue-500 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.toggle-button:hover {
+  color: #63b3ed; /* hover:text-blue-400 */
 }
 
 /* CSS aggiuntivo per il gioco */

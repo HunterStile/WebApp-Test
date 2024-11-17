@@ -404,7 +404,7 @@ function Marketplace() {
 
         {/* Modal */}
         <div className={`modal ${selectedEgg ? 'active' : ''}`}>
-          <div className="modal-content">
+          <div className="modal-buy">
             <span className="close" onClick={handleCloseModal}>&times;</span>
             {selectedEgg && (
               <div>

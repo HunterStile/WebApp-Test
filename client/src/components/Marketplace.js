@@ -229,7 +229,7 @@ function Marketplace() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <button 
+                <button
                   onClick={openMysteryBox}
                   className="bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded-lg"
                 >
@@ -246,7 +246,7 @@ function Marketplace() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <button 
+                <button
                   onClick={resetBox}
                   className="bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded-lg"
                 >
@@ -298,7 +298,7 @@ function Marketplace() {
                         placeholder="Set price"
                         className="w-full bg-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
-                      <button 
+                      <button
                         onClick={() => handleSellEgg(eggType)}
                         className="w-full bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg"
                       >
@@ -390,7 +390,7 @@ function Marketplace() {
                     onClick={() => handleRemoveEggSale(egg.eggType)}
                     className="w-full bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
                   >
-                    Remove Listing
+                    Remove Sale
                   </button>
                 </div>
               ))}
@@ -402,30 +402,22 @@ function Marketplace() {
           )}
         </div>
 
-        {/* Purchase Modal */}
-        {selectedEgg && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-slate-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-purple-400">Buy Eggs: {selectedEgg.eggType}</h3>
-                <button 
-                  onClick={handleCloseModal}
-                  className="text-slate-400 hover:text-white"
-                >
-                  &times;
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-bold mb-2 text-cyan-400">Items for Sale:</h4>
-                  {eggSales.length > 0 ? (
-                    <div className="bg-slate-700 rounded-lg p-4">
-                      <table className="w-full">
+        {/* Modal */}
+        <div className={`modal ${selectedEgg ? 'active' : ''}`}>
+          <div className="modal-content">
+            <span className="close" onClick={handleCloseModal}>&times;</span>
+            {selectedEgg && (
+              <div>
+                <h3>Buy Eggs: {selectedEgg.eggType}</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div style={{ width: '60%' }}>
+                    <h4>Items for Sale:</h4>
+                    {eggSales.length > 0 ? (
+                      <table>
                         <thead>
                           <tr>
-                            <th className="text-left text-slate-400">Price</th>
-                            <th className="text-left text-slate-400">Quantity</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -433,57 +425,44 @@ function Marketplace() {
                             .sort((a, b) => a.price - b.price)
                             .map((sale, index) => (
                               <tr key={index}>
-                                <td className="py-2">{sale.price.toFixed(2)} TC</td>
-                                <td className="py-2">{sale.quantity}</td>
+                                <td>{sale.price.toFixed(2)} TC</td>
+                                <td>{sale.quantity}</td>
                               </tr>
                             ))}
                         </tbody>
                       </table>
-                    </div>
-                  ) : (
-                    <p className="text-slate-400">No items for sale.</p>
-                  )}
-                </div>
-                
-                <div className="bg-slate-700 rounded-lg p-4">
-                  <h4 className="font-bold mb-4 text-green-400">Purchase Details</h4>
-                  <div className="w-32 h-32 bg-slate-600 rounded-lg overflow-hidden mx-auto mb-4">
-                    <img
-                      src={getEggImage(selectedEgg.eggType)}
-                      alt={selectedEgg.eggType}
-                      className="w-full h-full object-cover"
-                    />
+                    ) : (
+                      <p>No items for sale.</p>
+                    )}
                   </div>
-                  <div className="space-y-4">
+                  <div className="selected-egg-details">
+                    <h4>Selected Egg Details:</h4>
+                    <img
+                          src={getEggImage(selectedEgg.eggType)}
+                          alt={selectedEgg.eggType}
+                          className="w-full h-full object-cover"
+                        />
                     <div>
-                      <label className="text-slate-400 block mb-1">Quantity:</label>
+                      <label>Quantity: </label>
                       <input
                         type="number"
                         min="1"
                         max={selectedEgg.totalQuantity}
                         value={quantity}
                         onChange={(e) => setQuantity(Math.max(1, Math.min(selectedEgg.totalQuantity, parseInt(e.target.value))))}
-                        className="w-full bg-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
-                    <div className="bg-slate-800 p-3 rounded-lg">
-                      <span className="text-slate-400">Total Price:</span>
-                      <span className="float-right text-yellow-400">
-                        {(selectedEgg.floorPrice * quantity).toFixed(2)} TC
-                      </span>
+                    <div>
+                      <label>Total Price: </label>
+                      <span>{(selectedEgg.floorPrice * quantity).toFixed(2)} TC</span>
                     </div>
-                    <button
-                      onClick={handleBuy}
-                      className="w-full bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg"
-                    >
-                      Buy Now
-                    </button>
+                    <button onClick={handleBuy}>Buy Now</button>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

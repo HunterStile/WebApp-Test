@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,9 +18,14 @@ body {
   line-height: 1.6;
   color: #e1e1e1;
   background-color: #1a1a1a;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  margin: 0; /* Rimosso margin auto */
+  min-height: 100vh; /* Assicura che il body copra almeno tutta l'altezza della viewport */
+  width: 100%; /* Assicura che il body copra tutta la larghezza */
+}
+
+.App {
+  width: 100%;
+  min-height: 100vh;
 }
 
 h1 {
@@ -45,16 +51,14 @@ input.search-input {
   background-color: #d5d5d5;
 }
 
-/* Regole responsive aggiunte */
-
-/* Imposta box-sizing universale */
+/* Regole responsive */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Previene overflow orizzontale */
+/* Previene overflow orizzontale ma permette lo scroll verticale */
 html, body {
   overflow-x: hidden;
   width: 100%;
@@ -71,23 +75,27 @@ img {
 /* Rende le tabelle responsive */
 table {
   width: 100%;
-  max-width: 100%;
   overflow-x: auto;
   display: block;
 }
 
+/* Stile per il contenitore principale delle pagine */
+.main-content {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+}
+
 /* Media query per schermi mobili */
 @media screen and (max-width: 768px) {
-  body {
+  .main-content {
     padding: 10px;
   }
 
-  /* Riduce i margini e i padding su mobile */
   h1, h2, h3 {
     margin: 15px 0;
   }
 
-  /* Adatta input e form per mobile */
   input, 
   select, 
   textarea {
@@ -96,7 +104,6 @@ table {
     margin-bottom: 10px;
   }
 
-  /* Sistema il font-size per una migliore leggibilità su mobile */
   body {
     font-size: 16px;
   }
@@ -116,11 +123,10 @@ table {
 
 /* Media query per schermi molto piccoli */
 @media screen and (max-width: 480px) {
-  body {
+  .main-content {
     padding: 8px;
   }
 
-  /* Ulteriori riduzioni per schermi molto piccoli */
   h1 {
     font-size: 22px;
   }

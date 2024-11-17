@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import mysteryBoxImage from '../assets/images/mystery-box.png';
-import eggImages from '../utils/eggImages';
+import { getEggImage } from '../utils/eggImages';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 import './Game.css';
@@ -21,7 +21,6 @@ function Marketplace() {
   const [quantity, setQuantity] = useState(1);
   const [eggSales, setEggSales] = useState([]); // Stato per gli articoli in vendita
 
-  const getEggImage = (eggType) => eggImages[`${eggType.toLowerCase().replace(/ /g, '-')}.png`] || null;
 
   useEffect(() => {
     fetchInventory();
@@ -212,159 +211,279 @@ function Marketplace() {
   };
 
   return (
-    <div className="marketplace">
-      <h2 className="section-title">Marketplace</h2>
-      
-      <div className="mystery-box">
-        {!boxOpened ? (
-          <>
-            <h3>Open your mystery box now!</h3>
-            <img src={mysteryBoxImage} alt="Mystery Box" />
-            <button onClick={openMysteryBox}>Open Mystery Box (50 TC)</button>
-          </>
-        ) : (
-          <>
-            <h3>You got a {result}!</h3>
-            {result && (
-              <img 
-                src={eggImages[`${result.toLowerCase().replace(/ /g, '-')}.png`]} 
-                alt={result} 
-              />
-            )}
-            <button onClick={resetBox}>Open a new Mystery Box</button>
-          </>
-        )}
-      </div>
+    <div className="min-h-screen bg-slate-900 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-purple-400 mb-6">Marketplace</h2>
 
-      <h3 className="section-title">Sell Eggs</h3>
-      {Object.keys(inventory).some(eggType => inventory[eggType] > 0) ? (
-        Object.keys(inventory)
-          .filter(eggType => inventory[eggType] > 0)
-          .map((eggType) => (
-            <div className="egg-item" key={eggType}>
-              <img 
-                src={eggImages[`${eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
-                alt={eggType} 
-              />
-              <span>{eggType} (x{inventory[eggType]})</span>
-              <input
-                type="number"
-                value={sellQuantity[eggType] || ''}
-                onChange={(e) =>
-                  setSellQuantity({ ...sellQuantity, [eggType]: Math.min(Number(e.target.value), inventory[eggType]) })
-                }
-                placeholder="Quantity"
-                max={inventory[eggType]}
-              />
-              <input
-                type="number"
-                value={sellPrice}
-                onChange={(e) => setSellPrice(e.target.value)}
-                placeholder="Set price"
-              />
-              <button className="sell" onClick={() => handleSellEgg(eggType)}>Sell</button>
-            </div>
-          ))
-      ) : (
-        <p>You have no eggs to sell.</p>
-      )}
-
-      <h3 className="section-title">Eggs for Sale</h3>
-      {Array.isArray(eggsForSale) && eggsForSale.length > 0 ? (
-        eggsForSale.map((egg, index) => (
-          <div className="egg-item" key={index}>
-            <img 
-              src={eggImages[`${egg.eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
-              alt={egg.eggType} 
-            />
-            <span>{egg.eggType}</span>
-            <span> - {egg.totalQuantity} available</span>
-            <span> - Average Price: {egg.averagePrice ? egg.averagePrice.toFixed(2) : 'N/A'} TC</span>
-            <span> - Floor Price: {egg.floorPrice ? egg.floorPrice.toFixed(2) : 'N/A'} TC</span>
-            <button className="preview" onClick={() => handleOpenModal(egg)}>Preview</button>
-          </div>
-        ))
-      ) : (
-        <p>No eggs for sale.</p>
-      )}
-
-      <h3 className="section-title">My Eggs for Sale</h3>
-      {Array.isArray(eggsForSaleUser) && eggsForSaleUser.length > 0 ? (
-        eggsForSaleUser.map((egg, index) => (
-          <div className="egg-item" key={index}>
-            <img 
-              src={eggImages[`${egg.eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
-              alt={egg.eggType} 
-            />
-            <span>{egg.eggType}</span>
-            <span> - {egg.quantity} available</span>
-            <span> - Price: {egg.price ? egg.price.toFixed(2) : 'N/A'} TC</span>
-            <button className="remove" onClick={() => handleRemoveEggSale(egg.eggType)}>Remove</button>
-          </div>
-        ))
-      ) : (
-        <p>No eggs for sale.</p>
-      )}
-
-      {/* Modal */}
-      <div className={`modal ${selectedEgg ? 'active' : ''}`}>
-        <div className="modal-content">
-          <span className="close" onClick={handleCloseModal}>&times;</span>
-          {selectedEgg && (
-            <div>
-              <h3>Buy Eggs: {selectedEgg.eggType}</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ width: '60%' }}>
-                  <h4>Items for Sale:</h4>
-                  {eggSales.length > 0 ? (
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Price</th>
-                          <th>Quantity</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {eggSales
-                          .sort((a, b) => a.price - b.price)
-                          .map((sale, index) => (
-                            <tr key={index}>
-                              <td>{sale.price.toFixed(2)} TC</td>
-                              <td>{sale.quantity}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p>No items for sale.</p>
-                  )}
-                </div>
-                <div className="selected-egg-details">
-                  <h4>Selected Egg Details:</h4>
-                  <img 
-                    src={eggImages[`${selectedEgg.eggType.toLowerCase().replace(/ /g, '-')}.png`]} 
-                    alt={selectedEgg.eggType} 
+        {/* Mystery Box Section */}
+        <div className="bg-slate-800 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold mb-4 text-cyan-400">Mystery Box</h3>
+          <div className="flex flex-col items-center bg-slate-700 rounded-lg p-6">
+            {!boxOpened ? (
+              <div className="text-center">
+                <h4 className="text-lg font-bold mb-4">Open your mystery box now!</h4>
+                <div className="w-32 h-32 bg-slate-600 rounded-lg overflow-hidden mb-4">
+                  <img
+                    src={mysteryBoxImage}
+                    alt="Mystery Box"
+                    className="w-full h-full object-cover"
                   />
-                  <div>
-                    <label>Quantity: </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max={selectedEgg.totalQuantity}
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, Math.min(selectedEgg.totalQuantity, parseInt(e.target.value))))}
-                    />
-                  </div>
-                  <div>
-                    <label>Total Price: </label>
-                    <span>{(selectedEgg.floorPrice * quantity).toFixed(2)} TC</span>
-                  </div>
-                  <button onClick={handleBuy}>Buy Now</button>
                 </div>
+                <button 
+                  onClick={openMysteryBox}
+                  className="bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded-lg"
+                >
+                  Open Mystery Box (50 TC)
+                </button>
               </div>
+            ) : (
+              <div className="text-center">
+                <h4 className="text-lg font-bold mb-4">You got a {result}!</h4>
+                <div className="w-32 h-32 bg-slate-600 rounded-lg overflow-hidden mb-4">
+                  <img
+                    src={getEggImage(result)}
+                    alt={result}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <button 
+                  onClick={resetBox}
+                  className="bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded-lg"
+                >
+                  Open a new Mystery Box
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sell Eggs Section */}
+        <div className="bg-slate-800 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold mb-4 text-green-400">Sell Eggs</h3>
+          {Object.keys(inventory).some(eggType => inventory[eggType] > 0) ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.keys(inventory)
+                .filter(eggType => inventory[eggType] > 0)
+                .map((eggType) => (
+                  <div key={eggType} className="bg-slate-700 rounded-lg p-4">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-16 h-16 bg-slate-600 rounded-lg overflow-hidden">
+                        <img
+                          src={getEggImage(eggType)}
+                          alt={eggType}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-bold">{eggType}</h4>
+                        <p className="text-sm text-slate-400">Available: {inventory[eggType]}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <input
+                        type="number"
+                        value={sellQuantity[eggType] || ''}
+                        onChange={(e) => setSellQuantity({
+                          ...sellQuantity,
+                          [eggType]: Math.min(Number(e.target.value), inventory[eggType])
+                        })}
+                        placeholder="Quantity"
+                        max={inventory[eggType]}
+                        className="w-full bg-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <input
+                        type="number"
+                        value={sellPrice}
+                        onChange={(e) => setSellPrice(e.target.value)}
+                        placeholder="Set price"
+                        className="w-full bg-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <button 
+                        onClick={() => handleSellEgg(eggType)}
+                        className="w-full bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg"
+                      >
+                        Sell
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <div className="text-center text-slate-400 py-8">
+              You have no eggs to sell.
             </div>
           )}
         </div>
+
+        {/* Market Listings Section */}
+        <div className="bg-slate-800 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold mb-4 text-pink-400">Eggs for Sale</h3>
+          {Array.isArray(eggsForSale) && eggsForSale.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {eggsForSale.map((egg, index) => (
+                <div key={index} className="bg-slate-700 rounded-lg p-4">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 bg-slate-600 rounded-lg overflow-hidden">
+                      <img
+                        src={getEggImage(egg.eggType)}
+                        alt={egg.eggType}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-bold">{egg.eggType}</h4>
+                      <p className="text-sm text-slate-400">Available: {egg.totalQuantity}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                    <div className="bg-slate-800 p-2 rounded">
+                      <span className="text-slate-400">Average Price:</span>
+                      <div className="text-yellow-400">
+                        {egg.averagePrice ? `${egg.averagePrice.toFixed(2)} TC` : 'N/A'}
+                      </div>
+                    </div>
+                    <div className="bg-slate-800 p-2 rounded">
+                      <span className="text-slate-400">Floor Price:</span>
+                      <div className="text-cyan-400">
+                        {egg.floorPrice ? `${egg.floorPrice.toFixed(2)} TC` : 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleOpenModal(egg)}
+                    className="w-full bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg"
+                  >
+                    Preview
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-slate-400 py-8">
+              No eggs for sale.
+            </div>
+          )}
+        </div>
+
+        {/* My Listings Section */}
+        <div className="bg-slate-800 rounded-lg p-6">
+          <h3 className="text-xl font-bold mb-4 text-orange-400">My Eggs for Sale</h3>
+          {Array.isArray(eggsForSaleUser) && eggsForSaleUser.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {eggsForSaleUser.map((egg, index) => (
+                <div key={index} className="bg-slate-700 rounded-lg p-4">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 bg-slate-600 rounded-lg overflow-hidden">
+                      <img
+                        src={getEggImage(egg.eggType)}
+                        alt={egg.eggType}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-bold">{egg.eggType}</h4>
+                      <p className="text-sm text-slate-400">Listed: {egg.quantity}</p>
+                      <p className="text-sm text-cyan-400">Price: {egg.price ? `${egg.price.toFixed(2)} TC` : 'N/A'}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveEggSale(egg.eggType)}
+                    className="w-full bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
+                  >
+                    Remove Listing
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-slate-400 py-8">
+              You have no eggs listed for sale.
+            </div>
+          )}
+        </div>
+
+        {/* Purchase Modal */}
+        {selectedEgg && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-slate-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-purple-400">Buy Eggs: {selectedEgg.eggType}</h3>
+                <button 
+                  onClick={handleCloseModal}
+                  className="text-slate-400 hover:text-white"
+                >
+                  &times;
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-bold mb-2 text-cyan-400">Items for Sale:</h4>
+                  {eggSales.length > 0 ? (
+                    <div className="bg-slate-700 rounded-lg p-4">
+                      <table className="w-full">
+                        <thead>
+                          <tr>
+                            <th className="text-left text-slate-400">Price</th>
+                            <th className="text-left text-slate-400">Quantity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {eggSales
+                            .sort((a, b) => a.price - b.price)
+                            .map((sale, index) => (
+                              <tr key={index}>
+                                <td className="py-2">{sale.price.toFixed(2)} TC</td>
+                                <td className="py-2">{sale.quantity}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-400">No items for sale.</p>
+                  )}
+                </div>
+                
+                <div className="bg-slate-700 rounded-lg p-4">
+                  <h4 className="font-bold mb-4 text-green-400">Purchase Details</h4>
+                  <div className="w-32 h-32 bg-slate-600 rounded-lg overflow-hidden mx-auto mb-4">
+                    <img
+                      src={getEggImage(selectedEgg.eggType)}
+                      alt={selectedEgg.eggType}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-slate-400 block mb-1">Quantity:</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max={selectedEgg.totalQuantity}
+                        value={quantity}
+                        onChange={(e) => setQuantity(Math.max(1, Math.min(selectedEgg.totalQuantity, parseInt(e.target.value))))}
+                        className="w-full bg-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="bg-slate-800 p-3 rounded-lg">
+                      <span className="text-slate-400">Total Price:</span>
+                      <span className="float-right text-yellow-400">
+                        {(selectedEgg.floorPrice * quantity).toFixed(2)} TC
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleBuy}
+                      className="w-full bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg"
+                    >
+                      Buy Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

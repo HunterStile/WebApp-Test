@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* funzionamento modale */
 .modal {
   display: none;
@@ -132,5 +136,40 @@ th {
   pre {
     max-width: 100%;
     overflow-x: scroll;
+  }
+}
+
+/* CSS aggiuntivo per il gioco */
+.game-container {
+  background-color: #4c566a; /* Colore di sfondo temporaneo per il gioco */
+  border-radius: 8px; /* bordi arrotondati per il container del gioco */
+}
+
+.bird {
+  background-color: #ebcb8b; /* colore per la barba del personaggio */
+}
+
+.pipe {
+  background-color: green; /* colore delle pipe */
+}
+
+.score {
+  font-family: 'Segoe UI', sans-serif;
+  color: #e1e1e1;
+  font-size: 24px;
+}
+
+.game-over {
+  font-size: 30px;
+  color: #bf616a;
+}
+
+.click-area {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .game-container {
+    padding: 10px;
   }
 }

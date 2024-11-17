@@ -19,26 +19,27 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App flex h-screen">
+        <div className="App min-h-screen bg-gray-900">
           <Navbar />
-          {/* Aggiungiamo un div spacer per compensare la larghezza della navbar fissa */}
-          <div className="w-64 flex-shrink-0"></div>
-          <div className="flex-1 bg-gray-900">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login2" element={<Login />} />
-              <Route path="/oddslist" element={<OddsList />} />
-              
-              {/* Rotte protette */}
-              <Route element={<PrivateRoute />}>
-                <Route path="/games" element={<Game />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/casino" element={<Casino />} />
-              </Route>
-            </Routes>
+          {/* Main content area - adjusted for mobile and desktop */}
+          <div className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
+            <div className="container mx-auto p-4">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login2" element={<Login />} />
+                <Route path="/oddslist" element={<OddsList />} />
+                
+                {/* Protected routes */}
+                <Route element={<PrivateRoute />}>
+                  <Route path="/games" element={<Game />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/inventory" element={<Inventory />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/casino" element={<Casino />} />
+                </Route>
+              </Routes>
+            </div>
           </div>
         </div>
       </Router>

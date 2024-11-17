@@ -7,7 +7,7 @@ const FlappyBeard = () => {
   // FISICA DEL GIOCO
   const GRAVITY = 0.6;        // Forza di gravità (più alto = cade più velocemente)
   const JUMP_FORCE = -12;     // Forza del salto (più negativo = salta più in alto)
-  const GAME_SPEED = 5;       // Velocità di movimento delle pipe
+  const GAME_SPEED = 10;       // Velocità di movimento delle pipe
   const GAME_TICK = 20;       // Intervallo di aggiornamento del gioco in ms
 
   // DIMENSIONI DEL GIOCATORE
@@ -26,8 +26,8 @@ const FlappyBeard = () => {
   const WIDTH_DECREASE_RATE = 2;    // Di quanto diminuisce la larghezza ogni 5 punti
   
   // CONFIGURAZIONE DELLO SPAWN DELLE PIPE
-  const INITIAL_SPAWN_INTERVAL = 120; // Intervallo iniziale tra la generazione di pipe
-  const MIN_SPAWN_INTERVAL = 90;      // Intervallo minimo tra la generazione di pipe
+  const INITIAL_SPAWN_INTERVAL = 60; // Intervallo iniziale tra la generazione di pipe
+  const MIN_SPAWN_INTERVAL = 50;      // Intervallo minimo tra la generazione di pipe
   const SPAWN_DECREASE_RATE = 2;      // Di quanto diminuisce l'intervallo ogni 5 punti
   
   // CONFIGURAZIONE DELLA ROTAZIONE DEL PERSONAGGIO

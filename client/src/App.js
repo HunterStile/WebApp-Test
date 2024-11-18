@@ -5,13 +5,16 @@ import Navbar from './components/NavBar';
 import Dashboard from './components/Dashboard';
 import Home from './components/Home';
 import Login from './components/Login';
-import Game from './components/Game';
 import Marketplace from './components/Marketplace';
 import Inventory from './components/Inventory';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './components/Profile';
 import OddsList from './components/OddsList';
 import Casino from './components/Casino';
+import FlappyBird from './components/games/FlappyBird';
+import BrickBreaker from './components/games/BrickBreaker';
+import Tetris from './components/games/Tetris';
+
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
@@ -31,7 +34,9 @@ function App() {
                 
                 {/* Protected routes */}
                 <Route element={<PrivateRoute />}>
-                  <Route path="/games" element={<Game />} />
+                  <Route path="/flappybird" element={<FlappyBird />} />
+                  <Route path="/brickbreaker" element={<BrickBreaker />} />
+                  <Route path="/tetris" element={<Tetris />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/marketplace" element={<Marketplace />} />
                   <Route path="/inventory" element={<Inventory />} />

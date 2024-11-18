@@ -15,6 +15,7 @@ import FlappyBird from './components/games/FlappyBird';
 import BrickBreaker from './components/games/BrickBreaker';
 import Tetris from './components/games/Tetris';
 import WoodyBlockPuzzle from './components/games/BlockPuzzle';
+import Games from './components/Games';
 
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -35,6 +36,7 @@ function App() {
                 
                 {/* Protected routes */}
                 <Route element={<PrivateRoute />}>
+                  <Route path="/games" element={<Games />} />
                   <Route path="/flappybird" element={<FlappyBird />} />
                   <Route path="/brickbreaker" element={<BrickBreaker />} />
                   <Route path="/tetris" element={<Tetris />} />

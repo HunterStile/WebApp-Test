@@ -1,5 +1,6 @@
 /*COMANDI PER AGGIORNAMENTO*/
 #client  = npm run build
+rm -rf public/static/* pulisce la directory
 #directory = cp -r client/build/* public/
 #server =  node app.js
 

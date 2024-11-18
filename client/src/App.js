@@ -14,6 +14,7 @@ import Casino from './components/Casino';
 import FlappyBird from './components/games/FlappyBird';
 import BrickBreaker from './components/games/BrickBreaker';
 import Tetris from './components/games/Tetris';
+import WoodyBlockPuzzle from './components/games/BlockPuzzle';
 
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -37,6 +38,7 @@ function App() {
                   <Route path="/flappybird" element={<FlappyBird />} />
                   <Route path="/brickbreaker" element={<BrickBreaker />} />
                   <Route path="/tetris" element={<Tetris />} />
+                  <Route path="/blockpuzzle" element={<WoodyBlockPuzzle />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/marketplace" element={<Marketplace />} />
                   <Route path="/inventory" element={<Inventory />} />

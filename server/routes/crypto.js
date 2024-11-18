@@ -73,7 +73,7 @@ router.post('/create-address', async (req, res) => {
     }
 
     res.json({ btcAddress });
-    console.log('Secret Key:', process.env.SECRET_KEY);
+    //console.log('Secret Key:', process.env.SECRET_KEY);
   } catch (error) {
     console.error('Error creating BTC address:', error.message);
     res.status(500).send('Error creating BTC address');
@@ -117,7 +117,7 @@ router.post('/webhook', async (req, res) => {
     user.btcBalance += amountReceived;
     await user.save();
 
-    console.log(`Saldo aggiornato per l'indirizzo ${user.btcAddress}: ${user.btcBalance}`);
+    console.log(`Saldo aggiornato per l'indirizzo ${user.btcAddress} dell'utente ${user}: ${user.btcBalance}`);
     res.status(200).send('Webhook received and processed');
   } catch (error) {
     console.error('Error processing webhook:', error);
@@ -181,7 +181,7 @@ router.post('/send-transaction', async (req, res) => {
 
     // Decrypt private key
     const privateKeyHex = decryptPrivateKey(encryptedPrivateKey);
-    console.log('Decrypted private key:', privateKeyHex);
+    //console.log('Decrypted private key:', privateKeyHex);
 
     // Convert hex private key to Buffer
     const privateKeyBuffer = Buffer.from(privateKeyHex, 'hex');

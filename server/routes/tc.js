@@ -121,7 +121,7 @@ const generateDragon = (eggType) => {
         probability: 34
       }
     ],
-    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 1000 }],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
     'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
     'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
     'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],

@@ -1,7 +1,30 @@
 /*COMANDI PER AGGIORNAMENTO*/
 #client  = npm run build
+rm -rf public/static/* pulisce la directory
 #directory = cp -r client/build/* public/
 #server =  node app.js
+
+INSTALLAZIONE Tailwind:
+1-Prima installa Tailwind CSS e le sue dipendenze usando npm:
+npm install -D tailwindcss postcss autoprefixer
+2-Genera i file di configurazione di Tailwind e PostCSS:
+npx tailwindcss init -p
+3-Aggiorna il file tailwind.config.js per includere i percorsi dei tuoi file contenenti le classi di Tailwind:
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html"
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+4-Crea o modifica il tuo file CSS principale 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Requirement */
 -mongoose

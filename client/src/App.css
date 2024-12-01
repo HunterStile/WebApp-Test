@@ -1,32 +1,7 @@
-.App {
-  text-align: left;
-}
 
-/* Base styles and reset */
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  background-color: #f5f5f7;
-}
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* funzionamento modale */
 .modal {
@@ -35,4 +10,395 @@ body {
 
 .modal.open {
   display: block;
+}
+
+.modal-buy {
+  background-color: #1a283f;
+  border-radius: 8px;
+  margin: 10% auto;
+  max-width: 600px;
+  padding: 20px;
+  position: relative;
+  width: 80%;
+}
+
+/* CSS di base */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: #e1e1e1;
+  background-color: #1a1a1a;
+  margin: 0; /* Rimosso margin auto */
+  min-height: 100vh; /* Assicura che il body copra almeno tutta l'altezza della viewport */
+  width: 100%; /* Assicura che il body copra tutta la larghezza */
+}
+
+.App {
+  width: 100%;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #81a1c1;
+  border-bottom: 2px solid #5e81ac;
+  padding-bottom: 10px;
+}
+
+h2 {
+  color: #88c0d0;
+  margin-top: 30px;
+}
+
+h3 {
+  color: #8fbcbb;
+}
+
+input[type="number"] {
+  background-color: #d5d5d5;
+}
+
+input.search-input {
+  background-color: #d5d5d5;
+}
+
+/* Regole responsive */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Previene overflow orizzontale ma permette lo scroll verticale */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Rende le immagini responsive */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Rende le tabelle responsive */
+table {
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+/* Stile per il contenitore principale delle pagine */
+.main-content {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Media query per schermi mobili */
+@media screen and (max-width: 768px) {
+  .main-content {
+    padding: 10px;
+  }
+
+  h1, h2, h3 {
+    margin: 15px 0;
+  }
+
+  input, 
+  select, 
+  textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  body {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 18px;
+  }
+}
+
+/* Media query per schermi molto piccoli */
+@media screen and (max-width: 480px) {
+  .main-content {
+    padding: 8px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+}
+
+
+
+/*applicazione per guida*/
+code {
+  background-color: #2e3440;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  color: #d8dee9;
+}
+
+pre {
+  background-color: #2e3440;
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+  border: 1px solid #434c5e;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.note {
+  background-color: #2e3440;
+  border-left: 4px solid #ebcb8b;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.warning {
+  background-color: #3b4252;
+  border-left: 4px solid #bf616a;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.tip {
+  background-color: #2e3440;
+  border-left: 4px solid #a3be8c;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+th,
+td {
+  padding: 12px;
+  border: 1px solid #434c5e;
+  text-align: left;
+}
+
+th {
+  background-color: #3b4252;
+}
+
+.section-nav {
+  background-color: #2e3440;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 30px;
+}
+
+.section-nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.section-nav ul ul {
+  padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  pre {
+    max-width: 100%;
+    overflow-x: scroll;
+  }
+}
+
+/* AUTH ZONE */
+/* Styles for the outer container */
+.container-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1a202c; /* bg-gray-900 */
+  padding: 3rem 1rem;
+}
+
+/* Styles for the form wrapper */
+.form-wrapper {
+  max-width: 400px;
+  width: 100%;
+  background-color: #2d3748; /* bg-gray-800 */
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* shadow-xl */
+}
+
+/* Styles for the title */
+.form-title {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: white;
+}
+
+/* Styles for the form */
+.form {
+  margin-top: 2rem;
+}
+
+/* Styles for the input group */
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Styles for each input wrapper */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Styles for the icons */
+.icon {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a0aec0; /* text-gray-400 */
+}
+
+/* Styles for the input fields */
+.input {
+  appearance: none;
+  border-radius: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 2.5rem;
+  border: 1px solid #4a5568; /* border-gray-600 */
+  background-color: #4a5568; /* bg-gray-700 */
+  color: white;
+  placeholder-color: #a0aec0; /* placeholder-gray-400 */
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  border-color: #4299e1; /* focus:border-blue-500 */
+  box-shadow: 0 0 0 2px #4299e1; /* focus:ring-2 */
+  z-index: 10;
+}
+
+/* Styles for the submit button */
+.submit-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: #3182ce; /* bg-blue-600 */
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #2b6cb0; /* hover:bg-blue-700 */
+}
+
+.submit-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4299e1; /* focus:ring-2 */
+}
+
+/* Styles for the toggle text and button */
+.toggle-text {
+  text-align: center;
+  color: #a0aec0; /* text-gray-400 */
+}
+
+.toggle-button {
+  font-weight: 500;
+  color: #4299e1; /* text-blue-500 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.toggle-button:hover {
+  color: #63b3ed; /* hover:text-blue-400 */
+}
+
+/* CSS aggiuntivo per il gioco */
+.game-container {
+  background-color: #4c566a; /* Colore di sfondo temporaneo per il gioco */
+  border-radius: 8px; /* bordi arrotondati per il container del gioco */
+}
+
+.bird {
+  background-color: #ebcb8b; /* colore per la barba del personaggio */
+}
+
+.pipe {
+  background-color: green; /* colore delle pipe */
+}
+
+.score {
+  font-family: 'Segoe UI', sans-serif;
+  color: #e1e1e1;
+  font-size: 24px;
+}
+
+.game-over {
+  font-size: 30px;
+  color: #bf616a;
+}
+
+.click-area {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .game-container {
+    padding: 10px;
+  }
 }

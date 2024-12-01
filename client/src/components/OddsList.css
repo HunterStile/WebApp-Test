@@ -1,939 +1,381 @@
-/* Main container layout */
+/* Base Container */
 .container-odds {
-  display: flex;
-  min-height: 100vh;
-  position: relative;
-}
-
-/* Available sports section */
-.available-sports {
-  position: fixed;
-  top: 73px;
-  width: 25rem;
-  border-right: 1px solid #e0e0e0;
-  background: white;
-  height: calc(100vh - 73px);
-  overflow-y: auto;
-  padding: 1.5rem;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
-}
-
-.sports-list {
-  list-style: none;
-  padding: 0;
-}
-
-.sports-category {
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.sports-category h3 {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 1rem;
-  cursor: pointer;
-  background: #f8f9fa;
-  border-radius: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.2s;
+  background: #1a1a1a;
+  color: #e0e0e0;
 }
 
-.sports-category h3:hover {
-  background: #e9ecef;
-}
-
-.sports-category ul {
-  list-style: none;
-  padding: 0.5rem 1rem;
-}
-
-.sports-category li {
-  padding: 0.75rem;
-  margin: 0.25rem 0;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.sports-category li:hover {
-  background-color: #f8f9fa;
-}
-
-/* Upcoming odds section */
+/* Card Styling */
 .upcoming-odds {
-  position: absolute;
-  top: 73px;
-  padding: 2rem;
-  background: #fff;
-  min-height: calc(100vh - 73px);
+  background: #2d2d2d;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
 }
 
-/* Search Filter autocomplete */
-.search-filter {
+/* Headers */
+h2 {
+  color: #ffffff;
   margin-bottom: 1.5rem;
-  width: 100%;
+  font-size: 1.5rem;
 }
 
-.search-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
+/* Filters Container */
+.filters-container {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
-.search-icon {
-  position: absolute;
-  left: 12px;
-  color: #6b7280;
+/* Date Filter */
+.date-filter {
+  background: #333333;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
-.search-input {
-  width: 100%;
-  padding: 0.75rem 2.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.clear-search-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.clear-search-btn:hover {
-  color: #4b5563;
-}
-
-.suggestions-container {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: .375rem;
-  box-shadow: 0 4px 6px -1px #0000001a;
-  margin-top: .25rem;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 50;
-}
-.suggestion-item {
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.suggestion-item:hover {
-  background-color: #f3f4f6;
-}
-
-/* Bookmaker filters */
-
-.bookmakers-filter {
-  width: 100%;
-}
-
-.bookmakers-content {
-  display: flex;
-  gap: 1rem;
-}
-
-.bookmakers-section {
-  position: relative;
-  min-width: 200px;
-  /* Aggiungiamo questa proprietà per creare un contesto di posizionamento */
-  isolation: isolate;
-}
-
-.bookmakers-title {
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.select-all-button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
-  background-color: #fff;
-  /* Aggiungiamo z-index per assicurarci che stia sopra il dropdown */
-  position: relative;
-  z-index: 2;
-}
-
-.bookmaker-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.bookmaker-checkbox input[type="checkbox"] {
-  margin: 0;
-}
-
-.chevron-icon {
-  transition: transform 0.2s ease-in-out;
-}
-
-.chevron-icon.rotate {
-  transform: rotate(180deg);
-}
-
-.dropdown-menu {
-  position: absolute;
-  width: 100%;
-  background-color: #f5f5f5;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
-  /* Modifichiamo il posizionamento per restare nel contesto */
-  top: 100%;
-  left: 0;
-  margin-top: 0.25rem;
-  z-index: 1;
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 0.5rem;
+.date-inputs-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  /* Aggiungiamo un'ombra per dare profondità */
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.dropdown-menu .bookmaker-checkbox {
-  padding: 0.25rem;
-}
-
-.dropdown-menu .bookmaker-checkbox:hover {
-  background-color: #e2e8f0;
-  border-radius: 0.25rem;
-}
-
-/* Stile per la scrollbar */
-.dropdown-menu::-webkit-scrollbar {
-  width: 8px;
-}
-
-.dropdown-menu::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .bookmakers-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-}
-
-/* Data Filters */
-
-.date-filter {
-  padding: 1.5rem;
-  background: #f5f5f5;
-  border-radius: 8px;
-}
-
-.date-filter h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
-}
-
-.date-range-inputs {
-  display: flex;
-  flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1rem;
 }
 
 .date-input-group {
-  flex: 1;
-  min-width: 200px;
-}
-
-.date-input-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #555;
-}
-
-.date-input-group input[type="date"] {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: white;
-}
-
-.clear-date-btn {
-  align-self: flex-end;
-  padding: 0.75rem 1.5rem;
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  height: fit-content;
-}
-
-.clear-date-btn:hover {
-  background-color: #cc0000;
-}
-
-.date-error {
-  color: #ff4444;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.quick-select-dates {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.quick-select-dates button {
-  padding: 0.5rem 1rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.quick-select-dates button:hover {
-  background-color: #357abd;
-}
-
-/*Rating Filters*/
-
-.filters-container {
-  display: flex;
-  flex-direction: row;
-  gap: 1.5rem;
-  margin: 1rem 0;
-}
-
-.rating-filter {
-  background: #f5f5f5;
-  padding: 1.5rem;
-  border-radius: 8px;
-}
-
-.rating-filter h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
-}
-
-.rating-inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.rating-slider-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.rating-slider {
-  width: 100%;
-  height: 6px;
-  -webkit-appearance: none;
-  background: #ddd;
-  border-radius: 3px;
-  outline: none;
-}
-
-.rating-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  background: #4a90e2;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background .15s ease-in-out;
-}
-
-.rating-slider::-webkit-slider-thumb:hover {
-  background: #357abd;
-}
-
-.rating-inputs-numeric {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.rating-input-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.rating-input-group input[type="number"] {
-  width: 80px;
+.date-input-group input {
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid #444444;
   border-radius: 4px;
   font-size: 0.9rem;
+  background: #2d2d2d;
+  color: #e0e0e0;
 }
 
-.quick-select-ratings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.quick-select-ratings button {
-  padding: 0.5rem 1rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-size: 0.9rem;
-}
-
-.quick-select-ratings button:hover {
-  background-color: #357abd;
-}
-
-.reset-filters-btn {
-  padding: 0.5rem 1rem;
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  align-self: flex-end;
-}
-
-.reset-filters-btn:hover {
-  background-color: #cc0000;
-}
-
-/* Odds Filters */
-
+/* Rating and Odds Filter */
+.rating-filter,
 .odds-filter {
-  background-color: #f5f5f5;
+  background: #333333;
   padding: 1rem;
   border-radius: 8px;
-  margin-bottom: 1rem;
 }
 
+.rating-inputs,
 .odds-inputs {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+.rating-slider-group,
 .odds-slider-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
+.rating-slider,
 .odds-slider {
   width: 100%;
-  cursor: pointer;
+  background: #2d2d2d;
 }
 
+.rating-inputs-numeric,
 .odds-inputs-numeric {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin-top: 0.5rem;
 }
 
-.odds-input-group {
+/* Bookmakers Filter */
+.bookmakers-filter {
+  background: #333333;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.bookmakers-section {
+  margin-bottom: 1rem;
+}
+
+.select-all-button {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.odds-input-group input {
-  width: 80px;
-  padding: 0.25rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.quick-select-odds {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.quick-select-odds button {
-  padding: 0.5rem 1rem;
-  background-color: #e0e0e0;
-  border: none;
+  padding: 0.5rem;
+  background: #2d2d2d;
+  border: 1px solid #444444;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  color: #e0e0e0;
 }
 
-.quick-select-odds button:hover {
-  background-color: #d0d0d0;
+.dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #2d2d2d;
+  border: 1px solid #444444;
+  border-radius: 4px;
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .rating-inputs-numeric {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .quick-select-ratings {
-    flex-direction: column;
-  }
-
-  .quick-select-ratings button {
-    width: 100%;
-  }
+/* Search Filter */
+.search-filter {
+  margin-bottom: 2rem;
 }
 
-/* Table Layout */
+.search-input-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem;
+  border: 1px solid #444444;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888888;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888888;
+}
+
+/* Table Styling */
 .odds-table {
   width: 100%;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.5rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 2rem;
 }
 
-.odds-table thead th {
-  background-color: #f8f9fa;
+.odds-table th,
+.odds-table td {
   padding: 1rem;
-  font-weight: 600;
   text-align: left;
-  border-bottom: 2px solid #eee;
+  border-bottom: 1px solid #444444;
 }
 
-.odds-table tbody td {
-  padding: 1rem;
-  border-bottom: 1px solid #eee;
-  vertical-align: middle;
-}
-
-.odds-table tr:hover {
-  background-color: #f8f9fa;
+.odds-table th {
+  background: #333333;
+  font-weight: 600;
+  color: #ffffff;
 }
 
 .match-info {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 .league-name {
-  font-weight: 600;
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  color: #888888;
 }
 
-.team-names {
-  font-weight: 500;
-}
-
-.odds-value {
+/* Modal Styling */
+.modal-odds {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
+  justify-content: center;
   align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #2d2d2d;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+}
+
+/* Pagination */
+.pagination-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #888888;
+}
+
+.pagination-buttons {
+  display: flex;
   gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-btn,
+.pagination-number {
+  padding: 0.5rem 1rem;
+  border: 1px solid #444444;
+  border-radius: 4px;
+  background: #2d2d2d;
+  cursor: pointer;
+  color: #e0e0e0;
+}
+
+.pagination-number.active {
+  background: #0066cc;
+  color: white;
+  border-color: #0066cc;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .container-odds {
+    padding: 0.5rem;
+  }
+  
+  .filters-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .odds-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .odds-table thead {
+    display: none;
+  }
+
+  .odds-table tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-bottom: 1rem;
+    border: 1px solid #444444;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .odds-table td {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    padding: 0.5rem;
+    border: none;
+  }
+
+  .odds-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #888888;
+  }
+}
+
+/* Utility Classes */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary {
+  background: #4a4a4a;
+  color: white;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: #5a5a5a;
 }
 
 .calculator-btn {
-  padding: 0.5rem 1rem;
-  background: #007bff;
+  background: #0066cc;
   color: white;
   border: none;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .calculator-btn:hover {
-  background: #0056b3;
+  background: #0052a3;
 }
 
+/* Additional improvements */
+.odds-value,
 .exchange-odds {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #666;
-}
-
-/* Pagination Controls */
-.pagination-controls {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.pagination-info {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.pagination-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pagination-btn {
-  padding: 0.5rem 1rem;
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #007bff;
-  font-size: 0.9rem;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #f8f9fa;
-  border-color: #007bff;
-}
-
-.pagination-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.pagination-numbers {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pagination-number {
-  padding: 0.5rem 1rem;
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  cursor: pointer;
-  min-width: 2.5rem;
-  text-align: center;
-}
-
-.pagination-number.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.pagination-number:hover:not(.active) {
-  background: #f8f9fa;
-  border-color: #007bff;
-}
-
-.pagination-ellipsis {
-  color: #666;
-  padding: 0 0.5rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .pagination-buttons {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .pagination-info {
-    text-align: center;
-  }
-}
-
-/* Modal styles ODDSMATCHER */
-
-.results-section {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-}
-
-.result-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.result-row:last-child {
-  border-bottom: none;
-}
-
-.result-row strong {
+  font-family: monospace;
   font-size: 1.1rem;
+  color: #e0e0e0;
 }
 
-.profit-positive,
+.profit-positive {
+  color: #2ecc71;
+}
+
+.profit-negative {
+  color: #e74c3c;
+}
+
 .rating-positive {
-  color: #28a745;
+  color: #2ecc71;
 }
 
-.profit-negative,
 .rating-negative {
-  color: #dc3545;
+  color: #e74c3c;
 }
 
-.input-section {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin: 1.5rem 0;
+.chevron-icon {
+  transition: transform 0.3s ease;
 }
 
-.market-type {
-  font-size: 0.9rem;
-  color: #6c757d;
-  margin-top: 0.5rem;
+.chevron-icon.rotate {
+  transform: rotate(180deg);
 }
 
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-  margin-left: 0.5rem;
-}
-
-.odd-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.event-rating {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  background: #f8f9fa;
-}
-
-.event-rating.high {
-  color: #28a745;
-  background: rgba(40, 167, 69, 0.1);
-}
-
-.event-rating.medium {
-  color: #ffc107;
-  background: rgba(255, 193, 7, 0.1);
-}
-
-.event-rating.low {
-  color: #dc3545;
-  background: rgba(220, 53, 69, 0.1);
-}
-
-.outcome-rating {
-  font-weight: bold;
-  color: #2196f3;
-  margin-top: 0.5rem;
-}
-
-.bookmaker-odds-single {
+.error-message {
+  color: #e74c3c;
   padding: 1rem;
-  background-color: #f5f5f5;
+  background: #442326;
   border-radius: 4px;
-  margin-top: 0.5rem;
-}
-
-.betfair-odd {
-  margin-left: 1rem;
-  color: #666;
-  font-size: 0.9em;
-}
-
-.view-toggle {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-  gap: 1rem;
-}
-
-.toggle-btn {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.toggle-btn.active {
-  background: #2196f3;
-  color: white;
-  border-color: #2196f3;
-}
-
-.toggle-btn:hover {
-  background: #f0f0f0;
-}
-
-.toggle-btn.active:hover {
-  background: #1976d2;
-}
-
-/* Modal styles TRIPLA PUNTATA*/
-.modal-odds {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.modal-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
-}
-
-.modal-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1rem;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 6px;
 }
 
-.input-group {
-  margin-bottom: 1.25rem;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #666;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.modal-actions {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
-
-/* Responsive design */
-@media (max-width: 1024px) {
-  .available-sports {
-    width: 20rem;
-  }
-
-  .upcoming-odds {
-    left: 20rem;
-    width: calc(100% - 20rem);
-  }
-}
-
-@media (max-width: 768px) {
-  .container-odds {
-    flex-direction: column;
-  }
-
-  .available-sports {
-    position: relative;
-    width: 100%;
-    top: 0;
-    height: auto;
-    max-height: 300px;
-  }
-
-  .upcoming-odds {
-    position: relative;
-    left: 0;
-    width: 100%;
-    top: 0;
-  }
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #888888;
 }

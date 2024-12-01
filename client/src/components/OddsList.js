@@ -243,49 +243,69 @@ const OddsList = () => {
     };
 
     return (
-      <div className="date-filter">
-        <h3>Filter by Date Range</h3>
-        <div className="date-range-inputs">
-          <div className="date-input-group">
-            <label htmlFor="startDate">From:</label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={dateRange.startDate}
-              min={today}
-              max={dateRange.endDate || undefined}
-              onChange={handleDateChange}
-            />
-          </div>
+      <div className="w-full">
+        <h3 className="text-sm text-slate-400 mb-2">Filter by Date Range</h3>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="startDate"
+                className="block text-sm font-medium text-slate-300"
+              >
+                From:
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                name="startDate"
+                value={dateRange.startDate}
+                min={today}
+                max={dateRange.endDate || undefined}
+                onChange={handleDateChange}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+              />
+            </div>
 
-          <div className="date-input-group">
-            <label htmlFor="endDate">To:</label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={dateRange.endDate}
-              min={dateRange.startDate || today}
-              onChange={handleDateChange}
-            />
+            <div className="space-y-2">
+              <label
+                htmlFor="endDate"
+                className="block text-sm font-medium text-slate-300"
+              >
+                To:
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                value={dateRange.endDate}
+                min={dateRange.startDate || today}
+                onChange={handleDateChange}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+              />
+            </div>
           </div>
 
           {(dateRange.startDate || dateRange.endDate) && (
             <button
-              className="clear-date-btn"
               onClick={clearDates}
+              className="inline-flex items-center px-3 py-2 text-sm rounded-lg
+                       bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors
+                       focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               Clear Dates
             </button>
           )}
-        </div>
 
-        {!isDateRangeValid() && (
-          <div className="date-error">
-            End date must be after start date
-          </div>
-        )}
+          {!isDateRangeValid() && (
+            <div className="text-red-400 text-sm bg-red-500/10 border border-red-500 rounded-lg p-2">
+              End date must be after start date
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -324,11 +344,14 @@ const OddsList = () => {
     };
 
     return (
-      <div className="rating-filter">
-        <h3>Filter by Rating Range</h3>
-        <div className="rating-inputs">
-          <div className="rating-slider-group">
-            <label>Minimum Rating: {localRatingRange.min}%</label>
+      <div className="w-full">
+        <h3 className="text-sm text-slate-400 mb-2">Filter by Rating Range</h3>
+        <div className="space-y-4">
+          {/* Slider per il minimo */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-300">
+              Minimum Rating: <span className="text-cyan-400">{localRatingRange.min}%</span>
+            </label>
             <input
               type="range"
               name="min"
@@ -336,12 +359,27 @@ const OddsList = () => {
               max={DEFAULT_RATING_RANGE.max}
               value={localRatingRange.min}
               onChange={handleRangeChange}
-              className="rating-slider"
+              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0"
             />
           </div>
-
-          <div className="rating-slider-group">
-            <label>Maximum Rating: {localRatingRange.max}%</label>
+    
+          {/* Slider per il massimo */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-300">
+              Maximum Rating: <span className="text-cyan-400">{localRatingRange.max}%</span>
+            </label>
             <input
               type="range"
               name="max"
@@ -349,13 +387,26 @@ const OddsList = () => {
               max={DEFAULT_RATING_RANGE.max}
               value={localRatingRange.max}
               onChange={handleRangeChange}
-              className="rating-slider"
+              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0"
             />
           </div>
-
-          <div className="rating-inputs-numeric">
-            <div className="rating-input-group">
-              <label>Min:</label>
+    
+          {/* Input numerici */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Min:</label>
               <input
                 type="number"
                 name="min"
@@ -365,10 +416,14 @@ const OddsList = () => {
                 min={DEFAULT_RATING_RANGE.min}
                 max={localRatingRange.max}
                 step="0.1"
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
               />
             </div>
-            <div className="rating-input-group">
-              <label>Max:</label>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Max:</label>
               <input
                 type="number"
                 name="max"
@@ -378,13 +433,19 @@ const OddsList = () => {
                 min={localRatingRange.min}
                 max={DEFAULT_RATING_RANGE.max}
                 step="0.1"
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
               />
             </div>
           </div>
-
+    
+          {/* Pulsante Reset */}
           <button
-            className="reset-filters-btn"
             onClick={resetRatingRange}
+            className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 
+                     rounded-lg transition-colors duration-200 
+                     focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             Reset Rating Range
           </button>
@@ -427,11 +488,14 @@ const OddsList = () => {
     };
 
     return (
-      <div className="odds-filter">
-        <h3>Filter by Odds Range</h3>
-        <div className="odds-inputs">
-          <div className="odds-slider-group">
-            <label>Minimum Odds: {localOddsRange.min}</label>
+      <div className="w-full">
+        <h3 className="text-sm text-slate-400 mb-2">Filter by Odds Range</h3>
+        <div className="space-y-4">
+          {/* Slider Quota Minima */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-300">
+              Minimum Odds: <span className="text-pink-400">{localOddsRange.min}</span>
+            </label>
             <input
               type="range"
               name="min"
@@ -440,12 +504,28 @@ const OddsList = () => {
               step="0.01"
               value={localOddsRange.min}
               onChange={handleRangeChange}
-              className="odds-slider"
+              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0
+                       focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
           </div>
-
-          <div className="odds-slider-group">
-            <label>Maximum Odds: {localOddsRange.max}</label>
+    
+          {/* Slider Quota Massima */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-300">
+              Maximum Odds: <span className="text-pink-400">{localOddsRange.max}</span>
+            </label>
             <input
               type="range"
               name="max"
@@ -454,13 +534,27 @@ const OddsList = () => {
               step="0.01"
               value={Math.min(localOddsRange.max, 20)}
               onChange={handleRangeChange}
-              className="odds-slider"
+              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0
+                       focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
           </div>
-
-          <div className="odds-inputs-numeric">
-            <div className="odds-input-group">
-              <label>Min:</label>
+    
+          {/* Input numerici */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Min:</label>
               <input
                 type="number"
                 name="min"
@@ -470,10 +564,14 @@ const OddsList = () => {
                 min={DEFAULT_ODDS_RANGE.min}
                 max={localOddsRange.max}
                 step="0.01"
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
               />
             </div>
-            <div className="odds-input-group">
-              <label>Max:</label>
+    
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Max:</label>
               <input
                 type="number"
                 name="max"
@@ -483,13 +581,19 @@ const OddsList = () => {
                 min={localOddsRange.min}
                 max={DEFAULT_ODDS_RANGE.max}
                 step="0.01"
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
               />
             </div>
           </div>
-
+    
+          {/* Pulsante Reset */}
           <button
-            className="reset-filters-btn"
             onClick={resetOddsRange}
+            className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 
+                     rounded-lg transition-colors duration-200 
+                     focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             Reset Odds Range
           </button>
@@ -588,72 +692,99 @@ const OddsList = () => {
     };
 
     return (
-      <div className="bookmakers-filter">
-        <div className="bookmakers-content">
-          {/* Regular Bookmakers Select */}
-          <div className="bookmakers-section">
-            <h3 className="bookmakers-title">Bookmakers ({selectedRegular.length})</h3>
-            <div
-              className="select-all-button"
+      <div className="w-full">
+        <h3 className="text-sm text-slate-400 mb-2">Filter by Bookmakers</h3>
+        <div className="space-y-4">
+          {/* Regular Bookmakers Section */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-slate-300">
+                Bookmakers ({selectedRegular.length})
+              </h3>
+            </div>
+            
+            <div 
+              className="w-full p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors duration-200"
               onClick={() => setIsBookmakersOpen(!isBookmakersOpen)}
             >
-              <label className="bookmaker-checkbox">
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAllRegular}
-                  checked={selectedRegular.length === Object.values(regularMapping).length}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAllRegular}
+                    checked={selectedRegular.length === Object.values(regularMapping).length}
+                    className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
+                  />
+                  <span className="text-sm text-slate-300">Select/Deselect All</span>
+                </label>
+                <ChevronDown 
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    isBookmakersOpen ? 'rotate-180' : ''
+                  }`}
                 />
-                <span>Select/Deselect All</span>
-              </label>
-              <ChevronDown className={`chevron-icon ${isBookmakersOpen ? 'rotate' : ''}`} />
+              </div>
             </div>
-
+  
             {isBookmakersOpen && (
-              <div className="dropdown-menu">
+              <div className="mt-2 space-y-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
                 {regularBookmakers.map((bookmaker, index) => (
-                  <label key={index} className="bookmaker-checkbox">
+                  <label key={index} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
                       value={bookmaker}
                       checked={selectedBookmakers.includes(regularMapping[bookmaker])}
                       onChange={handleRegularBookmakerChange}
+                      className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
                     />
-                    <span>{bookmaker}</span>
+                    <span className="text-sm text-slate-300">{bookmaker}</span>
                   </label>
                 ))}
               </div>
             )}
           </div>
-
-          {/* Exchange Select */}
-          <div className="bookmakers-section">
-            <h3 className="bookmakers-title">Exchange ({selectedExchange.length})</h3>
-            <div
-              className="select-all-button"
+  
+          {/* Exchange Section */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-slate-300">
+                Exchange ({selectedExchange.length})
+              </h3>
+            </div>
+            
+            <div 
+              className="w-full p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors duration-200"
               onClick={() => setIsExchangeOpen(!isExchangeOpen)}
             >
-              <label className="bookmaker-checkbox">
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAllExchange}
-                  checked={selectedExchange.length === Object.values(exchangeMapping).length}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAllExchange}
+                    checked={selectedExchange.length === Object.values(exchangeMapping).length}
+                    className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
+                  />
+                  <span className="text-sm text-slate-300">Select/Deselect All</span>
+                </label>
+                <ChevronDown 
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    isExchangeOpen ? 'rotate-180' : ''
+                  }`}
                 />
-                <span>Select/Deselect All</span>
-              </label>
-              <ChevronDown className={`chevron-icon ${isExchangeOpen ? 'rotate' : ''}`} />
+              </div>
             </div>
-
+  
             {isExchangeOpen && (
-              <div className="dropdown-menu">
+              <div className="mt-2 space-y-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
                 {exchangeOptions.map((bookmaker, index) => (
-                  <label key={index} className="bookmaker-checkbox">
+                  <label key={index} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
                       value={bookmaker}
                       checked={selectedBookmakers.includes(exchangeMapping[bookmaker])}
                       onChange={handleExchangeChange}
+                      className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
                     />
-                    <span>{bookmaker}</span>
+                    <span className="text-sm text-slate-300">{bookmaker}</span>
                   </label>
                 ))}
               </div>
@@ -700,7 +831,7 @@ const OddsList = () => {
 
     return (
       <div className="search-filter">
-        <h3>Search Matches</h3>
+        <h3>Search Matches!</h3>
         <div className="search-input-container">
           <Search className="search-icon" size={20} />
           <input
@@ -895,167 +1026,180 @@ const OddsList = () => {
 
   //MAIN PAGE//
   return (
-    <div className="container-odds">
-      {/* Sezione Quote */}
-      <div className="upcoming-odds">
-        <h2>ODDSMATCHER</h2>
-        <div className="filters-container">
-          <DateRangeFilter />
-          <RatingRangeFilter />
-          <OddsRangeFilter />
-          <BookmakersFilter
-            selectedBookmakers={selectedBookmakers}
-            setSelectedBookmakers={setSelectedBookmakers}
-            bookmakerMapping={bookmakerMapping}
-            bookmakerOptions={bookmakerOptions}
-          />
-        </div>
-        <SearchFilter />
-        <h2>Elenco Partite</h2>
-        {error && <p className="error-message">{error}</p>}
+    <div className="min-h-screen bg-slate-900 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-purple-400 mb-4">ODDSMATCHER</h2>
 
-        {/* Lista delle Quote in formato tabella */}
-        {filteredOdds.length > 0 ? (
-          <>
-            <table className="odds-table">
-              <thead>
-                <tr>
-                  <th>Data e Ora</th>
-                  <th>Partita</th>
-                  <th>Tipo</th>
-                  <th>Rating</th>
-                  <th>Calcolatore</th>
-                  <th>Bookmaker</th>
-                  <th>Quota</th>
-                  <th>Exchange</th>
-                  <th>Quota Exchange</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getCurrentPageOdds().map((game, index) => (
-                  <tr key={index}>
-                    <td>{formatDate(game.commence_time)}</td>
-                    <td>
-                      <div className="match-info">
-                        <span className="league-name">
-                          {getLeagueName(game.league)}
-                        </span>
-                        <span className="team-names">
-                          {game.home_team} vs {game.away_team}
-                        </span>
-                      </div>
-                    </td>
-                    <td>{game.selectedOutcome.type}</td>
-                    <td>{game.selectedOutcome.rating.toFixed(2)}%</td>
-                    <td>
-                      <button
-                        className="calculator-btn"
-                        onClick={() => {
-                          const market = game.bookmakers
-                            .find(b => b.title === game.selectedOutcome.bookmaker)
-                            ?.markets.find(m => m.key === 'h2h');
-                          const outcome = market?.outcomes[
-                            game.selectedOutcome.type === '1' ? 0 :
-                              game.selectedOutcome.type === '2' ? 1 : 2
-                          ];
-                          if (market && outcome) {
-                            openArbitrageModal(
-                              game,
-                              market,
-                              outcome,
-                              game.selectedOutcome.type === '1' ? 0 :
-                                game.selectedOutcome.type === '2' ? 1 : 2
-                            );
-                          }
-                        }}
-                      >
-                        Calcola
-                      </button>
-                    </td>
-                    <td>{game.selectedOutcome.bookmaker}</td>
-                    <td className="odds-value">{game.selectedOutcome.odds}</td>
-                    <td>Betfair</td>
-                    <td className="exchange-odds">{game.selectedOutcome.betfairOdds}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Filters Section */}
+          <div className="bg-slate-800 rounded-lg p-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <DateRangeFilter />
+              <RatingRangeFilter />
+              <OddsRangeFilter />
+              <BookmakersFilter
+                selectedBookmakers={selectedBookmakers}
+                setSelectedBookmakers={setSelectedBookmakers}
+                bookmakerMapping={bookmakerMapping}
+                bookmakerOptions={bookmakerOptions}
+              />
+            </div>
+            <div className="mt-4">
+              <SearchFilter />
+            </div>
+          </div>
 
-            {/* Controlli Paginazione */}
-            <div className="pagination-controls">
-              <div className="pagination-info">
-                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
-              </div>
-              <div className="pagination-buttons">
-                <button
-                  className="pagination-btn"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(1)}
-                >
-                  First
-                </button>
-                <button
-                  className="pagination-btn"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                >
-                  Previous
-                </button>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
+              {error}
+            </div>
+          )}
 
-                <div className="pagination-numbers">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(pageNum => {
-                      return (
-                        pageNum === 1 ||
-                        pageNum === totalPages ||
-                        Math.abs(pageNum - currentPage) <= 1
-                      );
-                    })
-                    .map((pageNum, index, array) => (
-                      <React.Fragment key={pageNum}>
-                        {index > 0 && array[index - 1] !== pageNum - 1 && (
-                          <span className="pagination-ellipsis">...</span>
-                        )}
-                        <button
-                          className={`pagination-number ${pageNum === currentPage ? 'active' : ''}`}
-                          onClick={() => setCurrentPage(pageNum)}
-                        >
-                          {pageNum}
-                        </button>
-                      </React.Fragment>
+          {/* Odds Table */}
+          {filteredOdds.length > 0 ? (
+            <div className="bg-slate-800 rounded-lg p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-700">
+                    <tr>
+                      <th className="p-4 text-left text-sm text-slate-400">Data e Ora</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Partita</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Tipo</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Rating</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Calcolatore</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Bookmaker</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Quota</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Exchange</th>
+                      <th className="p-4 text-left text-sm text-slate-400">Quota Exchange</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700">
+                    {getCurrentPageOdds().map((game, index) => (
+                      <tr key={index} className="hover:bg-slate-700/50">
+                        <td className="p-4">{formatDate(game.commence_time)}</td>
+                        <td className="p-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm text-slate-400">{getLeagueName(game.league)}</span>
+                            <span className="font-medium">{game.home_team} vs {game.away_team}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">{game.selectedOutcome.type}</td>
+                        <td className="p-4 text-cyan-400">{game.selectedOutcome.rating.toFixed(2)}%</td>
+                        <td className="p-4">
+                          <button
+                            onClick={() => {
+                              const market = game.bookmakers
+                                .find(b => b.title === game.selectedOutcome.bookmaker)
+                                ?.markets.find(m => m.key === 'h2h');
+                              const outcome = market?.outcomes[
+                                game.selectedOutcome.type === '1' ? 0 :
+                                  game.selectedOutcome.type === '2' ? 1 : 2
+                              ];
+                              if (market && outcome) {
+                                openArbitrageModal(game, market, outcome,
+                                  game.selectedOutcome.type === '1' ? 0 :
+                                    game.selectedOutcome.type === '2' ? 1 : 2
+                                );
+                              }
+                            }}
+                            className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg text-sm"
+                          >
+                            Calcola
+                          </button>
+                        </td>
+                        <td className="p-4">{game.selectedOutcome.bookmaker}</td>
+                        <td className="p-4 text-green-400">{game.selectedOutcome.odds}</td>
+                        <td className="p-4">Betfair</td>
+                        <td className="p-4 text-pink-400">{game.selectedOutcome.betfairOdds}</td>
+                      </tr>
                     ))}
-                </div>
+                  </tbody>
+                </table>
+              </div>
 
-                <button
-                  className="pagination-btn"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                >
-                  Next
-                </button>
-                <button
-                  className="pagination-btn"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(totalPages)}
-                >
-                  Last
-                </button>
+              {/* Pagination */}
+              <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="text-sm text-slate-400">
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(1)}
+                  >
+                    First
+                  </button>
+                  <button
+                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  >
+                    Previous
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(pageNum => {
+                        return (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          Math.abs(pageNum - currentPage) <= 1
+                        );
+                      })
+                      .map((pageNum, index, array) => (
+                        <React.Fragment key={pageNum}>
+                          {index > 0 && array[index - 1] !== pageNum - 1 && (
+                            <span className="text-slate-400">...</span>
+                          )}
+                          <button
+                            className={`px-4 py-2 rounded-lg ${pageNum === currentPage
+                              ? 'bg-purple-500'
+                              : 'bg-slate-700 hover:bg-slate-600'
+                              }`}
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </button>
+                        </React.Fragment>
+                      ))}
+                  </div>
+
+                  <button
+                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  >
+                    Next
+                  </button>
+                  <button
+                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                  >
+                    Last
+                  </button>
+                </div>
               </div>
             </div>
-          </>
-        ) : (
-          <p className="no-data">No odds available.</p>
+          ) : (
+            <div className="bg-slate-800 rounded-lg p-8 text-center text-slate-400">
+              No odds available.
+            </div>
+          )}
+        </div>
+
+        {/* Arbitrage Modal */}
+        {arbitrageModalData && (
+          <ArbitrageModal
+            isOpen={!!arbitrageModalData}
+            onClose={() => setArbitrageModalData(null)}
+            {...arbitrageModalData}
+          />
         )}
       </div>
-
-      {/* Modal per l'arbitraggio */}
-      {arbitrageModalData && (
-        <ArbitrageModal
-          isOpen={!!arbitrageModalData}
-          onClose={() => setArbitrageModalData(null)}
-          {...arbitrageModalData}
-        />
-      )}
     </div>
   );
 };

@@ -121,7 +121,7 @@ const generateDragon = (eggType) => {
         probability: 34
       }
     ],
-    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 1000 }],
+    'Uncommon Egg': [{ name: 'Uncommon Dragon', resistance: 20, miningPower: 10 }],
     'Rare Egg': [{ name: 'Rare Dragon', resistance: 30, miningPower: 20 }],
     'Epic Egg': [{ name: 'Epic Dragon', resistance: 40, miningPower: 30 }],
     'Legendary Egg': [{ name: 'Legendary Dragon', resistance: 50, miningPower: 50 }],
@@ -297,14 +297,14 @@ router.post('/buy-egg', async (req, res) => {
   const { username, eggType, price, quantity } = req.body;
 
   try {
-    console.log('Request Body:', req.body);
+    //console.log('Request Body:', req.body);
 
     const buyer = await User.findOne({ username });
     if (!buyer) {
       return res.status(404).send('Buyer not found');
     }
 
-    console.log('Buyer:', buyer);
+    //console.log('Buyer:', buyer);
 
     const seller = await User.findOne({
       'eggsForSale.eggType': eggType,
@@ -315,7 +315,7 @@ router.post('/buy-egg', async (req, res) => {
       return res.status(404).send('Seller not found');
     }
 
-    console.log('Seller:', seller);
+    //console.log('Seller:', seller);
 
     const eggForSale = seller.eggsForSale.find(
       (egg) => egg.eggType === eggType && egg.price === price
@@ -350,7 +350,7 @@ router.post('/buy-egg', async (req, res) => {
     await buyer.save();
     await seller.save();
 
-    console.log('Purchase successful');
+    //console.log('Purchase successful');
     res.send('Purchase successful');
   } catch (error) {
     console.error('Error processing purchase:', error);

@@ -5,7 +5,9 @@ import Navbar from './components/NavBar';
 import Home from './components/Home';
 import Login from './components/Login';
 import PrivateRoute from './components/PrivateRoute';
-import OddsList from './components/OddsList';
+import Oddsmatcher from './components/Oddsmatcher';
+import DoppiaPuntata from  './components/TriplaPuntata';
+import TriplaPuntata from  './components/TriplaPuntata';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
@@ -24,7 +26,9 @@ function App() {
                 
                 {/* Protected routes */}
                 <Route element={<PrivateRoute />}>
-                  <Route path="/oddsmatcher" element={<OddsList />} />
+                  <Route path="/oddsmatcher" element={<Oddsmatcher />} />
+                  <Route path="/doppia_puntata" element={<DoppiaPuntata />} />
+                  <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
                 </Route>
               </Routes>
             </div>

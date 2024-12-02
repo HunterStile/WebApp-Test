@@ -3,8 +3,6 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
-const tcRoutes = require('./routes/tc');
-const cryptoRoutes = require('./routes/crypto');
 const oddsRoutes = require('./routes/odds');
 
 require('dotenv').config();
@@ -36,8 +34,6 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
 app.use('/api/auth', authRoutes);
-app.use('/api/tc', tcRoutes);
-app.use('/api/crypto', cryptoRoutes);
 app.use('/api/odds', oddsRoutes);
 
 // Catch-all route

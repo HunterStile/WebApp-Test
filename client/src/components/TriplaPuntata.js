@@ -193,7 +193,7 @@ const OddsList = () => {
 
     const getFilteredOdds = () => {
         let filteredGames = [];
-
+    
         if (!selectedBookmakers.length) {
             filteredGames = odds;
         } else {
@@ -204,33 +204,33 @@ const OddsList = () => {
                 )
             })).filter(game => game.bookmakers.length > 0);
         }
-
+    
         // Applica il filtro delle date
         if (dateRange.startDate || dateRange.endDate) {
             filteredGames = filteredGames.filter(game => {
                 const gameDate = new Date(game.commence_time);
                 const startDate = dateRange.startDate ? new Date(dateRange.startDate) : null;
                 const endDate = dateRange.endDate ? new Date(dateRange.endDate) : null;
-
+    
                 // Se solo startDate è impostato
                 if (startDate && !endDate) {
                     return gameDate >= startDate;
                 }
-
+                
                 // Se solo endDate è impostato
                 if (!startDate && endDate) {
                     return gameDate <= endDate;
                 }
-
+                
                 // Se entrambe le date sono impostate
                 if (startDate && endDate) {
                     return gameDate >= startDate && gameDate <= endDate;
                 }
-
+    
                 return true;
             });
         }
-
+    
         // Calcola la migliore combinazione di quote per ogni partita
         const oddsWithRating = filteredGames.map(game => {
             const bestCombination = findBestOddsCombination(game);
@@ -239,15 +239,24 @@ const OddsList = () => {
                 bestCombination
             };
         }).filter(game => game.bestCombination !== null);
-
+    
         // Applica il filtro del rating
-        const filteredByRating = oddsWithRating.filter(game =>
-            game.bestCombination.rating >= ratingRange.min &&
+        const filteredByRating = oddsWithRating.filter(game => 
+            game.bestCombination.rating >= ratingRange.min && 
             game.bestCombination.rating <= ratingRange.max
         );
-
+    
+        // Applica il filtro di ricerca
+        const filteredBySearch = searchTerm 
+            ? filteredByRating.filter(game => 
+                `${game.home_team} vs ${game.away_team}`
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+              )
+            : filteredByRating;
+    
         // Ordina per rating in ordine decrescente
-        return filteredByRating.sort((a, b) => b.bestCombination.rating - a.bestCombination.rating);
+        return filteredBySearch.sort((a, b) => b.bestCombination.rating - a.bestCombination.rating);
     };
 
     const filteredOdds = getFilteredOdds();
@@ -966,15 +975,8 @@ const OddsList = () => {
                     {/* Filters Section */}
                     <div className="bg-slate-800 rounded-lg p-4 mb-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <DateRangeFilter
-                                dateRange={dateRange}
-                                setDateRange={setDateRange}
-                            />
-                            <RatingRangeFilter
-                                ratingRange={ratingRange}
-                                setRatingRange={setRatingRange}
-                                DEFAULT_RATING_RANGE={DEFAULT_RATING_RANGE}
-                            />
+                            <DateRangeFilter/>
+                            <RatingRangeFilter/>
                             <OddsRangeFilter />
                             <BookmakersFilter
                                 selectedBookmakers={selectedBookmakers}

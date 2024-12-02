@@ -273,6 +273,13 @@ const OddsList = () => {
                         </div>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
+                            {error}
+                        </div>
+                    )}
+
                     {/* Odds Table */}
                     {filteredOdds.length > 0 ? (
                         <div className="bg-slate-800 rounded-lg overflow-hidden">

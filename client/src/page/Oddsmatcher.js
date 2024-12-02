@@ -1,8 +1,8 @@
 //components/Oddsmatcher.js
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
-import { ChevronDown, Search, X } from 'lucide-react';
+import {Search, X } from 'lucide-react';
 import Modal from 'react-modal';
 import DateRangeFilter from '../components/filters/DateRangeFilter';
 import RatingRangeFilter from '../components/filters/RatingRangeFilter';

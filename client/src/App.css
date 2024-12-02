@@ -3,24 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* funzionamento modale */
-.modal {
-  display: none;
-}
 
-.modal.open {
-  display: block;
-}
-
-.modal-buy {
-  background-color: #1a283f;
-  border-radius: 8px;
-  margin: 10% auto;
-  max-width: 600px;
-  padding: 20px;
-  position: relative;
-  width: 80%;
-}
 
 /* CSS di base */
 body {

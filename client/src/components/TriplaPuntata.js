@@ -1,456 +1,429 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactModal from 'react-modal';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
-import './OddsList.css'; // Importa il CSS per la modale
+
 
 const bookmakerMapping = {
-  'Unibet': 'unibet',
-  'LiveScore Bet (EU)': 'livescorebeteu',
-  'Marathon Bet': 'marathon_bet',
-  '888sport': '888sport',
-  'Pinnacle': 'pinnacle',
-  'Tipico': 'tipico',
-  'Nordic Bet': 'nordicbet',
-  'Betsson': 'betsson',
-  'Betfair': 'betfair',
-  'MyBookie.ag': 'mybookieag',
-  'William Hill': 'williamhill',
-  'Matchbook': 'matchbook',
-  'BetOnline.ag': 'betonlineag',
-  'Coolbet': 'coolbet'
+    'Unibet': 'unibet',
+    'LiveScore Bet (EU)': 'livescorebeteu',
+    'Marathon Bet': 'marathon_bet',
+    '888sport': '888sport',
+    'Pinnacle': 'pinnacle',
+    'Tipico': 'tipico',
+    'Nordic Bet': 'nordicbet',
+    'Betsson': 'betsson',
+    'Betfair': 'betfair',
+    'MyBookie.ag': 'mybookieag',
+    'William Hill': 'williamhill',
+    'Matchbook': 'matchbook',
+    'BetOnline.ag': 'betonlineag',
+    'Coolbet': 'coolbet'
 };
 
 const bookmakerOptions = Object.keys(bookmakerMapping);
 
 const OddsList = () => {
-  const [odds, setOdds] = useState([]);
-  const [sports, setSports] = useState([]);
-  const [error, setError] = useState(null);
-  const [modalData, setModalData] = useState(null);
-  const [betAmount, setBetAmount] = useState(100);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
-  const [selectedBookmakers, setSelectedBookmakers] = useState([]);
-  const [cachedOdds, setCachedOdds] = useState({});
-  const [competitionTitle, setCompetitionTitle] = useState("Upcoming Odds");
+    const [odds, setOdds] = useState([]);
+    const [sports, setSports] = useState([]);
+    const [error, setError] = useState(null);
+    const [modalData, setModalData] = useState(null);
+    const [betAmount, setBetAmount] = useState(100);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
+    const [selectedBookmakers, setSelectedBookmakers] = useState([]);
+    const [cachedOdds, setCachedOdds] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
-  // State to track expanded descriptions
-  const [expandedDescriptions, setExpandedDescriptions] = useState({});
+    // In the component, add a method to open the modal
+    const openModal = (game) => {
+        // Prepare modal data with the first bookmaker's H2H market odds
+        const h2hMarket = game.bookmakers[0]?.markets.find(market => market.key === 'h2h');
+        if (h2hMarket && h2hMarket.outcomes.length === 3) {
+            setModalData({
+                home_team: game.home_team,
+                away_team: game.away_team,
+                odds1: h2hMarket.outcomes[0].price,
+                oddsX: h2hMarket.outcomes[1].price,
+                odds2: h2hMarket.outcomes[2].price
+            });
+            setModalIsOpen(true);
+        }
+    };
 
-  const fetchSports = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/odds/sports`);
-      setSports(response.data);
-    } catch (error) {
-      setError('Error fetching sports data');
-      console.error('Error fetching sports:', error);
-    }
-  }, []);
 
-  const fetchOdds = useCallback(async (sportKey) => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
-        params: { sportKey }
-      });
-      const currentTime = new Date();
-      const filteredOdds = response.data.filter(game => {
-        const eventTime = new Date(game.commence_time);
-        return eventTime > currentTime;
-      });
-      setCachedOdds(prevState => ({
-        ...prevState,
-        [sportKey]: filteredOdds
-      }));
-      setOdds(filteredOdds);
-    } catch (error) {
-      setError('Error fetching odds data');
-      console.error('Error fetching odds:', error);
-    }
-  }, []);
+    const fetchSports = useCallback(async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/odds/sports`);
+            setSports(response.data);
+        } catch (error) {
+            setError('Error fetching sports data');
+            console.error('Error fetching sports:', error);
+        }
+    }, []);
 
-  useEffect(() => {
-    fetchSports(); // Richiama l'API degli sport all'avvio del componente
-  }, [fetchSports]);
+    const fetchOdds = useCallback(async (sportKey) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/odds/upcoming-odds`, {
+                params: { sportKey }
+            });
+            const currentTime = new Date();
+            const filteredOdds = response.data.filter(game => {
+                const eventTime = new Date(game.commence_time);
+                return eventTime > currentTime;
+            });
+            setCachedOdds(prevState => ({
+                ...prevState,
+                [sportKey]: filteredOdds
+            }));
+            setOdds(filteredOdds);
+        } catch (error) {
+            setError('Error fetching odds data');
+            console.error('Error fetching odds:', error);
+        }
+    }, []);
 
-  useEffect(() => {
-    if (cachedOdds[selectedSport]) {
-      // Usa i dati già in cache
-      setOdds(cachedOdds[selectedSport]);
-    } else {
-      // Fetch data if not in cache
-      fetchOdds(selectedSport);
-    }
-  }, [selectedSport, cachedOdds, fetchOdds]);
+    useEffect(() => {
+        fetchSports(); // Richiama l'API degli sport all'avvio del componente
+    }, [fetchSports]);
 
-  const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    const bookmakerKey = bookmakerMapping[value];
-    setSelectedBookmakers(prevState => {
-      if (checked) {
-        return [...prevState, bookmakerKey];
-      } else {
-        return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
-      }
-    });
-  };
+    useEffect(() => {
+        if (cachedOdds[selectedSport]) {
+            // Usa i dati già in cache
+            setOdds(cachedOdds[selectedSport]);
+        } else {
+            // Fetch data if not in cache
+            fetchOdds(selectedSport);
+        }
+    }, [selectedSport, cachedOdds, fetchOdds]);
 
-  const getFilteredOdds = () => {
-    if (!selectedBookmakers.length) return odds;
-    return odds.map(game => ({
-      ...game,
-      bookmakers: game.bookmakers.filter(bookmaker =>
-        selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
-      )
-    })).filter(game => game.bookmakers.length > 0);
-  };
+    const getFilteredOdds = () => {
+        if (!selectedBookmakers.length) return odds;
+        return odds.map(game => ({
+            ...game,
+            bookmakers: game.bookmakers.filter(bookmaker =>
+                selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
+            )
+        })).filter(game => game.bookmakers.length > 0);
+    };
 
-  const filteredOdds = getFilteredOdds();
+    const filteredOdds = getFilteredOdds();
+    const totalPages = Math.ceil(filteredOdds.length / ITEMS_PER_PAGE);
 
-  const formatDate = (isoDate) => {
-    const date = new Date(isoDate);
-    return new Intl.DateTimeFormat('default', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZoneName: 'short'
-    }).format(date);
-  };
+    const getCurrentPageOdds = () => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredOdds.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    };
 
-  const openModal = (game, market) => {
-    setModalData({
-      game,
-      market,
-      odds1: market.outcomes[0]?.price || 0,
-      oddsX: market.outcomes[2]?.price || 'N/A',
-      odds2: market.outcomes[1]?.price || 0
-    });
-    setModalIsOpen(true);
-  };
+    const handleBookmakerFilter = (bookmaker) => {
+        setSelectedBookmakers(prev =>
+            prev.includes(bookmakerMapping[bookmaker])
+                ? prev.filter(b => b !== bookmakerMapping[bookmaker])
+                : [...prev, bookmakerMapping[bookmaker]]
+        );
+    };
 
-  const closeModal = () => {
-    setModalIsOpen(false);
-    setModalData(null);
-    setBetAmount(100);
-  };
+    const formatDate = (isoDate) => {
+        const date = new Date(isoDate);
+        return new Intl.DateTimeFormat('default', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
+        }).format(date);
+    };
 
-  const calculatePunta = (odds1, oddsX, odds2) => {
-    const puntaX = (betAmount * odds1) / oddsX;
-    const punta2 = (betAmount * odds1) / odds2;
-    return { puntaX, punta2 };
-  };
+    const closeModal = () => {
+        setModalIsOpen(false);
+        setModalData(null);
+        setBetAmount(100);
+    };
 
-  const TotalBetting = (betAmount, puntaX, punta2) => {
-    const totalbet = betAmount + puntaX + punta2;
-    return totalbet;
-  };
+    const calculatePunta = (odds1, oddsX, odds2) => {
+        const puntaX = (betAmount * odds1) / oddsX;
+        const punta2 = (betAmount * odds1) / odds2;
+        return { puntaX, punta2 };
+    };
 
-  const calculateRating = (profit, totalbet) => {
-    const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
-    return (rating / 100);
-  };
+    const TotalBetting = (betAmount, puntaX, punta2) => {
+        const totalbet = betAmount + puntaX + punta2;
+        return totalbet;
+    };
 
-  const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
-    const totalBet = puntata1 + puntataX + puntata2;
-    return (quota * puntata1) - totalBet;
-  };
+    const calculateRating = (profit, totalbet) => {
+        const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
+        return (rating / 100);
+    };
 
-  const handleAmountChange = (e) => {
-    setBetAmount(Number(e.target.value));
-  };
+    const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
+        const totalBet = puntata1 + puntataX + puntata2;
+        return (quota * puntata1) - totalBet;
+    };
 
-  const handleOddsChange = (e, key) => {
-    setModalData(prevState => ({
-      ...prevState,
-      [key]: Number(e.target.value)
-    }));
-  };
+    const handleAmountChange = (e) => {
+        setBetAmount(Number(e.target.value));
+    };
 
-  const handleSportChange = (sportKey, sport) => {
-    setSelectedSport(sportKey);
-    setCompetitionTitle(sport.title);
-  };
+    const handleOddsChange = (e, key) => {
+        setModalData(prevState => ({
+            ...prevState,
+            [key]: Number(e.target.value)
+        }));
+    };
 
-  const handleSelectAll = (e) => {
-    const isChecked = e.target.checked;
-    if (isChecked) {
-      // Seleziona tutti i bookmaker
-      setSelectedBookmakers(Object.values(bookmakerMapping));
-    } else {
-      // Deseleziona tutti i bookmaker
-      setSelectedBookmakers([]);
-    }
-  };
 
-  // Group sports by description
-  const groupedSports = sports.reduce((acc, sport) => {
-    if (!acc[sport.description]) {
-      acc[sport.description] = [];
-    }
-    acc[sport.description].push(sport);
-    return acc;
-  }, {});
+    return (
+        <div className="min-h-screen bg-slate-900 text-white p-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="mb-6">
+                    <h2 className="text-3xl font-bold text-purple-400 mb-4">ODDS TRACKER</h2>
 
-  const toggleDescription = (description) => {
-    setExpandedDescriptions(prevState => ({
-      ...prevState,
-      [description]: !prevState[description]
-    }));
-  };
-
-  return (
-    <div className="container-odds">
-      {/* Sezione Sport Disponibili */}
-      <div className="available-sports">
-        <h2>Available Sports</h2>
-        {error && <p className="error-message">{error}</p>}
-        {Object.keys(groupedSports).length > 0 ? (
-          <div>
-            {Object.entries(groupedSports).map(([description, sports]) => (
-              <div key={description} className="sports-category">
-                <h3 onClick={() => toggleDescription(description)}>
-                  <span>{description}</span>
-                  <span>{expandedDescriptions[description] ? '▲' : '▼'}</span>
-                </h3>
-                {expandedDescriptions[description] && (
-                  <ul className="sports-list">
-                    {sports.map((sport) => (
-                      <li
-                        key={sport.key}
-                        onClick={() => handleSportChange(sport.key, sport)}
-                        className="sport-item"
-                      >
-                        <strong>{sport.title}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="no-data">No sports available.</p>
-        )}
-      </div>
-
-      {/* Sezione Quote Imminenti */}
-      <div className="upcoming-odds">
-        {/* Sezione Filtri Bookmaker */}
-        <div className="bookmakers-section">
-          <h2>Filter by Bookmakers</h2>
-          <div className="bookmakers-checkboxes">
-            <label className="bookmaker-checkbox">
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedBookmakers.length === Object.values(bookmakerMapping).length}
-              />
-              <span>Seleziona/Deseleziona Tutto</span>
-            </label>
-            {bookmakerOptions.map((bookmaker, index) => (
-              <label key={index} className="bookmaker-checkbox">
-                <input
-                  type="checkbox"
-                  value={bookmaker}
-                  checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
-                  onChange={handleCheckboxChange}
-                />
-                <span>{bookmaker}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <h2>{competitionTitle}</h2>
-        {error && <p className="error-message">{error}</p>}
-
-        {/* Lista delle Quote */}
-        {filteredOdds.length > 0 ? (
-          <div className="games-list">
-            {filteredOdds.map((game, index) => (
-              <div key={index} className="game-card">
-                <div className="game-header">
-                  <div className="game-teams">
-                    <strong>{game.sport_title}</strong>
-                    <span> - {game.home_team} vs {game.away_team}</span>
-                  </div>
-                  <div className="game-date">
-                    {formatDate(game.commence_time)}
-                  </div>
-                </div>
-
-                <div className="bookmakers-list">
-                  {game.bookmakers.map((bookmaker, bIndex) => (
-                    <div key={bIndex} className="bookmaker-odds">
-                      <h4>{bookmaker.title}</h4>
-                      <div className="odds-grid">
-                        {bookmaker.markets.map((market, mIndex) => (
-                          market.key === 'h2h' && (
-                            <div key={mIndex} className="odds-row">
-                              <div className="odds-values">
-                                <span> 1: {market.outcomes[0]?.price || 'N/A'}</span>
-                                <span> X: {market.outcomes[2]?.price || 'N/A'}</span>
-                                <span> 2: {market.outcomes[1]?.price || 'N/A'}</span>
-                              </div>
-                              <button
-                                className="btn btn-primary"
-                                onClick={() => openModal(game, market)}
-                              >
-                                Calcola puntate
-                              </button>
+                    {/* Filters Section */}
+                    <div className="bg-slate-800 rounded-lg p-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Sport Selection */}
+                            <div className="bg-slate-700 rounded-lg p-3">
+                                <h3 className="text-lg font-semibold text-slate-300 mb-2">Sports</h3>
+                                <div className="max-h-60 overflow-y-auto">
+                                    {sports.map((sport) => (
+                                        <div
+                                            key={sport.key}
+                                            onClick={() => setSelectedSport(sport.key)}
+                                            className={`p-2 rounded-md cursor-pointer ${selectedSport === sport.key
+                                                ? 'bg-purple-500 text-white'
+                                                : 'hover:bg-slate-600'
+                                                }`}
+                                        >
+                                            {sport.title}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                          )
-                        ))}
-                      </div>
+
+                            {/* Bookmakers Filter */}
+                            <div className="bg-slate-700 rounded-lg p-3">
+                                <h3 className="text-lg font-semibold text-slate-300 mb-2">Bookmakers</h3>
+                                <div className="max-h-60 overflow-y-auto">
+                                    {bookmakerOptions.map((bookmaker) => (
+                                        <div
+                                            key={bookmaker}
+                                            onClick={() => handleBookmakerFilter(bookmaker)}
+                                            className={`p-2 rounded-md cursor-pointer ${selectedBookmakers.includes(bookmakerMapping[bookmaker])
+                                                ? 'bg-purple-500 text-white'
+                                                : 'hover:bg-slate-600'
+                                                }`}
+                                        >
+                                            {bookmaker}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Search/Additional Filter */}
+                            <div className="bg-slate-700 rounded-lg p-3">
+                                <h3 className="text-lg font-semibold text-slate-300 mb-2">Search</h3>
+                                <input
+                                    type="text"
+                                    placeholder="Search games..."
+                                    className="w-full bg-slate-600 text-white px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                />
+                            </div>
+                        </div>
                     </div>
-                  ))}
+
+                    {/* Odds Table */}
+                    {filteredOdds.length > 0 ? (
+                        <div className="bg-slate-800 rounded-lg overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-slate-700">
+                                        <tr>
+                                            <th className="p-4 text-left text-sm text-slate-400">Date</th>
+                                            <th className="p-4 text-left text-sm text-slate-400">Match</th>
+                                            <th className="p-4 text-left text-sm text-slate-400">Bookmakers</th>
+                                            <th className="p-4 text-left text-sm text-slate-400">Odds</th>
+                                            <th className="p-4 text-left text-sm text-slate-400">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-700">
+                                        {getCurrentPageOdds().map((game, index) => (
+                                            <tr key={index} className="hover:bg-slate-700/50">
+                                                <td className="p-4 text-sm text-slate-300">
+                                                    {formatDate(game.commence_time)}
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium">{game.home_team} vs {game.away_team}</span>
+                                                        <span className="text-xs text-slate-400">{game.sport_title}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {game.bookmakers.slice(0, 3).map((bookmaker, bIndex) => (
+                                                            <span
+                                                                key={bIndex}
+                                                                className="bg-slate-700 text-xs px-2 py-1 rounded"
+                                                            >
+                                                                {bookmaker.title}
+                                                            </span>
+                                                        ))}
+                                                        {game.bookmakers.length > 3 && (
+                                                            <span className="bg-slate-700 text-xs px-2 py-1 rounded">
+                                                                +{game.bookmakers.length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex space-x-2">
+                                                        {game.bookmakers[0]?.markets.map((market, mIndex) =>
+                                                            market.key === 'h2h' && (
+                                                                <div key={mIndex} className="flex space-x-1">
+                                                                    {market.outcomes.map((outcome, oIndex) => (
+                                                                        <span
+                                                                            key={oIndex}
+                                                                            className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded"
+                                                                        >
+                                                                            {outcome.price}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <button
+                                                        className="bg-purple-500 hover:bg-purple-600 text-white text-sm px-3 py-2 rounded-md"
+                                                        onClick={() => openModal(game)}
+                                                    >
+                                                        Calculate
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {modalData && (
+                                <ReactModal
+                                    isOpen={modalIsOpen}
+                                    onRequestClose={closeModal}
+                                    className="modal bg-slate-800 text-white rounded-lg p-6 max-w-md mx-auto mt-20"
+                                    overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                                >
+                                    <h2 className="text-2xl font-bold mb-4">{modalData.home_team} vs {modalData.away_team}</h2>
+
+                                    <div className="mb-4">
+                                        <label className="block text-sm mb-2">Bet Amount</label>
+                                        <input
+                                            type="number"
+                                            value={betAmount}
+                                            onChange={handleAmountChange}
+                                            className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <div>
+                                            <label className="block text-sm mb-2">{modalData.home_team} Odds</label>
+                                            <input
+                                                type="number"
+                                                value={modalData.odds1}
+                                                onChange={(e) => handleOddsChange(e, 'odds1')}
+                                                className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm mb-2">Draw Odds</label>
+                                            <input
+                                                type="number"
+                                                value={modalData.oddsX}
+                                                onChange={(e) => handleOddsChange(e, 'oddsX')}
+                                                className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm mb-2">{modalData.away_team} Odds</label>
+                                            <input
+                                                type="number"
+                                                value={modalData.odds2}
+                                                onChange={(e) => handleOddsChange(e, 'odds2')}
+                                                className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {modalData.odds1 && modalData.oddsX && modalData.odds2 && (
+                                        <div>
+                                            <h3 className="text-xl font-semibold mb-4">Calculation Results</h3>
+
+                                            {/* Example calculation display */}
+                                            <div className="bg-slate-700 p-4 rounded-md">
+                                                <p>Total Bet: {TotalBetting(
+                                                    betAmount,
+                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2
+                                                )}</p>
+                                                <p>Potential Profit: {calculateProfit(
+                                                    betAmount,
+                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
+                                                    modalData.odds1
+                                                )}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-end space-x-2 mt-6">
+                                        <button
+                                            onClick={closeModal}
+                                            className="bg-slate-700 text-white px-4 py-2 rounded-md"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </ReactModal>
+                            )}
+
+
+                            {/* Pagination */}
+                            <div className="bg-slate-800 p-4 flex justify-between items-center">
+                                <div className="text-sm text-slate-400">
+                                    Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className="bg-slate-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                                    >
+                                        Previous
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className="bg-slate-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-slate-800 rounded-lg p-8 text-center text-slate-400">
+                            No odds available.
+                        </div>
+                    )}
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="no-data">No odds available.</p>
-        )}
-      </div>
-
-      {/* Modal per il Calcolo delle Puntate */}
-      {modalIsOpen && (
-        <div className="modal-odds">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>{modalData.game.home_team} vs {modalData.game.away_team}</h3>
             </div>
-
-            <div className="modal-row">
-              <div>
-                <strong>Totale Giocato:</strong>
-              </div>
-              <div>
-                {(() => {
-                  const { odds1, oddsX, odds2 } = modalData;
-                  const { puntaX, punta2 } = calculatePunta(odds1, oddsX, odds2);
-                  const totalBet = TotalBetting(betAmount, puntaX, punta2);
-                  return totalBet.toFixed(2);
-                })()}
-              </div>
-            </div>
-
-            <div className="modal-row">
-              <div>
-                <strong>Rating:</strong>
-              </div>
-              <div>
-                {(() => {
-                  const { odds1, oddsX, odds2 } = modalData;
-                  const { puntaX, punta2 } = calculatePunta(odds1, oddsX, odds2);
-                  const totalBet = TotalBetting(betAmount, puntaX, punta2);
-                  const profit = calculateProfit(betAmount, puntaX, punta2, odds1);
-                  const rating = calculateRating(profit, totalBet);
-                  return rating.toFixed(2) + '%';
-                })()}
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Importo puntato:
-                <input
-                  type="number"
-                  value={betAmount}
-                  onChange={handleAmountChange}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota 1:
-                <input
-                  type="number"
-                  value={modalData.odds1}
-                  onChange={(e) => handleOddsChange(e, 'odds1')}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota X:
-                <input
-                  type="number"
-                  value={modalData.oddsX}
-                  onChange={(e) => handleOddsChange(e, 'oddsX')}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota 2:
-                <input
-                  type="number"
-                  value={modalData.odds2}
-                  onChange={(e) => handleOddsChange(e, 'odds2')}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="betting-summary">
-              <div className="bet-info">
-                <p>
-                  Punta 1: {betAmount} a quota {modalData.odds1}
-                  {modalData.odds1 !== 'N/A' &&
-                    ` | Profitto: ${calculateProfit(
-                      betAmount,
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                      modalData.odds1
-                    ).toFixed(2)}`
-                  }
-                </p>
-                {modalData.oddsX !== 'N/A' && (
-                  <p>
-                    Punta X: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)} a quota {modalData.oddsX}
-                    {modalData.oddsX !== 'N/A' &&
-                      ` | Profitto: ${calculateProfit(
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                        betAmount,
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                        modalData.oddsX
-                      ).toFixed(2)}`
-                    }
-                  </p>
-                )}
-                <p>
-                  Punta 2: {calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)} a quota {modalData.odds2}
-                  {modalData.odds2 !== 'N/A' &&
-                    ` | Profitto: ${calculateProfit(
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                      betAmount,
-                      calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                      modalData.odds2
-                    ).toFixed(2)}`
-                  }
-                </p>
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={closeModal}>
-                Chiudi
-              </button>
-            </div>
-          </div>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default OddsList;

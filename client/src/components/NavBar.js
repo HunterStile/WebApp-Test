@@ -45,10 +45,10 @@ function Navbar() {
             <Link to="/oddsmatcher" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Oddsmatcher
             </Link>
-            <Link to="/Doppia_Puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            <Link to="/doppia_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Doppia Puntata
             </Link>
-            <Link to="/Tripla_Puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            <Link to="/tripla_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Tripla_Puntata
             </Link>
             

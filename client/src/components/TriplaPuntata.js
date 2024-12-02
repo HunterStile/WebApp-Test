@@ -193,7 +193,7 @@ const OddsList = () => {
 
     const getFilteredOdds = () => {
         let filteredGames = [];
-    
+        // Applica il filtro dei bookmakers
         if (!selectedBookmakers.length) {
             filteredGames = odds;
         } else {
@@ -212,20 +212,9 @@ const OddsList = () => {
                 const startDate = dateRange.startDate ? new Date(dateRange.startDate) : null;
                 const endDate = dateRange.endDate ? new Date(dateRange.endDate) : null;
     
-                // Se solo startDate è impostato
-                if (startDate && !endDate) {
-                    return gameDate >= startDate;
-                }
-                
-                // Se solo endDate è impostato
-                if (!startDate && endDate) {
-                    return gameDate <= endDate;
-                }
-                
-                // Se entrambe le date sono impostate
-                if (startDate && endDate) {
-                    return gameDate >= startDate && gameDate <= endDate;
-                }
+                if (startDate && !endDate) return gameDate >= startDate;
+                if (!startDate && endDate) return gameDate <= endDate;
+                if (startDate && endDate) return gameDate >= startDate && gameDate <= endDate;
     
                 return true;
             });
@@ -246,14 +235,25 @@ const OddsList = () => {
             game.bestCombination.rating <= ratingRange.max
         );
     
+        // Applica il filtro delle quote
+        const filteredByOdds = filteredByRating.filter(game => {
+            // Controlla che almeno una delle quote (1, X, 2) sia nell'intervallo
+            const isWithinOddsRange = 
+                (game.bestCombination.bestOdds1 >= oddsRange.min && game.bestCombination.bestOdds1 <= oddsRange.max) ||
+                (game.bestCombination.bestOddsX >= oddsRange.min && game.bestCombination.bestOddsX <= oddsRange.max) ||
+                (game.bestCombination.bestOdds2 >= oddsRange.min && game.bestCombination.bestOdds2 <= oddsRange.max);
+    
+            return isWithinOddsRange;
+        });
+    
         // Applica il filtro di ricerca
         const filteredBySearch = searchTerm 
-            ? filteredByRating.filter(game => 
+            ? filteredByOdds.filter(game => 
                 `${game.home_team} vs ${game.away_team}`
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase())
               )
-            : filteredByRating;
+            : filteredByOdds;
     
         // Ordina per rating in ordine decrescente
         return filteredBySearch.sort((a, b) => b.bestCombination.rating - a.bestCombination.rating);
@@ -975,8 +975,8 @@ const OddsList = () => {
                     {/* Filters Section */}
                     <div className="bg-slate-800 rounded-lg p-4 mb-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <DateRangeFilter/>
-                            <RatingRangeFilter/>
+                            <DateRangeFilter />
+                            <RatingRangeFilter />
                             <OddsRangeFilter />
                             <BookmakersFilter
                                 selectedBookmakers={selectedBookmakers}

@@ -1,51 +1,61 @@
-const RatingRangeFilter = () => {
-    const [localRatingRange, setLocalRatingRange] = useState(ratingRange);
+import React, { useState } from 'react';
+
+// Defaul rating 
+const DEFAULT_ODDS_RANGE = { min: 1.01, max: 1000 };
+
+const OddsRangeFilter = ({
+    oddsRange, 
+    setOddsRange
+}) => {
+
+    const [localOddsRange, setLocalOddsRange] = useState(oddsRange);
 
     const handleRangeChange = (e) => {
         const { name, value } = e.target;
         const newRange = {
-            ...localRatingRange,
+            ...localOddsRange,
             [name]: parseFloat(value)
         };
-        setLocalRatingRange(newRange);
+        setLocalOddsRange(newRange);
 
         // Aggiorna immediatamente per gli slider
         if (e.target.type === 'range') {
-            setRatingRange(newRange);
+            setOddsRange(newRange);
         }
     };
 
     // handleBlur solo per gli input numerici
     const handleBlur = (e) => {
         if (e.target.type === 'number') {
-            setRatingRange(localRatingRange);
+            setOddsRange(localOddsRange);
         }
     };
 
-    const resetRatingRange = () => {
+    const resetOddsRange = () => {
         const defaultRange = {
-            min: DEFAULT_RATING_RANGE.min,
-            max: DEFAULT_RATING_RANGE.max
+            min: DEFAULT_ODDS_RANGE.min,
+            max: DEFAULT_ODDS_RANGE.max
         };
-        setLocalRatingRange(defaultRange);
-        setRatingRange(defaultRange);
+        setLocalOddsRange(defaultRange);
+        setOddsRange(defaultRange);
     };
 
     return (
         <div className="w-full">
-            <h3 className="text-sm text-slate-400 mb-2">Filter by Rating Range</h3>
+            <h3 className="text-sm text-slate-400 mb-2">Filter by Odds Range</h3>
             <div className="space-y-4">
-                {/* Slider per il minimo */}
+                {/* Slider Quota Minima */}
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-slate-300">
-                        Minimum Rating: <span className="text-cyan-400">{localRatingRange.min}%</span>
+                        Minimum Odds: <span className="text-pink-400">{localOddsRange.min}</span>
                     </label>
                     <input
                         type="range"
                         name="min"
-                        min={DEFAULT_RATING_RANGE.min}
-                        max={DEFAULT_RATING_RANGE.max}
-                        value={localRatingRange.min}
+                        min={DEFAULT_ODDS_RANGE.min}
+                        max={10}
+                        step="0.01"
+                        value={localOddsRange.min}
                         onChange={handleRangeChange}
                         className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
@@ -59,21 +69,23 @@ const RatingRangeFilter = () => {
                    [&::-moz-range-thumb]:rounded-full
                    [&::-moz-range-thumb]:bg-purple-500
                    [&::-moz-range-thumb]:hover:bg-purple-400
-                   [&::-moz-range-thumb]:border-0"
+                   [&::-moz-range-thumb]:border-0
+                   focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                     />
                 </div>
 
-                {/* Slider per il massimo */}
+                {/* Slider Quota Massima */}
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-slate-300">
-                        Maximum Rating: <span className="text-cyan-400">{localRatingRange.max}%</span>
+                        Maximum Odds: <span className="text-pink-400">{localOddsRange.max}</span>
                     </label>
                     <input
                         type="range"
                         name="max"
-                        min={DEFAULT_RATING_RANGE.min}
-                        max={DEFAULT_RATING_RANGE.max}
-                        value={localRatingRange.max}
+                        min={localOddsRange.min}
+                        max={20}
+                        step="0.01"
+                        value={Math.min(localOddsRange.max, 20)}
                         onChange={handleRangeChange}
                         className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
@@ -87,7 +99,8 @@ const RatingRangeFilter = () => {
                    [&::-moz-range-thumb]:rounded-full
                    [&::-moz-range-thumb]:bg-purple-500
                    [&::-moz-range-thumb]:hover:bg-purple-400
-                   [&::-moz-range-thumb]:border-0"
+                   [&::-moz-range-thumb]:border-0
+                   focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                     />
                 </div>
 
@@ -98,12 +111,12 @@ const RatingRangeFilter = () => {
                         <input
                             type="number"
                             name="min"
-                            value={localRatingRange.min}
+                            value={localOddsRange.min}
                             onChange={handleRangeChange}
                             onBlur={handleBlur}
-                            min={DEFAULT_RATING_RANGE.min}
-                            max={localRatingRange.max}
-                            step="0.1"
+                            min={DEFAULT_ODDS_RANGE.min}
+                            max={localOddsRange.max}
+                            step="0.01"
                             className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
                      placeholder-slate-400"
@@ -115,12 +128,12 @@ const RatingRangeFilter = () => {
                         <input
                             type="number"
                             name="max"
-                            value={localRatingRange.max}
+                            value={localOddsRange.max}
                             onChange={handleRangeChange}
                             onBlur={handleBlur}
-                            min={localRatingRange.min}
-                            max={DEFAULT_RATING_RANGE.max}
-                            step="0.1"
+                            min={localOddsRange.min}
+                            max={DEFAULT_ODDS_RANGE.max}
+                            step="0.01"
                             className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
                      placeholder-slate-400"
@@ -130,14 +143,16 @@ const RatingRangeFilter = () => {
 
                 {/* Pulsante Reset */}
                 <button
-                    onClick={resetRatingRange}
+                    onClick={resetOddsRange}
                     className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 
                  rounded-lg transition-colors duration-200 
                  focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
-                    Reset Rating Range
+                    Reset Odds Range
                 </button>
             </div>
         </div>
     );
 };
+
+export default OddsRangeFilter;

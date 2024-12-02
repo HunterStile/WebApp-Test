@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactModal from 'react-modal';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
+import { ChevronDown, Search, X } from 'lucide-react';
 
 
 const bookmakerMapping = {
@@ -39,6 +40,10 @@ const bookmakerOptions = Object.keys(bookmakerMapping);
 
 // Max partite per pagina
 const ITEMS_PER_PAGE = 10;
+// Defaul rating 
+const DEFAULT_RATING_RANGE = { min: 0, max: 200 };
+// Default del filtro quote
+const DEFAULT_ODDS_RANGE = { min: 1.01, max: 1000 };
 
 const OddsList = () => {
     const [odds, setOdds] = useState([]);
@@ -50,6 +55,21 @@ const OddsList = () => {
     const [cachedOdds, setCachedOdds] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [dateRange, setDateRange] = useState({
+        startDate: '',
+        endDate: ''
+    });
+    const [ratingRange, setRatingRange] = useState({
+        min: DEFAULT_RATING_RANGE.min,
+        max: DEFAULT_RATING_RANGE.max
+    });
+    const [oddsRange, setOddsRange] = useState({
+        min: DEFAULT_ODDS_RANGE.min,
+        max: DEFAULT_ODDS_RANGE.max
+    });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
 
     // In the component, add a method to open the modal
     const openModal = (game) => {
@@ -67,6 +87,7 @@ const OddsList = () => {
         }
     };
 
+    //FETCH DELLE SCOMESSES
     const fetchOdds = useCallback(async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/odds/major-leagues`);
@@ -172,7 +193,7 @@ const OddsList = () => {
 
     const getFilteredOdds = () => {
         let filteredGames = [];
-
+    
         if (!selectedBookmakers.length) {
             filteredGames = odds;
         } else {
@@ -183,35 +204,698 @@ const OddsList = () => {
                 )
             })).filter(game => game.bookmakers.length > 0);
         }
-
-        // Calculate best odds combination for each game
+    
+        // Applica il filtro delle date
+        if (dateRange.startDate || dateRange.endDate) {
+            filteredGames = filteredGames.filter(game => {
+                const gameDate = new Date(game.commence_time);
+                const startDate = dateRange.startDate ? new Date(dateRange.startDate) : null;
+                const endDate = dateRange.endDate ? new Date(dateRange.endDate) : null;
+    
+                // Se solo startDate è impostato
+                if (startDate && !endDate) {
+                    return gameDate >= startDate;
+                }
+                
+                // Se solo endDate è impostato
+                if (!startDate && endDate) {
+                    return gameDate <= endDate;
+                }
+                
+                // Se entrambe le date sono impostate
+                if (startDate && endDate) {
+                    return gameDate >= startDate && gameDate <= endDate;
+                }
+    
+                return true;
+            });
+        }
+    
+        // Calcola la migliore combinazione di quote per ogni partita
         const oddsWithRating = filteredGames.map(game => {
             const bestCombination = findBestOddsCombination(game);
-
             return {
                 ...game,
                 bestCombination
             };
         }).filter(game => game.bestCombination !== null);
-
-        // Sort by rating in descending order
+    
+        // Ordina per rating in ordine decrescente
         return oddsWithRating.sort((a, b) => b.bestCombination.rating - a.bestCombination.rating);
     };
 
     const filteredOdds = getFilteredOdds();
+
+    // Add date range filter component
+    const DateRangeFilter = () => {
+        const today = new Date().toISOString().split('T')[0];
+
+        const handleDateChange = (e) => {
+            const { name, value } = e.target;
+            setDateRange(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        };
+
+        const clearDates = () => {
+            setDateRange({
+                startDate: '',
+                endDate: ''
+            });
+        };
+
+        const isDateRangeValid = () => {
+            if (!dateRange.startDate || !dateRange.endDate) return true;
+            return new Date(dateRange.startDate) <= new Date(dateRange.endDate);
+        };
+
+        return (
+            <div className="w-full">
+                <h3 className="text-sm text-slate-400 mb-2">Filter by Date Range</h3>
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="startDate"
+                                className="block text-sm font-medium text-slate-300"
+                            >
+                                From:
+                            </label>
+                            <input
+                                type="date"
+                                id="startDate"
+                                name="startDate"
+                                value={dateRange.startDate}
+                                min={today}
+                                max={dateRange.endDate || undefined}
+                                onChange={handleDateChange}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="endDate"
+                                className="block text-sm font-medium text-slate-300"
+                            >
+                                To:
+                            </label>
+                            <input
+                                type="date"
+                                id="endDate"
+                                name="endDate"
+                                value={dateRange.endDate}
+                                min={dateRange.startDate || today}
+                                onChange={handleDateChange}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+                            />
+                        </div>
+                    </div>
+
+                    {(dateRange.startDate || dateRange.endDate) && (
+                        <button
+                            onClick={clearDates}
+                            className="inline-flex items-center px-3 py-2 text-sm rounded-lg
+                       bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors
+                       focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                            Clear Dates
+                        </button>
+                    )}
+
+                    {!isDateRangeValid() && (
+                        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500 rounded-lg p-2">
+                            End date must be after start date
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const RatingRangeFilter = () => {
+        const [localRatingRange, setLocalRatingRange] = useState(ratingRange);
+
+        const handleRangeChange = (e) => {
+            const { name, value } = e.target;
+            const newRange = {
+                ...localRatingRange,
+                [name]: parseFloat(value)
+            };
+            setLocalRatingRange(newRange);
+
+            // Aggiorna immediatamente per gli slider
+            if (e.target.type === 'range') {
+                setRatingRange(newRange);
+            }
+        };
+
+        // handleBlur solo per gli input numerici
+        const handleBlur = (e) => {
+            if (e.target.type === 'number') {
+                setRatingRange(localRatingRange);
+            }
+        };
+
+        const resetRatingRange = () => {
+            const defaultRange = {
+                min: DEFAULT_RATING_RANGE.min,
+                max: DEFAULT_RATING_RANGE.max
+            };
+            setLocalRatingRange(defaultRange);
+            setRatingRange(defaultRange);
+        };
+
+        return (
+            <div className="w-full">
+                <h3 className="text-sm text-slate-400 mb-2">Filter by Rating Range</h3>
+                <div className="space-y-4">
+                    {/* Slider per il minimo */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Minimum Rating: <span className="text-cyan-400">{localRatingRange.min}%</span>
+                        </label>
+                        <input
+                            type="range"
+                            name="min"
+                            min={DEFAULT_RATING_RANGE.min}
+                            max={DEFAULT_RATING_RANGE.max}
+                            value={localRatingRange.min}
+                            onChange={handleRangeChange}
+                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0"
+                        />
+                    </div>
+
+                    {/* Slider per il massimo */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Maximum Rating: <span className="text-cyan-400">{localRatingRange.max}%</span>
+                        </label>
+                        <input
+                            type="range"
+                            name="max"
+                            min={DEFAULT_RATING_RANGE.min}
+                            max={DEFAULT_RATING_RANGE.max}
+                            value={localRatingRange.max}
+                            onChange={handleRangeChange}
+                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0"
+                        />
+                    </div>
+
+                    {/* Input numerici */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-slate-300">Min:</label>
+                            <input
+                                type="number"
+                                name="min"
+                                value={localRatingRange.min}
+                                onChange={handleRangeChange}
+                                onBlur={handleBlur}
+                                min={DEFAULT_RATING_RANGE.min}
+                                max={localRatingRange.max}
+                                step="0.1"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-slate-300">Max:</label>
+                            <input
+                                type="number"
+                                name="max"
+                                value={localRatingRange.max}
+                                onChange={handleRangeChange}
+                                onBlur={handleBlur}
+                                min={localRatingRange.min}
+                                max={DEFAULT_RATING_RANGE.max}
+                                step="0.1"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Pulsante Reset */}
+                    <button
+                        onClick={resetRatingRange}
+                        className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 
+                     rounded-lg transition-colors duration-200 
+                     focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        Reset Rating Range
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    const OddsRangeFilter = () => {
+        const [localOddsRange, setLocalOddsRange] = useState(oddsRange);
+
+        const handleRangeChange = (e) => {
+            const { name, value } = e.target;
+            const newRange = {
+                ...localOddsRange,
+                [name]: parseFloat(value)
+            };
+            setLocalOddsRange(newRange);
+
+            // Aggiorna immediatamente per gli slider
+            if (e.target.type === 'range') {
+                setOddsRange(newRange);
+            }
+        };
+
+        // handleBlur solo per gli input numerici
+        const handleBlur = (e) => {
+            if (e.target.type === 'number') {
+                setOddsRange(localOddsRange);
+            }
+        };
+
+        const resetOddsRange = () => {
+            const defaultRange = {
+                min: DEFAULT_ODDS_RANGE.min,
+                max: DEFAULT_ODDS_RANGE.max
+            };
+            setLocalOddsRange(defaultRange);
+            setOddsRange(defaultRange);
+        };
+
+        return (
+            <div className="w-full">
+                <h3 className="text-sm text-slate-400 mb-2">Filter by Odds Range</h3>
+                <div className="space-y-4">
+                    {/* Slider Quota Minima */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Minimum Odds: <span className="text-pink-400">{localOddsRange.min}</span>
+                        </label>
+                        <input
+                            type="range"
+                            name="min"
+                            min={DEFAULT_ODDS_RANGE.min}
+                            max={10}
+                            step="0.01"
+                            value={localOddsRange.min}
+                            onChange={handleRangeChange}
+                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0
+                       focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        />
+                    </div>
+
+                    {/* Slider Quota Massima */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Maximum Odds: <span className="text-pink-400">{localOddsRange.max}</span>
+                        </label>
+                        <input
+                            type="range"
+                            name="max"
+                            min={localOddsRange.min}
+                            max={20}
+                            step="0.01"
+                            value={Math.min(localOddsRange.max, 20)}
+                            onChange={handleRangeChange}
+                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer
+                       [&::-webkit-slider-thumb]:appearance-none
+                       [&::-webkit-slider-thumb]:w-4
+                       [&::-webkit-slider-thumb]:h-4
+                       [&::-webkit-slider-thumb]:rounded-full
+                       [&::-webkit-slider-thumb]:bg-purple-500
+                       [&::-webkit-slider-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:w-4
+                       [&::-moz-range-thumb]:h-4
+                       [&::-moz-range-thumb]:rounded-full
+                       [&::-moz-range-thumb]:bg-purple-500
+                       [&::-moz-range-thumb]:hover:bg-purple-400
+                       [&::-moz-range-thumb]:border-0
+                       focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        />
+                    </div>
+
+                    {/* Input numerici */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-slate-300">Min:</label>
+                            <input
+                                type="number"
+                                name="min"
+                                value={localOddsRange.min}
+                                onChange={handleRangeChange}
+                                onBlur={handleBlur}
+                                min={DEFAULT_ODDS_RANGE.min}
+                                max={localOddsRange.max}
+                                step="0.01"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-slate-300">Max:</label>
+                            <input
+                                type="number"
+                                name="max"
+                                value={localOddsRange.max}
+                                onChange={handleRangeChange}
+                                onBlur={handleBlur}
+                                min={localOddsRange.min}
+                                max={DEFAULT_ODDS_RANGE.max}
+                                step="0.01"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                         placeholder-slate-400"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Pulsante Reset */}
+                    <button
+                        onClick={resetOddsRange}
+                        className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 
+                     rounded-lg transition-colors duration-200 
+                     focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        Reset Odds Range
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    const BookmakersFilter = ({
+        selectedBookmakers,
+        setSelectedBookmakers,
+        bookmakerMapping,
+        bookmakerOptions
+    }) => {
+        const [isBookmakersOpen, setIsBookmakersOpen] = useState(false);
+        const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+
+        // Separa i bookmaker tra normali ed exchange
+        const exchangeOptions = bookmakerOptions.filter(book =>
+            book.toLowerCase().includes('betfair')
+        );
+        const regularBookmakers = bookmakerOptions.filter(book =>
+            !book.toLowerCase().includes('betfair')
+        );
+
+        // Crea mapping separati
+        const exchangeMapping = Object.fromEntries(
+            Object.entries(bookmakerMapping).filter(([key]) =>
+                key.toLowerCase().includes('betfair')
+            )
+        );
+        const regularMapping = Object.fromEntries(
+            Object.entries(bookmakerMapping).filter(([key]) =>
+                !key.toLowerCase().includes('betfair')
+            )
+        );
+
+        // Filtra le selezioni correnti
+        const selectedExchange = selectedBookmakers.filter(book =>
+            Object.values(exchangeMapping).includes(book)
+        );
+        const selectedRegular = selectedBookmakers.filter(book =>
+            Object.values(regularMapping).includes(book)
+        );
+
+        const handleRegularBookmakerChange = (e) => {
+            const { value, checked } = e.target;
+            const bookmakerKey = regularMapping[value];
+            setSelectedBookmakers(prevState => {
+                if (checked) {
+                    return [...prevState, bookmakerKey];
+                } else {
+                    return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+                }
+            });
+        };
+
+        const handleExchangeChange = (e) => {
+            const { value, checked } = e.target;
+            const bookmakerKey = exchangeMapping[value];
+            setSelectedBookmakers(prevState => {
+                if (checked) {
+                    return [...prevState, bookmakerKey];
+                } else {
+                    return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+                }
+            });
+        };
+
+        const handleSelectAllRegular = (e) => {
+            const isChecked = e.target.checked;
+            if (isChecked) {
+                setSelectedBookmakers(prev => [
+                    ...prev.filter(book => Object.values(exchangeMapping).includes(book)),
+                    ...Object.values(regularMapping)
+                ]);
+            } else {
+                setSelectedBookmakers(prev =>
+                    prev.filter(book => Object.values(exchangeMapping).includes(book))
+                );
+            }
+        };
+
+        const handleSelectAllExchange = (e) => {
+            const isChecked = e.target.checked;
+            if (isChecked) {
+                setSelectedBookmakers(prev => [
+                    ...prev.filter(book => Object.values(regularMapping).includes(book)),
+                    ...Object.values(exchangeMapping)
+                ]);
+            } else {
+                setSelectedBookmakers(prev =>
+                    prev.filter(book => Object.values(regularMapping).includes(book))
+                );
+            }
+        };
+
+        return (
+            <div className="w-full">
+                <h3 className="text-sm text-slate-400 mb-2">Filter by Bookmakers</h3>
+                <div className="space-y-4">
+                    {/* Regular Bookmakers Section */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-slate-300">
+                                Bookmakers ({selectedRegular.length})
+                            </h3>
+                        </div>
+
+                        <div
+                            className="w-full p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors duration-200"
+                            onClick={() => setIsBookmakersOpen(!isBookmakersOpen)}
+                        >
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAllRegular}
+                                        checked={selectedRegular.length === Object.values(regularMapping).length}
+                                        className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
+                                    />
+                                    <span className="text-sm text-slate-300">Select/Deselect All</span>
+                                </label>
+                                <ChevronDown
+                                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isBookmakersOpen ? 'rotate-180' : ''
+                                        }`}
+                                />
+                            </div>
+                        </div>
+
+                        {isBookmakersOpen && (
+                            <div className="mt-2 space-y-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
+                                {regularBookmakers.map((bookmaker, index) => (
+                                    <label key={index} className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            value={bookmaker}
+                                            checked={selectedBookmakers.includes(regularMapping[bookmaker])}
+                                            onChange={handleRegularBookmakerChange}
+                                            className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
+                                        />
+                                        <span className="text-sm text-slate-300">{bookmaker}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Exchange Section */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-slate-300">
+                                Exchange ({selectedExchange.length})
+                            </h3>
+                        </div>
+
+                        <div
+                            className="w-full p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors duration-200"
+                            onClick={() => setIsExchangeOpen(!isExchangeOpen)}
+                        >
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAllExchange}
+                                        checked={selectedExchange.length === Object.values(exchangeMapping).length}
+                                        className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
+                                    />
+                                    <span className="text-sm text-slate-300">Select/Deselect All</span>
+                                </label>
+                                <ChevronDown
+                                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isExchangeOpen ? 'rotate-180' : ''
+                                        }`}
+                                />
+                            </div>
+                        </div>
+
+                        {isExchangeOpen && (
+                            <div className="mt-2 space-y-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
+                                {exchangeOptions.map((bookmaker, index) => (
+                                    <label key={index} className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            value={bookmaker}
+                                            checked={selectedBookmakers.includes(exchangeMapping[bookmaker])}
+                                            onChange={handleExchangeChange}
+                                            className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
+                                        />
+                                        <span className="text-sm text-slate-300">{bookmaker}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Funzione per ottenere tutte le partite uniche dal dataset
+    const getUniqueMatches = () => {
+        return Array.from(new Set(odds.map(game => `${game.home_team} vs ${game.away_team}`)));
+    };
+
+    // Componente SearchFilter
+    const SearchFilter = () => {
+        const handleSearchChange = (e) => {
+            const value = e.target.value;
+            setSearchTerm(value);
+
+            if (value.trim()) {
+                const matchSuggestions = getUniqueMatches().filter(match =>
+                    match.toLowerCase().includes(value.toLowerCase())
+                );
+                setSuggestions(matchSuggestions);
+                setShowSuggestions(true);
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
+        };
+
+        const handleSuggestionClick = (suggestion) => {
+            setSearchTerm(suggestion);
+            setShowSuggestions(false);
+        };
+
+        const clearSearch = () => {
+            setSearchTerm('');
+            setSuggestions([]);
+            setShowSuggestions(false);
+        };
+
+        return (
+            <div className="search-filter">
+                <h3>Search Matches!</h3>
+                <div className="search-input-container">
+                    <Search className="search-icon" size={20} />
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        placeholder="Search for matches..."
+                        className="search-input"
+                    />
+                    {searchTerm && (
+                        <button className="clear-search-btn" onClick={clearSearch}>
+                            <X size={20} />
+                        </button>
+                    )}
+                </div>
+
+                {showSuggestions && suggestions.length > 0 && (
+                    <div className="suggestions-container">
+                        {suggestions.map((suggestion, index) => (
+                            <div
+                                key={index}
+                                className="suggestion-item"
+                                onClick={() => handleSuggestionClick(suggestion)}
+                            >
+                                {suggestion}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const getCurrentPageOdds = () => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         return filteredOdds.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     };
 
-    const handleBookmakerFilter = (bookmaker) => {
-        setSelectedBookmakers(prev =>
-            prev.includes(bookmakerMapping[bookmaker])
-                ? prev.filter(b => b !== bookmakerMapping[bookmaker])
-                : [...prev, bookmakerMapping[bookmaker]]
-        );
-    };
 
     const formatDate = (isoDate) => {
         const date = new Date(isoDate);
@@ -271,44 +955,26 @@ const OddsList = () => {
         <div className="min-h-screen bg-slate-900 text-white p-6">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-6">
-                    <h2 className="text-3xl font-bold text-purple-400 mb-4">ODDS TRACKER</h2>
+                    <h2 className="text-3xl font-bold text-purple-400 mb-4">TRIPLA PUNTATA</h2>
 
                     {/* Filters Section */}
                     <div className="bg-slate-800 rounded-lg p-4 mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* datat Selection */}
-                            <div className="bg-slate-700 rounded-lg p-3">
-                                inprohress
-                            </div>
-
-                            {/* Bookmakers Filter */}
-                            <div className="bg-slate-700 rounded-lg p-3">
-                                <h3 className="text-lg font-semibold text-slate-300 mb-2">Bookmakers</h3>
-                                <div className="max-h-60 overflow-y-auto">
-                                    {bookmakerOptions.map((bookmaker) => (
-                                        <div
-                                            key={bookmaker}
-                                            onClick={() => handleBookmakerFilter(bookmaker)}
-                                            className={`p-2 rounded-md cursor-pointer ${selectedBookmakers.includes(bookmakerMapping[bookmaker])
-                                                ? 'bg-purple-500 text-white'
-                                                : 'hover:bg-slate-600'
-                                                }`}
-                                        >
-                                            {bookmaker}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Search/Additional Filter */}
-                            <div className="bg-slate-700 rounded-lg p-3">
-                                <h3 className="text-lg font-semibold text-slate-300 mb-2">Search</h3>
-                                <input
-                                    type="text"
-                                    placeholder="Search games..."
-                                    className="w-full bg-slate-600 text-white px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                />
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <DateRangeFilter
+                            dateRange={dateRange} 
+                            setDateRange={setDateRange}  
+                            />
+                            <RatingRangeFilter />
+                            <OddsRangeFilter />
+                            <BookmakersFilter
+                                selectedBookmakers={selectedBookmakers}
+                                setSelectedBookmakers={setSelectedBookmakers}
+                                bookmakerMapping={bookmakerMapping}
+                                bookmakerOptions={bookmakerOptions}
+                            />
+                        </div>
+                        <div className="mt-4">
+                            <SearchFilter />
                         </div>
                     </div>
 

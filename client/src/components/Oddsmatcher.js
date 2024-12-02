@@ -3,6 +3,7 @@ import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import './OddsList.css'; // Importa il CSS per la modale
 import { ChevronDown, Search, X } from 'lucide-react';
+import Modal from 'react-modal';
 
 // VARIABILI
 const bookmakerMapping = {
@@ -879,109 +880,135 @@ const OddsList = () => {
     const [commission, setCommission] = useState(0.05);
     const [customBookmakerOdds, setCustomBookmakerOdds] = useState(bookmakerOdds);
     const [customBetfairOdds, setCustomBetfairOdds] = useState(betfairOdds);
-
+  
     const calculations = calculateArbitrage(
       stake,
       commission,
       customBookmakerOdds,
       customBetfairOdds
     );
-
-    if (!isOpen) return null;
-
+  
+    // Custom styles for the modal
+    const customStyles = {
+      content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: '#1e293b', // slate-800
+        color: 'white',
+        borderRadius: '0.5rem',
+        padding: '2rem',
+        maxWidth: '500px',
+        width: '90%'
+      },
+      overlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        zIndex: 1000
+      }
+    };
+  
     return (
-      <div className="modal-odds">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3>{teamNames.home} vs {teamNames.away}</h3>
-            <div className="market-type">
-              Mercato: {marketType === '1' ? 'Home' : marketType === 'X' ? 'Draw' : 'Away'}
-            </div>
-          </div>
-
-          <div className="input-section">
-            <div className="input-group">
-              <label>
-                Puntata (€):
-                <input
-                  type="number"
-                  value={stake}
-                  onChange={(e) => setStake(parseFloat(e.target.value) || 0)}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Commissione Betfair:
-                <input
-                  type="number"
-                  value={commission}
-                  step="0.01"
-                  onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota Bookmaker:
-                <input
-                  type="number"
-                  value={customBookmakerOdds}
-                  step="0.01"
-                  onChange={(e) => setCustomBookmakerOdds(parseFloat(e.target.value) || 0)}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            <div className="input-group">
-              <label>
-                Quota Betfair:
-                <input
-                  type="number"
-                  value={customBetfairOdds}
-                  step="0.01"
-                  onChange={(e) => setCustomBetfairOdds(parseFloat(e.target.value) || 0)}
-                  className="form-input"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="results-section">
-            <div className="result-row">
-              <span>Bancata:</span>
-              <strong>€{calculations.lay}</strong>
-            </div>
-            <div className="result-row">
-              <span>Responsabilità:</span>
-              <strong>€{calculations.liability}</strong>
-            </div>
-            <div className="result-row">
-              <span>Profit:</span>
-              <strong className={calculations.profit > 0 ? 'profit-positive' : 'profit-negative'}>
-                €{calculations.profit}
-              </strong>
-            </div>
-            <div className="result-row">
-              <span>Rating:</span>
-              <strong className={calculations.rating > 0 ? 'rating-positive' : 'rating-negative'}>
-                {calculations.rating}%
-              </strong>
-            </div>
-          </div>
-
-          <div className="modal-actions">
-            <button className="btn btn-secondary" onClick={onClose}>
-              Chiudi
-            </button>
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={onClose}
+        style={customStyles}
+        contentLabel="Arbitrage Calculation"
+      >
+        <div className="modal-header mb-4">
+          <h3 className="text-2xl font-bold mb-2">{teamNames.home} vs {teamNames.away}</h3>
+          <div className="market-type text-sm text-slate-400">
+            Mercato: {marketType === '1' ? 'Home' : marketType === 'X' ? 'Draw' : 'Away'}
           </div>
         </div>
-      </div>
+  
+        <div className="input-section grid gap-4 mb-4">
+          <div className="input-group">
+            <label className="block mb-2">
+              Puntata (€):
+              <input
+                type="number"
+                value={stake}
+                onChange={(e) => setStake(parseFloat(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-slate-700 rounded-lg mt-1"
+              />
+            </label>
+          </div>
+  
+          <div className="input-group">
+            <label className="block mb-2">
+              Commissione Betfair:
+              <input
+                type="number"
+                value={commission}
+                step="0.01"
+                onChange={(e) => setCommission(parseFloat(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-slate-700 rounded-lg mt-1"
+              />
+            </label>
+          </div>
+  
+          <div className="input-group">
+            <label className="block mb-2">
+              Quota Bookmaker:
+              <input
+                type="number"
+                value={customBookmakerOdds}
+                step="0.01"
+                onChange={(e) => setCustomBookmakerOdds(parseFloat(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-slate-700 rounded-lg mt-1"
+              />
+            </label>
+          </div>
+  
+          <div className="input-group">
+            <label className="block mb-2">
+              Quota Betfair:
+              <input
+                type="number"
+                value={customBetfairOdds}
+                step="0.01"
+                onChange={(e) => setCustomBetfairOdds(parseFloat(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-slate-700 rounded-lg mt-1"
+              />
+            </label>
+          </div>
+        </div>
+  
+        <div className="results-section space-y-2 mb-4">
+          <div className="result-row flex justify-between">
+            <span>Bancata:</span>
+            <strong>€{calculations.lay}</strong>
+          </div>
+          <div className="result-row flex justify-between">
+            <span>Responsabilità:</span>
+            <strong>€{calculations.liability}</strong>
+          </div>
+          <div className="result-row flex justify-between">
+            <span>Profit:</span>
+            <strong className={calculations.profit > 0 ? 'text-green-400' : 'text-red-400'}>
+              €{calculations.profit}
+            </strong>
+          </div>
+          <div className="result-row flex justify-between">
+            <span>Rating:</span>
+            <strong className={calculations.rating > 0 ? 'text-green-400' : 'text-red-400'}>
+              {calculations.rating}%
+            </strong>
+          </div>
+        </div>
+  
+        <div className="modal-actions flex justify-end">
+          <button 
+            className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg"
+            onClick={onClose}
+          >
+            Chiudi
+          </button>
+        </div>
+      </Modal>
     );
   };
 

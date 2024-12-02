@@ -4,7 +4,7 @@ import ReactModal from 'react-modal';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
 import { ChevronDown, Search, X } from 'lucide-react';
-
+import DateRangeFilter from '../components/filters/DateRangeFilter';
 
 const bookmakerMapping = {
     'Unibet': 'unibet',
@@ -34,7 +34,6 @@ const getLeagueName = (leagueKey) => {
     };
     return leagueNames[leagueKey] || leagueKey;
 };
-
 
 const bookmakerOptions = Object.keys(bookmakerMapping);
 
@@ -204,22 +203,22 @@ const OddsList = () => {
                 )
             })).filter(game => game.bookmakers.length > 0);
         }
-    
+
         // Applica il filtro delle date
         if (dateRange.startDate || dateRange.endDate) {
             filteredGames = filteredGames.filter(game => {
                 const gameDate = new Date(game.commence_time);
                 const startDate = dateRange.startDate ? new Date(dateRange.startDate) : null;
                 const endDate = dateRange.endDate ? new Date(dateRange.endDate) : null;
-    
+
                 if (startDate && !endDate) return gameDate >= startDate;
                 if (!startDate && endDate) return gameDate <= endDate;
                 if (startDate && endDate) return gameDate >= startDate && gameDate <= endDate;
-    
+
                 return true;
             });
         }
-    
+
         // Calcola la migliore combinazione di quote per ogni partita
         const oddsWithRating = filteredGames.map(game => {
             const bestCombination = findBestOddsCombination(game);
@@ -228,130 +227,40 @@ const OddsList = () => {
                 bestCombination
             };
         }).filter(game => game.bestCombination !== null);
-    
+
         // Applica il filtro del rating
-        const filteredByRating = oddsWithRating.filter(game => 
-            game.bestCombination.rating >= ratingRange.min && 
+        const filteredByRating = oddsWithRating.filter(game =>
+            game.bestCombination.rating >= ratingRange.min &&
             game.bestCombination.rating <= ratingRange.max
         );
-    
+
         // Applica il filtro delle quote
         const filteredByOdds = filteredByRating.filter(game => {
             // Controlla che almeno una delle quote (1, X, 2) sia nell'intervallo
-            const isWithinOddsRange = 
+            const isWithinOddsRange =
                 (game.bestCombination.bestOdds1 >= oddsRange.min && game.bestCombination.bestOdds1 <= oddsRange.max) ||
                 (game.bestCombination.bestOddsX >= oddsRange.min && game.bestCombination.bestOddsX <= oddsRange.max) ||
                 (game.bestCombination.bestOdds2 >= oddsRange.min && game.bestCombination.bestOdds2 <= oddsRange.max);
-    
+
             return isWithinOddsRange;
         });
-    
+
         // Applica il filtro di ricerca
-        const filteredBySearch = searchTerm 
-            ? filteredByOdds.filter(game => 
+        const filteredBySearch = searchTerm
+            ? filteredByOdds.filter(game =>
                 `${game.home_team} vs ${game.away_team}`
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase())
-              )
+            )
             : filteredByOdds;
-    
+
         // Ordina per rating in ordine decrescente
         return filteredBySearch.sort((a, b) => b.bestCombination.rating - a.bestCombination.rating);
     };
 
     const filteredOdds = getFilteredOdds();
 
-    // Add date range filter component
-    const DateRangeFilter = () => {
-        const today = new Date().toISOString().split('T')[0];
 
-        const handleDateChange = (e) => {
-            const { name, value } = e.target;
-            setDateRange(prev => ({
-                ...prev,
-                [name]: value
-            }));
-        };
-
-        const clearDates = () => {
-            setDateRange({
-                startDate: '',
-                endDate: ''
-            });
-        };
-
-        const isDateRangeValid = () => {
-            if (!dateRange.startDate || !dateRange.endDate) return true;
-            return new Date(dateRange.startDate) <= new Date(dateRange.endDate);
-        };
-
-        return (
-            <div className="w-full">
-                <h3 className="text-sm text-slate-400 mb-2">Filter by Date Range</h3>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label
-                                htmlFor="startDate"
-                                className="block text-sm font-medium text-slate-300"
-                            >
-                                From:
-                            </label>
-                            <input
-                                type="date"
-                                id="startDate"
-                                name="startDate"
-                                value={dateRange.startDate}
-                                min={today}
-                                max={dateRange.endDate || undefined}
-                                onChange={handleDateChange}
-                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
-                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                         placeholder-slate-400"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label
-                                htmlFor="endDate"
-                                className="block text-sm font-medium text-slate-300"
-                            >
-                                To:
-                            </label>
-                            <input
-                                type="date"
-                                id="endDate"
-                                name="endDate"
-                                value={dateRange.endDate}
-                                min={dateRange.startDate || today}
-                                onChange={handleDateChange}
-                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white 
-                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                         placeholder-slate-400"
-                            />
-                        </div>
-                    </div>
-
-                    {(dateRange.startDate || dateRange.endDate) && (
-                        <button
-                            onClick={clearDates}
-                            className="inline-flex items-center px-3 py-2 text-sm rounded-lg
-                       bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors
-                       focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                            Clear Dates
-                        </button>
-                    )}
-
-                    {!isDateRangeValid() && (
-                        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500 rounded-lg p-2">
-                            End date must be after start date
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    };
 
     const RatingRangeFilter = () => {
         const [localRatingRange, setLocalRatingRange] = useState(ratingRange);
@@ -975,7 +884,10 @@ const OddsList = () => {
                     {/* Filters Section */}
                     <div className="bg-slate-800 rounded-lg p-4 mb-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <DateRangeFilter />
+                            <DateRangeFilter
+                                dateRange={dateRange}
+                                setDateRange={setDateRange}
+                            />
                             <RatingRangeFilter />
                             <OddsRangeFilter />
                             <BookmakersFilter

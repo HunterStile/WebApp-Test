@@ -1,13 +1,13 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/NavBar';
-import Home from './components/Home';
-import Login from './components/Login';
+import Navbar from './page/NavBar';
+import Home from './page/Home';
+import Login from './page/Login';
 import PrivateRoute from './components/PrivateRoute';
-import Oddsmatcher from './components/Oddsmatcher';
-import DoppiaPuntata from  './components/TriplaPuntata';
-import TriplaPuntata from  './components/TriplaPuntata';
+import Oddsmatcher from './page/Oddsmatcher';
+import DoppiaPuntata from  './page/TriplaPuntata';
+import TriplaPuntata from  './page/TriplaPuntata';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 

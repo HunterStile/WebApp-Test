@@ -7,7 +7,7 @@ import {Search, X } from 'lucide-react';
 import DateRangeFilter from '../components/filters/DateRangeFilter';
 import RatingRangeFilter from '../components/filters/RatingRangeFilter';
 import OddsRangeFilter from '../components/filters/OddsRangeFilter';
-import BookmakersFilter from '../components/filters/BookmakersFilter';
+import BookmakersFilter from '../components/filters/BookmakersFilterbase';
 
 const bookmakerMapping = {
     'Unibet': 'unibet',

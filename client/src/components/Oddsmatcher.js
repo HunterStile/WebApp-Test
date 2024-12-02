@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
-import './OddsList.css'; // Importa il CSS per la modale
 import { ChevronDown, Search, X } from 'lucide-react';
 import Modal from 'react-modal';
 

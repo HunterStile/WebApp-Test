@@ -38,12 +38,10 @@ const bookmakerOptions = Object.keys(bookmakerMapping);
 
 const OddsList = () => {
     const [odds, setOdds] = useState([]);
-    const [sports, setSports] = useState([]);
     const [error, setError] = useState(null);
     const [modalData, setModalData] = useState(null);
     const [betAmount, setBetAmount] = useState(100);
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [selectedSport, setSelectedSport] = useState('soccer'); // Default sport
     const [selectedBookmakers, setSelectedBookmakers] = useState([]);
     const [cachedOdds, setCachedOdds] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
@@ -65,17 +63,6 @@ const OddsList = () => {
         }
     };
 
-
-    const fetchSports = useCallback(async () => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/odds/sports`);
-            setSports(response.data);
-        } catch (error) {
-            setError('Error fetching sports data');
-            console.error('Error fetching sports:', error);
-        }
-    }, []);
-
     const fetchOdds = useCallback(async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/odds/major-leagues`);
@@ -92,20 +79,6 @@ const OddsList = () => {
             console.error('Error fetching odds:', error);
         }
     }, []);
-
-    useEffect(() => {
-        fetchSports(); // Richiama l'API degli sport all'avvio del componente
-    }, [fetchSports]);
-
-    useEffect(() => {
-        if (cachedOdds[selectedSport]) {
-            // Usa i dati già in cache
-            setOdds(cachedOdds[selectedSport]);
-        } else {
-            // Fetch data if not in cache
-            fetchOdds(selectedSport);
-        }
-    }, [selectedSport, cachedOdds, fetchOdds]);
 
     const calculatePunta = (odds1, oddsX, odds2) => {
         const puntaX = (betAmount * odds1) / oddsX;
@@ -220,6 +193,14 @@ const OddsList = () => {
         }));
     };
 
+    useEffect(() => {
+        if (cachedOdds.length > 0) {
+          setOdds(cachedOdds);
+        } else {
+          fetchOdds();
+        }
+      }, [cachedOdds, fetchOdds]);
+    
 
     return (
         <div className="min-h-screen bg-slate-900 text-white p-6">
@@ -230,23 +211,9 @@ const OddsList = () => {
                     {/* Filters Section */}
                     <div className="bg-slate-800 rounded-lg p-4 mb-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Sport Selection */}
+                            {/* datat Selection */}
                             <div className="bg-slate-700 rounded-lg p-3">
-                                <h3 className="text-lg font-semibold text-slate-300 mb-2">Sports</h3>
-                                <div className="max-h-60 overflow-y-auto">
-                                    {sports.map((sport) => (
-                                        <div
-                                            key={sport.key}
-                                            onClick={() => setSelectedSport(sport.key)}
-                                            className={`p-2 rounded-md cursor-pointer ${selectedSport === sport.key
-                                                ? 'bg-purple-500 text-white'
-                                                : 'hover:bg-slate-600'
-                                                }`}
-                                        >
-                                            {sport.title}
-                                        </div>
-                                    ))}
-                                </div>
+                                inprohress
                             </div>
 
                             {/* Bookmakers Filter */}

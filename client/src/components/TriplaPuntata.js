@@ -1,3 +1,4 @@
+//components/TriplaPuntata.js
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactModal from 'react-modal';
 import axios from 'axios';
@@ -36,6 +37,9 @@ const getLeagueName = (leagueKey) => {
 
 const bookmakerOptions = Object.keys(bookmakerMapping);
 
+// Max partite per pagina
+const ITEMS_PER_PAGE = 10;
+
 const OddsList = () => {
     const [odds, setOdds] = useState([]);
     const [error, setError] = useState(null);
@@ -45,7 +49,7 @@ const OddsList = () => {
     const [selectedBookmakers, setSelectedBookmakers] = useState([]);
     const [cachedOdds, setCachedOdds] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 10;
+    const [totalPages, setTotalPages] = useState(1);
 
     // In the component, add a method to open the modal
     const openModal = (game) => {
@@ -94,16 +98,16 @@ const OddsList = () => {
                 market: bookmaker.markets.find(market => market.key === 'h2h')
             }))
             .filter(item => item.market && item.market.outcomes.length === 3);
-    
+
         let bestCombination = null;
         let maxRating = 0;
-    
+
         // Exact rating calculation you specified
         const calculateRating = (profit, totalbet) => {
             const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
             return (rating / 100);
         };
-    
+
         // Compare all possible combinations of bookmakers
         for (let i = 0; i < h2hMarkets.length; i++) {
             for (let j = i + 1; j < h2hMarkets.length; j++) {
@@ -111,38 +115,38 @@ const OddsList = () => {
                     const market1 = h2hMarkets[i].market.outcomes;
                     const market2 = h2hMarkets[j].market.outcomes;
                     const market3 = h2hMarkets[k].market.outcomes;
-    
+
                     const odds1 = [
-                        market1[0].price, 
-                        market2[0].price, 
+                        market1[0].price,
+                        market2[0].price,
                         market3[0].price
                     ];
                     const oddsX = [
-                        market1[1].price, 
-                        market2[1].price, 
+                        market1[1].price,
+                        market2[1].price,
                         market3[1].price
                     ];
                     const odds2 = [
-                        market1[2].price, 
-                        market2[2].price, 
+                        market1[2].price,
+                        market2[2].price,
                         market3[2].price
                     ];
-    
+
                     // Find best odds for each market
                     const bestOdds1 = Math.max(...odds1);
                     const bestOddsX = Math.max(...oddsX);
                     const bestOdds2 = Math.max(...odds2);
-    
+
                     // Calculate betting strategy
                     const betAmount = 100;
                     const puntaX = (betAmount * bestOdds1) / bestOddsX;
                     const punta2 = (betAmount * bestOdds1) / bestOdds2;
                     const totalBet = betAmount + puntaX + punta2;
                     const profit = (bestOdds1 * betAmount) - totalBet;
-    
+
                     // Calculate rating using your specific formula
                     const rating = calculateRating(profit, totalBet);
-    
+
                     if (rating > maxRating) {
                         maxRating = rating;
                         bestCombination = {
@@ -162,7 +166,7 @@ const OddsList = () => {
                 }
             }
         }
-    
+
         return bestCombination;
     };
 
@@ -195,7 +199,6 @@ const OddsList = () => {
     };
 
     const filteredOdds = getFilteredOdds();
-    const totalPages = Math.ceil(filteredOdds.length / ITEMS_PER_PAGE);
 
     const getCurrentPageOdds = () => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -258,7 +261,12 @@ const OddsList = () => {
         }
     }, [cachedOdds, fetchOdds]);
 
+    // Calcola il totale delle pagine quando filteredOdds cambia
+    useEffect(() => {
+        setTotalPages(Math.ceil(filteredOdds.length / ITEMS_PER_PAGE));
+    }, [filteredOdds]);
 
+    //MAIN PAGE//
     return (
         <div className="min-h-screen bg-slate-900 text-white p-6">
             <div className="max-w-7xl mx-auto">
@@ -304,6 +312,12 @@ const OddsList = () => {
                         </div>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
+                            {error}
+                        </div>
+                    )}
                     {/* Odds Table */}
                     {filteredOdds.length > 0 ? (
                         <div className="bg-slate-800 rounded-lg overflow-hidden">
@@ -462,24 +476,66 @@ const OddsList = () => {
 
 
                             {/* Pagination */}
-                            <div className="bg-slate-800 p-4 flex justify-between items-center">
+                            <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
                                 <div className="text-sm text-slate-400">
                                     Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
                                 </div>
-                                <div className="flex space-x-2">
+                                <div className="flex items-center gap-2">
                                     <button
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={currentPage === 1}
-                                        className="bg-slate-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                                        onClick={() => setCurrentPage(1)}
+                                    >
+                                        First
+                                    </button>
+                                    <button
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                     >
                                         Previous
                                     </button>
+
+                                    <div className="flex items-center gap-2">
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                            .filter(pageNum => {
+                                                return (
+                                                    pageNum === 1 ||
+                                                    pageNum === totalPages ||
+                                                    Math.abs(pageNum - currentPage) <= 1
+                                                );
+                                            })
+                                            .map((pageNum, index, array) => (
+                                                <React.Fragment key={pageNum}>
+                                                    {index > 0 && array[index - 1] !== pageNum - 1 && (
+                                                        <span className="text-slate-400">...</span>
+                                                    )}
+                                                    <button
+                                                        className={`px-4 py-2 rounded-lg ${pageNum === currentPage
+                                                            ? 'bg-purple-500'
+                                                            : 'bg-slate-700 hover:bg-slate-600'
+                                                            }`}
+                                                        onClick={() => setCurrentPage(pageNum)}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                </React.Fragment>
+                                            ))}
+                                    </div>
+
                                     <button
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={currentPage === totalPages}
-                                        className="bg-slate-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                     >
                                         Next
+                                    </button>
+                                    <button
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(totalPages)}
+                                    >
+                                        Last
                                     </button>
                                 </div>
                             </div>

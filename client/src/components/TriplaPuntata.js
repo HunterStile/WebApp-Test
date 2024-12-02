@@ -49,15 +49,15 @@ const OddsList = () => {
 
     // In the component, add a method to open the modal
     const openModal = (game) => {
-        // Prepare modal data with the first bookmaker's H2H market odds
-        const h2hMarket = game.bookmakers[0]?.markets.find(market => market.key === 'h2h');
-        if (h2hMarket && h2hMarket.outcomes.length === 3) {
+        // Use the best combination from the game
+        if (game.bestCombination) {
             setModalData({
                 home_team: game.home_team,
                 away_team: game.away_team,
-                odds1: h2hMarket.outcomes[0].price,
-                oddsX: h2hMarket.outcomes[1].price,
-                odds2: h2hMarket.outcomes[2].price
+                odds1: game.bestCombination.bestOdds1,
+                oddsX: game.bestCombination.bestOddsX,
+                odds2: game.bestCombination.bestOdds2,
+                bookmakers: game.bestCombination.bookmakers
             });
             setModalIsOpen(true);
         }
@@ -86,9 +86,84 @@ const OddsList = () => {
         return { puntaX, punta2 };
     };
 
-    const calculateRating = (profit, totalbet) => {
-        const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
-        return (rating / 100);
+    const findBestOddsCombination = (game) => {
+        // Collect all H2H markets from different bookmakers
+        const h2hMarkets = game.bookmakers
+            .map(bookmaker => ({
+                bookmaker: bookmaker.title,
+                market: bookmaker.markets.find(market => market.key === 'h2h')
+            }))
+            .filter(item => item.market && item.market.outcomes.length === 3);
+    
+        let bestCombination = null;
+        let maxRating = 0;
+    
+        // Exact rating calculation you specified
+        const calculateRating = (profit, totalbet) => {
+            const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
+            return (rating / 100);
+        };
+    
+        // Compare all possible combinations of bookmakers
+        for (let i = 0; i < h2hMarkets.length; i++) {
+            for (let j = i + 1; j < h2hMarkets.length; j++) {
+                for (let k = j + 1; k < h2hMarkets.length; k++) {
+                    const market1 = h2hMarkets[i].market.outcomes;
+                    const market2 = h2hMarkets[j].market.outcomes;
+                    const market3 = h2hMarkets[k].market.outcomes;
+    
+                    const odds1 = [
+                        market1[0].price, 
+                        market2[0].price, 
+                        market3[0].price
+                    ];
+                    const oddsX = [
+                        market1[1].price, 
+                        market2[1].price, 
+                        market3[1].price
+                    ];
+                    const odds2 = [
+                        market1[2].price, 
+                        market2[2].price, 
+                        market3[2].price
+                    ];
+    
+                    // Find best odds for each market
+                    const bestOdds1 = Math.max(...odds1);
+                    const bestOddsX = Math.max(...oddsX);
+                    const bestOdds2 = Math.max(...odds2);
+    
+                    // Calculate betting strategy
+                    const betAmount = 100;
+                    const puntaX = (betAmount * bestOdds1) / bestOddsX;
+                    const punta2 = (betAmount * bestOdds1) / bestOdds2;
+                    const totalBet = betAmount + puntaX + punta2;
+                    const profit = (bestOdds1 * betAmount) - totalBet;
+    
+                    // Calculate rating using your specific formula
+                    const rating = calculateRating(profit, totalBet);
+    
+                    if (rating > maxRating) {
+                        maxRating = rating;
+                        bestCombination = {
+                            bestOdds1,
+                            bestOddsX,
+                            bestOdds2,
+                            bookmakers: [
+                                h2hMarkets[i].bookmaker,
+                                h2hMarkets[j].bookmaker,
+                                h2hMarkets[k].bookmaker
+                            ],
+                            rating,
+                            totalBet,
+                            profit
+                        };
+                    }
+                }
+            }
+        }
+    
+        return bestCombination;
     };
 
     const getFilteredOdds = () => {
@@ -105,36 +180,18 @@ const OddsList = () => {
             })).filter(game => game.bookmakers.length > 0);
         }
 
-        // Calculate rating for each game
+        // Calculate best odds combination for each game
         const oddsWithRating = filteredGames.map(game => {
-            // Find H2H market with three outcomes
-            const h2hMarket = game.bookmakers[0]?.markets.find(market => market.key === 'h2h');
-
-            if (h2hMarket && h2hMarket.outcomes.length === 3) {
-                const [odds1, oddsX, odds2] = h2hMarket.outcomes.map(outcome => outcome.price);
-
-                // Assuming a fixed bet amount of 100 for rating calculation
-                const puntaX = (100 * odds1) / oddsX;
-                const punta2 = (100 * odds1) / odds2;
-                const totalBet = 100 + puntaX + punta2;
-                const profit = (odds1 * 100) - totalBet;
-
-                const rating = calculateRating(profit, totalBet);
-
-                return {
-                    ...game,
-                    rating: rating
-                };
-            }
+            const bestCombination = findBestOddsCombination(game);
 
             return {
                 ...game,
-                rating: 0
+                bestCombination
             };
-        });
+        }).filter(game => game.bestCombination !== null);
 
         // Sort by rating in descending order
-        return oddsWithRating.sort((a, b) => b.rating - a.rating);
+        return oddsWithRating.sort((a, b) => b.bestCombination.rating - a.bestCombination.rating);
     };
 
     const filteredOdds = getFilteredOdds();
@@ -195,12 +252,12 @@ const OddsList = () => {
 
     useEffect(() => {
         if (cachedOdds.length > 0) {
-          setOdds(cachedOdds);
+            setOdds(cachedOdds);
         } else {
-          fetchOdds();
+            fetchOdds();
         }
-      }, [cachedOdds, fetchOdds]);
-    
+    }, [cachedOdds, fetchOdds]);
+
 
     return (
         <div className="min-h-screen bg-slate-900 text-white p-6">
@@ -275,50 +332,46 @@ const OddsList = () => {
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {game.bookmakers.slice(0, 3).map((bookmaker, bIndex) => (
-                                                            <span
-                                                                key={bIndex}
-                                                                className="bg-slate-700 text-xs px-2 py-1 rounded"
-                                                            >
-                                                                {bookmaker.title}
-                                                            </span>
-                                                        ))}
-                                                        {game.bookmakers.length > 3 && (
-                                                            <span className="bg-slate-700 text-xs px-2 py-1 rounded">
-                                                                +{game.bookmakers.length - 3}
-                                                            </span>
-                                                        )}
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs text-slate-400">Best Combination:</span>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {game.bestCombination.bookmakers.map((bookmaker, bIndex) => (
+                                                                <span
+                                                                    key={bIndex}
+                                                                    className="bg-slate-700 text-xs px-2 py-1 rounded"
+                                                                >
+                                                                    {bookmaker}
+                                                                </span>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex space-x-2">
-                                                        {game.bookmakers[0]?.markets.map((market, mIndex) =>
-                                                            market.key === 'h2h' && (
-                                                                <div key={mIndex} className="flex space-x-1">
-                                                                    {market.outcomes.map((outcome, oIndex) => (
-                                                                        <span
-                                                                            key={oIndex}
-                                                                            className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded"
-                                                                        >
-                                                                            {outcome.price}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            )
-                                                        )}
+                                                        <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
+                                                            1: {game.bestCombination.bestOdds1.toFixed(2)}
+                                                        </span>
+                                                        <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
+                                                            X: {game.bestCombination.bestOddsX.toFixed(2)}
+                                                        </span>
+                                                        <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
+                                                            2: {game.bestCombination.bestOdds2.toFixed(2)}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
                                                     <button
                                                         className="bg-purple-500 hover:bg-purple-600 text-white text-sm px-3 py-2 rounded-md"
-                                                        onClick={() => openModal(game)}
+                                                        onClick={() => openModal({
+                                                            ...game,
+                                                            bestCombination: game.bestCombination
+                                                        })}
                                                     >
                                                         Calculate
                                                     </button>
                                                 </td>
                                                 <td className="p-4 text-sm text-slate-300">
-                                                    {game.rating ? game.rating.toFixed(2) : 'N/A'}
+                                                    {game.bestCombination.rating.toFixed(2)}
                                                 </td>
                                             </tr>
                                         ))}

@@ -98,14 +98,61 @@ const OddsList = () => {
         }
     }, [selectedSport, cachedOdds, fetchOdds]);
 
+    const calculatePunta = (odds1, oddsX, odds2) => {
+        const puntaX = (betAmount * odds1) / oddsX;
+        const punta2 = (betAmount * odds1) / odds2;
+        return { puntaX, punta2 };
+    };
+
+    const calculateRating = (profit, totalbet) => {
+        const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
+        return (rating / 100);
+    };
+
     const getFilteredOdds = () => {
-        if (!selectedBookmakers.length) return odds;
-        return odds.map(game => ({
-            ...game,
-            bookmakers: game.bookmakers.filter(bookmaker =>
-                selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
-            )
-        })).filter(game => game.bookmakers.length > 0);
+        let filteredGames = [];
+
+        if (!selectedBookmakers.length) {
+            filteredGames = odds;
+        } else {
+            filteredGames = odds.map(game => ({
+                ...game,
+                bookmakers: game.bookmakers.filter(bookmaker =>
+                    selectedBookmakers.includes(bookmakerMapping[bookmaker.title])
+                )
+            })).filter(game => game.bookmakers.length > 0);
+        }
+
+        // Calculate rating for each game
+        const oddsWithRating = filteredGames.map(game => {
+            // Find H2H market with three outcomes
+            const h2hMarket = game.bookmakers[0]?.markets.find(market => market.key === 'h2h');
+
+            if (h2hMarket && h2hMarket.outcomes.length === 3) {
+                const [odds1, oddsX, odds2] = h2hMarket.outcomes.map(outcome => outcome.price);
+
+                // Assuming a fixed bet amount of 100 for rating calculation
+                const puntaX = (100 * odds1) / oddsX;
+                const punta2 = (100 * odds1) / odds2;
+                const totalBet = 100 + puntaX + punta2;
+                const profit = (odds1 * 100) - totalBet;
+
+                const rating = calculateRating(profit, totalBet);
+
+                return {
+                    ...game,
+                    rating: rating
+                };
+            }
+
+            return {
+                ...game,
+                rating: 0
+            };
+        });
+
+        // Sort by rating in descending order
+        return oddsWithRating.sort((a, b) => b.rating - a.rating);
     };
 
     const filteredOdds = getFilteredOdds();
@@ -143,22 +190,13 @@ const OddsList = () => {
         setBetAmount(100);
     };
 
-    const calculatePunta = (odds1, oddsX, odds2) => {
-        const puntaX = (betAmount * odds1) / oddsX;
-        const punta2 = (betAmount * odds1) / odds2;
-        return { puntaX, punta2 };
-    };
-
+    
     const TotalBetting = (betAmount, puntaX, punta2) => {
         const totalbet = betAmount + puntaX + punta2;
         return totalbet;
     };
 
-    const calculateRating = (profit, totalbet) => {
-        const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
-        return (rating / 100);
-    };
-
+    
     const calculateProfit = (puntata1, puntataX, puntata2, quota) => {
         const totalBet = puntata1 + puntataX + puntata2;
         return (quota * puntata1) - totalBet;
@@ -247,6 +285,7 @@ const OddsList = () => {
                                             <th className="p-4 text-left text-sm text-slate-400">Bookmakers</th>
                                             <th className="p-4 text-left text-sm text-slate-400">Odds</th>
                                             <th className="p-4 text-left text-sm text-slate-400">Actions</th>
+                                            <th className="p-4 text-left text-sm text-slate-400">Rating</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-700">
@@ -303,6 +342,9 @@ const OddsList = () => {
                                                     >
                                                         Calculate
                                                     </button>
+                                                </td>
+                                                <td className="p-4 text-sm text-slate-300">
+                                                    {game.rating ? game.rating.toFixed(2) : 'N/A'}
                                                 </td>
                                             </tr>
                                         ))}

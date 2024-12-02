@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState} from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
@@ -16,9 +16,6 @@ export const AuthProvider = ({ children }) => {
       // Imposta l'utente nel contesto e nel localStorage
       setUser(username);
       localStorage.setItem('user', username);
-      // Aggiorna i bilanci
-      fetchTcBalance(username);
-      fetchBtcBalance(username);
     } catch (error) {
       console.error('Login fallito:', error);
     }
@@ -28,8 +25,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    setTcBalance(0);
-    setBtcBalance(0);
   };
 
 

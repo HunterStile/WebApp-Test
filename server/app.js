@@ -7,7 +7,7 @@ const oddsRoutes = require('./routes/odds');
 
 require('dotenv').config();
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 // Middleware per il CORS (importante per le API)
 app.use((req, res, next) => {

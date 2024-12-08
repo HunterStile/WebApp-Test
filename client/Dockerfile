@@ -9,8 +9,8 @@ COPY package*.json ./
 # Installa le dipendenze
 RUN npm install
 
-# Cambia i permessi su node_modules e .cache dopo l'installazione
-RUN chown -R node:node /app/node_modules /app/node_modules/.cache
+# Cambia i permessi su node_modules e .cache solo dopo l'installazione
+RUN mkdir -p /app/node_modules/.cache && chown -R node:node /app/node_modules /app/node_modules/.cache
 
 # Copia il resto del progetto
 COPY . .

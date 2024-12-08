@@ -16,7 +16,7 @@ RUN mkdir -p /app/node_modules/.cache && chown -R node:node /app/node_modules /a
 COPY . .
 
 # Esponi la porta
-EXPOSE 3001
+EXPOSE 3000
 
 # Comando di avvio
 CMD ["npm", "start"]

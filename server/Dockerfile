@@ -10,6 +10,6 @@ COPY . .
 
 WORKDIR /app/server
 
-EXPOSE 5001
+EXPOSE 5000
 
 CMD ["npm", "start"]

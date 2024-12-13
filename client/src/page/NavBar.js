@@ -45,7 +45,7 @@ function Navbar() {
             <Link to="/oddsmatcher" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Oddsmatcher
             </Link>
-            <Link to="/doppia_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+            <Link to="/conversionlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Doppia Puntata
             </Link>
             <Link to="/tripla_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">

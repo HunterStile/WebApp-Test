@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const oddsRoutes = require('./routes/odds');
+const gamblingRoutes = require('./routes/gambling');
 
 require('dotenv').config();
 const app = express();
@@ -22,8 +23,6 @@ app.use((req, res, next) => {
 
 // Connessione a MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/WebApp-Test', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected...'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -35,6 +34,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
 app.use('/api/auth', authRoutes);
 app.use('/api/odds', oddsRoutes);
+app.use('/api/gambling', gamblingRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

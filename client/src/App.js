@@ -6,7 +6,7 @@ import Home from './page/Home';
 import Login from './page/Login';
 import PrivateRoute from './components/PrivateRoute';
 import Oddsmatcher from './page/Oddsmatcher';
-import DoppiaPuntata from  './page/TriplaPuntata';
+import ConversionList from  './page/ConversionList';
 import TriplaPuntata from  './page/TriplaPuntata';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -27,7 +27,7 @@ function App() {
                 {/* Protected routes */}
                 <Route element={<PrivateRoute />}>
                   <Route path="/oddsmatcher" element={<Oddsmatcher />} />
-                  <Route path="/doppia_puntata" element={<DoppiaPuntata />} />
+                  <Route path="/conversionlist" element={<ConversionList />} />
                   <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
                 </Route>
               </Routes>

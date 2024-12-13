@@ -69,14 +69,6 @@ npm init -y
 
 Sports data received: [
   {
-    key: 'americanfootball_cfl',
-    group: 'American Football',
-    title: 'CFL',
-    description: 'Canadian Football League',
-    active: true,
-    has_outrights: false
-  },
-  {
     key: 'americanfootball_ncaaf',
     group: 'American Football',
     title: 'NCAAF',
@@ -109,18 +101,10 @@ Sports data received: [
     has_outrights: true
   },
   {
-    key: 'baseball_kbo',
-    group: 'Baseball',
-    title: 'KBO',
-    description: 'KBO League',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'baseball_mlb',
-    group: 'Baseball',
-    title: 'MLB',
-    description: 'Major League Baseball',
+    key: 'aussierules_afl',
+    group: 'Aussie Rules',
+    title: 'AFL',
+    description: 'Aussie Football',
     active: true,
     has_outrights: false
   },
@@ -128,17 +112,9 @@ Sports data received: [
     key: 'baseball_mlb_world_series_winner',
     group: 'Baseball',
     title: 'MLB World Series Winner',
-    description: 'World Series Winner 2024',
+    description: 'World Series Winner 2025',
     active: true,
     has_outrights: true
-  },
-  {
-    key: 'baseball_npb',
-    group: 'Baseball',
-    title: 'NPB',
-    description: 'Nippon Professional Baseball',
-    active: true,
-    has_outrights: false
   },
   {
     key: 'basketball_euroleague',
@@ -165,18 +141,18 @@ Sports data received: [
     has_outrights: true
   },
   {
-    key: 'basketball_nba_preseason',
-    group: 'Basketball',
-    title: 'NBA Preseason',
-    description: 'US Basketball',
-    active: true,
-    has_outrights: false
-  },
-  {
     key: 'basketball_nbl',
     group: 'Basketball',
     title: 'NBL',
     description: 'AU National Basketball League',
+    active: true,
+    has_outrights: false
+  },
+  {
+    key: 'basketball_ncaab',
+    group: 'Basketball',
+    title: 'NCAAB',
+    description: 'US College Basketball',
     active: true,
     has_outrights: false
   },
@@ -189,10 +165,10 @@ Sports data received: [
     has_outrights: true
   },
   {
-    key: 'basketball_wnba',
+    key: 'basketball_wncaab',
     group: 'Basketball',
-    title: 'WNBA',
-    description: 'US Basketball',
+    title: 'WNCAAB',
+    description: "US Women's College Basketball",
     active: true,
     has_outrights: false
   },
@@ -205,10 +181,26 @@ Sports data received: [
     has_outrights: false
   },
   {
+    key: 'cricket_big_bash',
+    group: 'Cricket',
+    title: 'Big Bash',
+    description: 'Big Bash League',
+    active: true,
+    has_outrights: false
+  },
+  {
     key: 'cricket_international_t20',
     group: 'Cricket',
     title: 'International Twenty20',
     description: 'International Twenty20',
+    active: true,
+    has_outrights: false
+  },
+  {
+    key: 'cricket_odi',
+    group: 'Cricket',
+    title: 'One Day Internationals',
+    description: 'One Day Internationals',
     active: true,
     has_outrights: false
   },
@@ -232,6 +224,22 @@ Sports data received: [
     key: 'golf_pga_championship_winner',
     group: 'Golf',
     title: 'PGA Championship Winner',
+    description: '2025 Winner',
+    active: true,
+    has_outrights: true
+  },
+  {
+    key: 'golf_the_open_championship_winner',
+    group: 'Golf',
+    title: 'The Open Winner',
+    description: '2025 Winner',
+    active: true,
+    has_outrights: true
+  },
+  {
+    key: 'golf_us_open_winner',
+    group: 'Golf',
+    title: 'US Open Winner',
     description: '2025 Winner',
     active: true,
     has_outrights: true
@@ -277,12 +285,12 @@ Sports data received: [
     has_outrights: false
   },
   {
-    key: 'politics_us_presidential_election_winner',
-    group: 'Politics',
-    title: 'US Presidential Elections Winner',
-    description: '2024 US Presidential Election Winner',
+    key: 'rugbyleague_nrl',
+    group: 'Rugby League',
+    title: 'NRL',
+    description: 'Aussie Rugby League',
     active: true,
-    has_outrights: true
+    has_outrights: false
   },
   {
     key: 'soccer_argentina_primera_division',
@@ -301,14 +309,6 @@ Sports data received: [
     has_outrights: false
   },
   {
-    key: 'soccer_austria_bundesliga',
-    group: 'Soccer',
-    title: 'Austrian Football Bundesliga',
-    description: 'Austrian Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
     key: 'soccer_belgium_first_div',
     group: 'Soccer',
     title: 'Belgium First Div',
@@ -317,58 +317,18 @@ Sports data received: [
     has_outrights: false
   },
   {
-    key: 'soccer_brazil_campeonato',
-    group: 'Soccer',
-    title: 'Brazil Série A',
-    description: 'Brasileirão Série A',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_brazil_serie_b',
-    group: 'Soccer',
-    title: 'Brazil Série B',
-    description: 'Campeonato Brasileiro Série B',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_chile_campeonato',
-    group: 'Soccer',
-    title: 'Primera División - Chile',
-    description: 'Campeonato Chileno',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_china_superleague',
-    group: 'Soccer',
-    title: 'Super League - China',
-    description: 'Chinese Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_conmebol_copa_libertadores',
-    group: 'Soccer',
-    title: 'Copa Libertadores',
-    description: 'CONMEBOL Copa Libertadores',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_denmark_superliga',
-    group: 'Soccer',
-    title: 'Denmark Superliga',
-    description: 'Danish Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
     key: 'soccer_efl_champ',
     group: 'Soccer',
     title: 'Championship',
     description: 'EFL Championship',
+    active: true,
+    has_outrights: false
+  },
+  {
+    key: 'soccer_england_efl_cup',
+    group: 'Soccer',
+    title: 'EFL Cup',
+    description: 'League Cup',
     active: true,
     has_outrights: false
   },
@@ -397,20 +357,20 @@ Sports data received: [
     has_outrights: false
   },
   {
+    key: 'soccer_fa_cup',
+    group: 'Soccer',
+    title: 'FA Cup',
+    description: 'Football Association Challenge Cup',
+    active: true,
+    has_outrights: false
+  },
+  {
     key: 'soccer_fifa_world_cup_winner',
     group: 'Soccer',
     title: 'FIFA World Cup Winner',
     description: 'FIFA World Cup Winner 2026',
     active: true,
     has_outrights: true
-  },
-  {
-    key: 'soccer_finland_veikkausliiga',
-    group: 'Soccer',
-    title: 'Veikkausliiga - Finland',
-    description: 'Finnish  Soccer',
-    active: true,
-    has_outrights: false
   },
   {
     key: 'soccer_france_ligue_one',
@@ -477,22 +437,6 @@ Sports data received: [
     has_outrights: false
   },
   {
-    key: 'soccer_japan_j_league',
-    group: 'Soccer',
-    title: 'J League',
-    description: 'Japan Soccer League',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_korea_kleague1',
-    group: 'Soccer',
-    title: 'K League 1',
-    description: 'Korean Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
     key: 'soccer_league_of_ireland',
     group: 'Soccer',
     title: 'League of Ireland',
@@ -513,14 +457,6 @@ Sports data received: [
     group: 'Soccer',
     title: 'Dutch Eredivisie',
     description: 'Dutch Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_norway_eliteserien',
-    group: 'Soccer',
-    title: 'Eliteserien - Norway',
-    description: 'Norwegian Soccer',
     active: true,
     has_outrights: false
   },
@@ -565,22 +501,6 @@ Sports data received: [
     has_outrights: false
   },
   {
-    key: 'soccer_sweden_allsvenskan',
-    group: 'Soccer',
-    title: 'Allsvenskan - Sweden',
-    description: 'Swedish Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
-    key: 'soccer_sweden_superettan',
-    group: 'Soccer',
-    title: 'Superettan - Sweden',
-    description: 'Swedish Soccer',
-    active: true,
-    has_outrights: false
-  },
-  {
     key: 'soccer_switzerland_superleague',
     group: 'Soccer',
     title: 'Swiss Superleague',
@@ -597,18 +517,18 @@ Sports data received: [
     has_outrights: false
   },
   {
-    key: 'soccer_uefa_champs_league',
+    key: 'soccer_uefa_europa_conference_league',
     group: 'Soccer',
-    title: 'UEFA Champions League',
-    description: 'European Champions League',
+    title: 'UEFA Europa Conference League',
+    description: 'UEFA Europa Conference League',
     active: true,
     has_outrights: false
   },
   {
-    key: 'soccer_usa_mls',
+    key: 'soccer_uefa_europa_league',
     group: 'Soccer',
-    title: 'MLS',
-    description: 'Major League Soccer',
+    title: 'UEFA Europa League',
+    description: 'European Europa League',
     active: true,
     has_outrights: false
   }

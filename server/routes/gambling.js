@@ -6,16 +6,26 @@ const router = express.Router();
 
 router.get('/fetch-conversions', async (req, res) => {
     try {
-      const apiKey = '9XQPzYXpBwSCZ1xakP1r8-Uy'; // API key nell'URL
+      const apiKey = '9XQPzYXpBwSCZ1xakP1r8-Uy'; 
       const apiUrl = `https://api.gambling-affiliation.com/aff/v1/${apiKey}/report/conversion`;
       
+      // Calcola date per gli ultimi 6 mesi
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 6);
+  
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+      const formattedEndDate = endDate.toISOString().split('T')[0];
+  
+      console.log(`Fetching conversions from ${formattedStartDate} to ${formattedEndDate}`);
+  
       const response = await axios.get(apiUrl, {
         params: {
           sites: [83638, 82703, 82990],
           campaigns: ['active'],
           period: 'custom',
-          start: '2024-11-01',
-          end: '2024-12-31',
+          start: formattedStartDate,
+          end: formattedEndDate,
           type: [1,2,3,4,5],
           status: [0,1,2,3],
           order_by: 'c.id',
@@ -72,6 +82,19 @@ router.get('/fetch-conversions', async (req, res) => {
         modifiedCount: result.modifiedCount
       });
     } catch (error) {
+      // Gestione specifica dell'errore di rate limit
+      if (error.response && error.response.data && error.response.data.error) {
+        const apiError = error.response.data.error;
+        
+        if (apiError.code === 'application.api.affiliate.ratelimit') {
+          console.error('Rate limit raggiunto:', apiError.message);
+          return res.status(429).json({
+            error: 'Rate limit raggiunto',
+            retryAfter: apiError.message.split('on :')[1]?.trim() || 'Prossimo tentativo non specificato'
+          });
+        }
+      }
+  
       console.error('Errore nel fetch conversioni:', error.response ? error.response.data : error.message);
       res.status(500).json({ 
         error: 'Impossibile recuperare le conversioni',

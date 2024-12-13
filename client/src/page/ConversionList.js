@@ -36,15 +36,18 @@ const ConversionList = () => {
       setUpdating(true);
       const response = await axios.get('http://localhost:5000/api/gambling/fetch-conversions');
       
-      // Dopo l'aggiornamento, ricarica le conversioni dal database
       await fetchConversionsFromDB();
       
-      // Mostra un messaggio di successo
       alert(`Aggiornamento completato. Nuove conversioni: ${response.data.count}`);
-      setUpdating(false);
     } catch (error) {
-      console.error('Errore durante l\'aggiornamento:', error);
-      setError(error.message);
+      if (error.response && error.response.status === 429) {
+        // Gestione specifica del rate limit
+        alert(`Limite di richieste raggiunto. Riprova dopo: ${error.response.data.retryAfter}`);
+      } else {
+        console.error('Errore durante l\'aggiornamento:', error);
+        alert('Errore durante l\'aggiornamento');
+      }
+    } finally {
       setUpdating(false);
     }
   };

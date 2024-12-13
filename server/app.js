@@ -33,8 +33,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
-app.use('/auth', authRoutes);
-app.use('/odds', oddsRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/odds', oddsRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

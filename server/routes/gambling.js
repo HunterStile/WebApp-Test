@@ -106,40 +106,31 @@ router.get('/fetch-conversions', async (req, res) => {
 // Rotta per ottenere conversioni con filtri
 router.get('/conversions', async (req, res) => {
   try {
-    const { 
-      status, 
-      campaign_name, 
-      type, 
-      startDate, 
-      endDate 
-    } = req.query;
+    const { aff_var, status, campaign_name, type, startDate, endDate } = req.query;
 
     // Costruisci filtro dinamico
     const filter = {};
+    if (aff_var) filter.aff_var = aff_var; // Filtra per aff_var (username)
     if (status) filter.status = status;
     if (campaign_name) filter.campaign_name = { $regex: campaign_name, $options: 'i' };
     if (type) filter.type = type;
-    
+
     if (startDate && endDate) {
       filter.date = {
         $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $lte: new Date(endDate),
       };
     }
 
-    const conversions = await Conversion
-      .find(filter)
-      .sort({ date: -1 })
-      .limit(100); // Limita a 100 risultati per default
-
+    const conversions = await Conversion.find(filter).sort({ date: -1 }).limit(100);
     res.json({
       total: await Conversion.countDocuments(filter),
-      conversions
+      conversions,
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Errore nel recupero conversioni',
-      details: error.message 
+      details: error.message,
     });
   }
 });

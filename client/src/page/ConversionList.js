@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const ConversionList = () => {
+  const { user } = useContext(AuthContext); // Ottieni l'username dal contesto
   const [conversions, setConversions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,10 +13,13 @@ const ConversionList = () => {
   const fetchConversionsFromDB = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/gambling/conversions');
+      // Passa l'username come parametro
+      const response = await axios.get('http://localhost:5000/api/gambling/conversions', {
+        params: { aff_var: user }, // Include l'username come aff_var
+      });
       
       // Assicurati di accedere alla proprietà corretta
-      const conversionData = response.data.conversions || response.data;
+      const conversionData = response.data.conversions || [];
       
       // Ordina le conversioni per data (più recenti prima)
       const sortedConversions = conversionData.sort((a, b) => 
@@ -54,8 +59,10 @@ const ConversionList = () => {
 
   // Carica le conversioni all'inizializzazione del componente
   useEffect(() => {
-    fetchConversionsFromDB();
-  }, []);
+    if (user) {
+      fetchConversionsFromDB();
+    }
+  }, [user]);
 
   if (loading) return <div>Caricamento conversioni...</div>;
   if (error) return <div>Errore: {error}</div>;

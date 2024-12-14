@@ -70,4 +70,33 @@ router.get('/user-requests', async (req, res) => {
   }
 });
 
+router.get('/:uniqueLink', async (req, res) => {
+  try {
+    // Ricostruisci l'intero percorso senza "/api" per il confronto
+    const relativePath = req.originalUrl.replace('/api', ''); // Elimina solo '/api'
+
+    console.log('Percorso richiesto:', relativePath);
+
+    // Cerchiamo nel DB usando il percorso corretto
+    const campaignRequest = await CampaignRequest.findOne({ uniqueLink: relativePath });
+
+    if (!campaignRequest) {
+      return res.status(404).send('Link non trovato.');
+    }
+
+    // Verifica che lo stato sia "APPROVED"
+    if (campaignRequest.status !== 'APPROVED') {
+      return res.status(403).send('Il link non è ancora approvato.');
+    }
+
+    // Reindirizzamento all'URL reale
+    console.log('Reindirizzamento a:', campaignRequest.realRedirectUrl);
+    return res.redirect(campaignRequest.realRedirectUrl);
+
+  } catch (error) {
+    console.error('Errore nel reindirizzamento:', error.message);
+    return res.status(500).send('Errore interno del server.');
+  }
+});
+
 module.exports = router;

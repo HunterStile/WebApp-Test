@@ -17,7 +17,6 @@ const campaignRequestSchema = new mongoose.Schema({
     },
     uniqueLink: {
         type: String,
-        unique: true
     },
     realRedirectUrl: {
         type: String

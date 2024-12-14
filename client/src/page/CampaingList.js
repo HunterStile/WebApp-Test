@@ -43,11 +43,11 @@ const CampaignRequestOverview = () => {
           params: { username: user }
         });
 
-        // Categorize requests
+        // Categorizza correttamente le richieste
         const categorizedRequests = {
           pending: response.data.pendingRequests || [],
-          approved: response.data.approvedRequests.filter(r => r.status === 'APPROVED') || [],
-          rejected: response.data.approvedRequests.filter(r => r.status === 'REJECTED') || []
+          approved: response.data.approvedRequests || [],
+          rejected: response.data.rejectedRequests || []
         };
 
         setUserRequests(categorizedRequests);

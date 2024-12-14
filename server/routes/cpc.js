@@ -60,7 +60,14 @@ router.get('/user-requests', async (req, res) => {
       status: 'APPROVED'
     });
 
-    res.json({ pendingRequests, approvedRequests });
+    // Trova le richieste rifiutate
+    const rejectedRequests = await CampaignRequest.find({
+      username: username,
+      status: 'REJECTED'
+    });
+
+    // Restituisci tutte le richieste suddivise per stato
+    res.json({ pendingRequests, approvedRequests, rejectedRequests });
   } catch (error) {
     console.error('Errore nel recupero delle richieste:', error);
     res.status(500).json({ 

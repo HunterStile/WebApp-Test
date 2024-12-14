@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext,useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 const campaigns = [
@@ -22,26 +22,49 @@ const campaigns = [
 
 const CampaignList = () => {
   const { user } = useContext(AuthContext); // Accedi al valore di user dal contesto
+  const [copied, setCopied] = useState(null); // Stato per il messaggio di copia
 
-  if (!user) {
-    return <p>Devi effettuare il login per vedere le campagne.</p>;
-  }
+  const generateFakeLink = (campaignName) => {
+    const randomValue = Math.random().toString(36).substr(2, 8); // Valore casuale
+    return `http://localhost:5000/cpc/${randomValue}?campaign=${campaignName}&user=${user}`;
+  };
+
+  // Funzione per copiare il link negli appunti
+  const handleCopy = (link) => {
+    navigator.clipboard.writeText(link);
+    setCopied(link);
+    setTimeout(() => setCopied(null), 2000); // Reset messaggio dopo 2 secondi
+  };
 
   return (
-    <div>
-      <h1>Campagne disponibili</h1>
-      <ul>
-        {campaigns.map((campaign, index) => (
-          <li key={index}>
-            <a
-              href={`${campaign.url}${user}`} // Aggiunge l'username al link della campagna
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {campaign.name}
-            </a>
-          </li>
-        ))}
+    <div className="campaign-list">
+      <h1 className="text-xl font-bold mb-4">Campagne disponibili</h1>
+      <ul className="space-y-4">
+        {campaigns.map((campaign, index) => {
+          const fakeLink = generateFakeLink(campaign.name); // Genera il link fittizio
+          return (
+            <li key={index} className="flex flex-col bg-gray-100 p-4 rounded shadow">
+              <span className="font-semibold text-lg">{campaign.name}</span>
+              <div className="flex items-center space-x-4 mt-2">
+                <input
+                  type="text"
+                  value={fakeLink}
+                  readOnly
+                  className="border p-2 w-full bg-gray-200 text-gray-600 rounded"
+                />
+                <button
+                  onClick={() => handleCopy(fakeLink)}
+                  className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+                >
+                  Copia Link
+                </button>
+              </div>
+              {copied === fakeLink && (
+                <span className="text-green-500 mt-2">Link copiato negli appunti!</span>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

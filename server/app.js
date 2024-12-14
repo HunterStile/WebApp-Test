@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const oddsRoutes = require('./routes/odds');
 const gamblingRoutes = require('./routes/gambling');
+const redirectRoutes = require('./routes/redirect')
 
 require('dotenv').config();
 const app = express();
@@ -35,6 +36,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/odds', oddsRoutes);
 app.use('/api/gambling', gamblingRoutes);
+app.use('/api/cpc', redirectRoutes);
 
 
 // Mappa delle campagne con gli URL reali

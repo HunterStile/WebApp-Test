@@ -1,5 +1,6 @@
 import React, { useContext,useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import API_BASE_URL from '../config';
 
 const campaigns = [
   {
@@ -26,7 +27,7 @@ const CampaignList = () => {
 
   const generateFakeLink = (campaignName) => {
     const randomValue = Math.random().toString(36).substr(2, 8); // Valore casuale
-    return `http://localhost:5000/cpc/${randomValue}?campaign=${campaignName}&user=${user}`;
+    return `${API_BASE_URL}/cpc/${randomValue}?campaign=${campaignName}&user=${user}`;
   };
 
   // Funzione per copiare il link negli appunti

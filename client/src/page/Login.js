@@ -1,27 +1,24 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import API_BASE_URL from '../config';
 import { LockIcon, UserIcon } from 'lucide-react';
 
 function Auth() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isRegister, setIsRegister] = useState(false);
-  const { login } = useContext(AuthContext); // Importa `login` dal contesto
+  const { login, register } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (isRegister) {
-        // Richiesta per la registrazione
-        await axios.post(`${API_BASE_URL}/auth/register`, { username, password });
-        alert('Registrazione riuscita! Procedi con il login.');
-        setIsRegister(false);
+        // Usa la funzione `register` dal contesto
+        await register(username, password);
+        setIsRegister(false); // Torna al form di login dopo la registrazione
       } else {
-        // Richiesta per il login
+        // Usa la funzione `login` dal contesto
         await login(username, password);
         navigate('/'); // Reindirizza alla homepage dopo il login
       }

@@ -1,4 +1,4 @@
-import React, { createContext, useState} from 'react';
+import React, { createContext, useState } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
@@ -6,7 +6,6 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(localStorage.getItem('user') || null);
- 
 
   // Funzione per effettuare il login
   const login = async (username, password) => {
@@ -27,9 +26,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  // Funzione per effettuare la registrazione
+  const register = async (username, password) => {
+    try {
+      // Chiamata all'API per la registrazione
+      await axios.post(`${API_BASE_URL}/auth/register`, { username, password });
+      alert('Registrazione riuscita! Procedi con il login.');
+    } catch (error) {
+      console.error('Registrazione fallita:', error);
+      throw new Error('Registrazione fallita');
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout}}>
+    <AuthContext.Provider value={{ user, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

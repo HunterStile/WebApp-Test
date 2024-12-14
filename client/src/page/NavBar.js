@@ -46,7 +46,7 @@ function Navbar() {
               Oddsmatcher
             </Link>
             <Link to="/conversionlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Doppia Puntata
+              ConversionList
             </Link>
             <Link to="/tripla_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Tripla_Puntata

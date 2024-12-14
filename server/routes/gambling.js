@@ -9,10 +9,10 @@ router.get('/fetch-conversions', async (req, res) => {
       const apiKey = '9XQPzYXpBwSCZ1xakP1r8-Uy'; 
       const apiUrl = `https://api.gambling-affiliation.com/aff/v1/${apiKey}/report/conversion`;
       
-      // Calcola date per gli ultimi 6 mesi
+      // Calcola date per gli ultimi 5 mesi
       const endDate = new Date();
       const startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 6);
+      startDate.setMonth(startDate.getMonth() - 5);
   
       const formattedStartDate = startDate.toISOString().split('T')[0];
       const formattedEndDate = endDate.toISOString().split('T')[0];
@@ -22,7 +22,7 @@ router.get('/fetch-conversions', async (req, res) => {
       const response = await axios.get(apiUrl, {
         params: {
           sites: [83638, 82703, 82990],
-          campaigns: ['active'],
+          campaigns: ['active','offline'],
           period: 'custom',
           start: formattedStartDate,
           end: formattedEndDate,

@@ -1,69 +1,21 @@
-import React, { useState, useEffect,useContext } from 'react';
-import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
-import API_BASE_URL from '../config';
+import React, { useContext, useState } from 'react';
+import { ConversionContext } from '../context/ConversionContext';
 
 const ConversionList = () => {
-  const { user } = useContext(AuthContext); // Ottieni l'username dal contesto
-  const [conversions, setConversions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { conversions, loading, error, updateConversions } = useContext(ConversionContext);
   const [updating, setUpdating] = useState(false);
 
-  // Funzione per recuperare le conversioni dal database
-  const fetchConversionsFromDB = async () => {
-    try {
-      setLoading(true);
-      // Passa l'username come parametro
-      const response = await axios.get(`${API_BASE_URL}/gambling/conversions`, {
-        params: { aff_var: user }, // Include l'username come aff_var
-      });
-      
-      // Assicurati di accedere alla proprietà corretta
-      const conversionData = response.data.conversions || [];
-      
-      // Ordina le conversioni per data (più recenti prima)
-      const sortedConversions = conversionData.sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-      );
-
-      setConversions(sortedConversions);
-      setLoading(false);
-    } catch (error) {
-      console.error('Errore nel recupero conversioni:', error);
-      setError(error.message);
-      setLoading(false);
-    }
-  };
-
-  // Funzione per aggiornare le conversioni dall'API esterna
-  const updateConversions = async () => {
+  const handleUpdate = async () => {
     try {
       setUpdating(true);
-      const response = await axios.get(`${API_BASE_URL}/gambling/fetch-conversions`);
-      
-      await fetchConversionsFromDB();
-      
-      alert(`Aggiornamento completato. Nuove conversioni: ${response.data.count}`);
-    } catch (error) {
-      if (error.response && error.response.status === 429) {
-        // Gestione specifica del rate limit
-        alert(`Limite di richieste raggiunto. Riprova dopo: ${error.response.data.retryAfter}`);
-      } else {
-        console.error('Errore durante l\'aggiornamento:', error);
-        alert('Errore durante l\'aggiornamento');
-      }
+      const newCount = await updateConversions();
+      alert(`Aggiornamento completato. Nuove conversioni: ${newCount}`);
+    } catch (err) {
+      alert('Errore durante l\'aggiornamento');
     } finally {
       setUpdating(false);
     }
   };
-
-  // Carica le conversioni all'inizializzazione del componente
-  useEffect(() => {
-    if (user) {
-      fetchConversionsFromDB();
-    }
-  }, [user]);
 
   if (loading) return <div>Caricamento conversioni...</div>;
   if (error) return <div>Errore: {error}</div>;
@@ -72,15 +24,12 @@ const ConversionList = () => {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Conversioni Affiliate</h1>
-        <button 
-          onClick={updateConversions} 
+        <button
+          onClick={handleUpdate}
           disabled={updating}
           className={`
             px-4 py-2 rounded 
-            ${updating 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }
+            ${updating ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}
           `}
         >
           {updating ? 'Aggiornamento...' : 'Aggiorna Conversioni'}
@@ -104,29 +53,23 @@ const ConversionList = () => {
               </tr>
             </thead>
             <tbody>
-              {conversions.map(conv => (
-                <tr 
-                  key={conv.conversion_id || conv._id} 
-                  className="hover:bg-gray-50"
-                >
+              {conversions.map((conv) => (
+                <tr key={conv.conversion_id || conv._id} className="hover:bg-gray-50">
                   <td className="p-2 border">{conv.conversion_id}</td>
                   <td className="p-2 border">{conv.campaign_name}</td>
                   <td className="p-2 border">
                     {new Date(conv.date).toLocaleDateString('it-IT', {
                       day: '2-digit',
                       month: '2-digit',
-                      year: 'numeric'
+                      year: 'numeric',
                     })}
                   </td>
                   <td className="p-2 border">{conv.type}</td>
                   <td className="p-2 border">
-                    <span 
+                    <span
                       className={`
                         px-2 py-1 rounded text-xs
-                        ${conv.status === 'validated' 
-                          ? 'bg-green-200 text-green-800' 
-                          : 'bg-yellow-200 text-yellow-800'
-                        }
+                        ${conv.status === 'validated' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}
                       `}
                     >
                       {conv.status}

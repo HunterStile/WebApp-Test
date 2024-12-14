@@ -1,6 +1,7 @@
 import React, { useState, useEffect,useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import API_BASE_URL from '../config';
 
 const ConversionList = () => {
   const { user } = useContext(AuthContext); // Ottieni l'username dal contesto
@@ -14,7 +15,7 @@ const ConversionList = () => {
     try {
       setLoading(true);
       // Passa l'username come parametro
-      const response = await axios.get('http://localhost:5000/api/gambling/conversions', {
+      const response = await axios.get(`${API_BASE_URL}/gambling/conversions`, {
         params: { aff_var: user }, // Include l'username come aff_var
       });
       
@@ -39,7 +40,7 @@ const ConversionList = () => {
   const updateConversions = async () => {
     try {
       setUpdating(true);
-      const response = await axios.get('http://localhost:5000/api/gambling/fetch-conversions');
+      const response = await axios.get(`${API_BASE_URL}/gambling/fetch-conversions`);
       
       await fetchConversionsFromDB();
       

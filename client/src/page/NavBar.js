@@ -28,15 +28,15 @@ function Navbar() {
       {/* Sidebar Navigation */}
       <div className={`fixed top-0 left-0 w-64 bg-gray-800 text-white flex flex-col h-screen transition-transform duration-300 ease-in-out z-40
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        
+
         {/* Logo - hidden on mobile since it's in the header */}
         <div className="p-4 hidden lg:block">
           <Link to="/" className="text-2xl font-bold text-orange-500">MyApp</Link>
         </div>
-        
+
         {/* Add top padding on mobile to account for header */}
         <div className="lg:hidden h-16"></div>
-        
+
         <nav className="flex-1">
           <div className="px-4 space-y-2">
             <Link to="/" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
@@ -51,8 +51,10 @@ function Navbar() {
             <Link to="/tripla_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Tripla_Puntata
             </Link>
-            
-            
+            <Link to="/campaignlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+              CampaignList
+            </Link>
+
             {/* Expandable sections */}
             <div className="py-2">
               <h3 className="px-4 text-xs font-semibold text-gray-400 uppercase">More</h3>

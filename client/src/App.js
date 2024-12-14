@@ -8,6 +8,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Oddsmatcher from './page/Oddsmatcher';
 import ConversionList from  './page/ConversionList';
 import TriplaPuntata from  './page/TriplaPuntata';
+import CampaignList from './page/CampaingList';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
@@ -29,6 +30,7 @@ function App() {
                   <Route path="/oddsmatcher" element={<Oddsmatcher />} />
                   <Route path="/conversionlist" element={<ConversionList />} />
                   <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
+                  <Route path="/campaignlist" element={<CampaignList/>} />
                 </Route>
               </Routes>
             </div>

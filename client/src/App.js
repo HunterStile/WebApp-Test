@@ -8,6 +8,7 @@ import Oddsmatcher from './page/Oddsmatcher';
 import ConversionList from './page/ConversionList';
 import TriplaPuntata from './page/TriplaPuntata';
 import CampaignList from './page/CampaingList';
+import Admin from './page/private/Admin';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext'; // Importa ConversionProvider
 import './App.css';
@@ -32,6 +33,7 @@ function App() {
                     <Route path="/conversionlist" element={<ConversionList />} />
                     <Route path="/tripla_puntata" element={<TriplaPuntata />} />
                     <Route path="/campaignlist" element={<CampaignList />} />
+                    <Route path="/admin" element={<Admin />} />
                   </Route>
                 </Routes>
               </div>

@@ -1,6 +1,7 @@
-import React, { useContext,useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
+import axios from 'axios';
 
 const campaigns = [
   {
@@ -21,54 +22,65 @@ const campaigns = [
   },
 ];
 
-const CampaignList = () => {
-  const { user } = useContext(AuthContext); // Accedi al valore di user dal contesto
-  const [copied, setCopied] = useState(null); // Stato per il messaggio di copia
+const RequestCampaign = () => {
+  const [selectedCampaign, setSelectedCampaign] = useState('');
+  const { user } = useContext(AuthContext);
 
-  const generateFakeLink = (campaignName) => {
-    const randomValue = Math.random().toString(36).substr(2, 8); // Valore casuale
-    return `${API_BASE_URL}/cpc/${randomValue}?campaign=${campaignName}&user=${user}`;
-  };
+  // Stato locale per i messaggi
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' o 'error'
 
-  // Funzione per copiare il link negli appunti
-  const handleCopy = (link) => {
-    navigator.clipboard.writeText(link);
-    setCopied(link);
-    setTimeout(() => setCopied(null), 2000); // Reset messaggio dopo 2 secondi
+  const handleRequestCampaign = async () => {
+    try {
+      // Usa lo username invece dell'ID
+      const response = await axios.post(`${API_BASE_URL}/cpc/campaign-requests`, {
+        campaign: selectedCampaign,
+        username: user, // Assumendo che user.username sia disponibile
+      });
+  
+      setMessage('Richiesta campagna inviata');
+      setMessageType('success');
+    } catch (error) {
+      console.error('Errore nella richiesta:', error.response ? error.response.data : error.message);
+      
+      setMessage(
+        error.response?.data?.message || 
+        "Errore nell'invio della richiesta"
+      );
+      setMessageType('error');
+    }
   };
 
   return (
-    <div className="campaign-list">
-      <h1 className="text-xl font-bold mb-4">Campagne disponibili</h1>
-      <ul className="space-y-4">
-        {campaigns.map((campaign, index) => {
-          const fakeLink = generateFakeLink(campaign.name); // Genera il link fittizio
-          return (
-            <li key={index} className="flex flex-col bg-gray-100 p-4 rounded shadow">
-              <span className="font-semibold text-lg">{campaign.name}</span>
-              <div className="flex items-center space-x-4 mt-2">
-                <input
-                  type="text"
-                  value={fakeLink}
-                  readOnly
-                  className="border p-2 w-full bg-gray-200 text-gray-600 rounded"
-                />
-                <button
-                  onClick={() => handleCopy(fakeLink)}
-                  className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                >
-                  Copia Link
-                </button>
-              </div>
-              {copied === fakeLink && (
-                <span className="text-green-500 mt-2">Link copiato negli appunti!</span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+    <div>
+      <select 
+        value={selectedCampaign} 
+        onChange={(e) => setSelectedCampaign(e.target.value)}
+      >
+        {campaigns.map(campaign => (
+          <option key={campaign.name} value={campaign.name}>
+            {campaign.name}
+          </option>
+        ))}
+      </select>
+      <button onClick={handleRequestCampaign}>
+        Richiedi Campagna
+      </button>
+
+      {/* Mostra il messaggio */}
+      {message && (
+        <div 
+          style={{ 
+            color: messageType === 'success' ? 'green' : 'red',
+            marginTop: '10px' 
+          }}
+        >
+          {message}
+        </div>
+      )}
     </div>
   );
 };
 
-export default CampaignList;
+
+export default RequestCampaign;

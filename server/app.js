@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const oddsRoutes = require('./routes/odds');
 const gamblingRoutes = require('./routes/gambling');
-const redirectRoutes = require('./routes/redirect')
+const redirectRoutes = require('./routes/cpc')
+const adminCampaignRoutes = require('./routes/admincpc');
 
 require('dotenv').config();
 const app = express();
@@ -37,37 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/odds', oddsRoutes);
 app.use('/api/gambling', gamblingRoutes);
 app.use('/api/cpc', redirectRoutes);
-
-
-// Mappa delle campagne con gli URL reali
-const campaignUrls = {
-  BETANO: 'https://www.gambling-affiliation.com/cpc/v=g5MTrVQ96U0IQlw1NeFO-hIm1W43ZmVn0.gSTfMxo2s_GA7331V2&aff_var_1=',
-  ROLLETTO: 'https://www.gambling-affiliation.com/cpc/v=CDv-VvGTatah4ZD6IPtEqcDZjnem9BRZ3z2oz1PDuhg_GA7331V2&aff_var_1=',
-  TIKIAKA: 'https://www.gambling-affiliation.com/cpc/v=WD9KR0uuFFaj9029..91PF4Kwbtu9Re0s6ZO6fobNIk_GA7331V2&aff_var_1=',
-  CAZEURS: 'https://www.gambling-affiliation.com/cpc/v=Xb75XCL1vA3pLoGQnEc6OtsmD1AFzUlVf2Rm5zd.DwM_GA7331V2&aff_var_1=',
-};
-
-// Endpoint per gestire i link fittizi
-app.get('/cpc/:randomValue', (req, res) => {
-  const { randomValue } = req.params; // Valore casuale generato
-  const { campaign, user } = req.query; // Nome campagna e username
-
-  if (!campaign || !user) {
-    return res.status(400).send('Parametri mancanti: assicurati che il link contenga campagna e username.');
-  }
-
-  // Trova il link reale corrispondente alla campagna
-  const realUrl = campaignUrls[campaign];
-  if (!realUrl) {
-    return res.status(404).send('Campagna non trovata.');
-  }
-
-  // Crea il link reale con l'username
-  const redirectUrl = `${realUrl}${user}`;
-
-  console.log(`Reindirizzamento per campagna "${campaign}" con user "${user}": ${redirectUrl}`);
-  res.redirect(redirectUrl);
-});
+app.use('/api/admin', adminCampaignRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

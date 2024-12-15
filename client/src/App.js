@@ -1,15 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './page/NavBar';
+import Navbar from './components/NavBar';
 import Home from './page/Home';
 import Login from './page/Login';
 import PrivateRoute from './components/PrivateRoute';
 import ConversionList from './page/ConversionList';
 import CampaignList from './page/CampaingList';
 import Admin from './page/private/Admin';
-import ManageCampaign from  './page/private/ManageCampaign';
+import ManageCampaign from './page/private/ManageCampaign';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext'; // Importa ConversionProvider
+import Footer from './components/Footer'; // Importa il Footer
+import Termini from './components/Termini'; // Importa il componente Termini
+import Privacy from './components/Privacy'; // Importa il componente Privacy
+import Cookies from './components/Cookies'; // Importa il componente Cookies
 import './App.css';
 
 function App() {
@@ -32,11 +36,16 @@ function App() {
                     <Route path="/campaignlist" element={<CampaignList />} />
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/manage" element={<ManageCampaign />} />
-                    
                   </Route>
+
+                  {/* Legal routes */}
+                  <Route path="/termini" element={<Termini />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/cookie" element={<Cookies />} />
                 </Routes>
               </div>
             </div>
+            <Footer /> {/* Aggiungi il footer alla fine della pagina */}
           </div>
         </Router>
       </ConversionProvider>

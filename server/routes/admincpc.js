@@ -3,22 +3,21 @@ const router = express.Router();
 const CampaignRequest = require('../models/CampaignRequest');
 const Campaign = require('../models/Campaign');
 
-// Endpoint per aggiungere una nuova campagna
+// Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
   const { name, realUrl } = req.body;
 
   if (!name || !realUrl) {
-    return res.status(400).json({ message: 'Nome e URL reale della campagna sono richiesti' });
+    return res.status(400).json({ message: 'Nome e URL della campagna sono richiesti' });
   }
 
   try {
-    // Verifica se la campagna esiste già
+    // Controlla se la campagna esiste già
     const existingCampaign = await Campaign.findOne({ name });
     if (existingCampaign) {
       return res.status(400).json({ message: 'La campagna esiste già' });
     }
 
-    // Aggiungi la nuova campagna al database
     const newCampaign = new Campaign({ name, realUrl });
     await newCampaign.save();
 
@@ -27,6 +26,51 @@ router.post('/campaigns', async (req, res) => {
     res.status(500).json({ message: 'Errore nell\'aggiunta della campagna', error: error.message });
   }
 });
+
+// Modifica una campagna esistente
+router.patch('/campaigns/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, realUrl } = req.body;
+
+  if (!name || !realUrl) {
+    return res.status(400).json({ message: 'Nome e URL della campagna sono richiesti' });
+  }
+
+  try {
+    const campaign = await Campaign.findById(id);
+
+    if (!campaign) {
+      return res.status(404).json({ message: 'Campagna non trovata' });
+    }
+
+    campaign.name = name;
+    campaign.realUrl = realUrl;
+    await campaign.save();
+
+    res.status(200).json({ message: 'Campagna modificata con successo', campaign });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nella modifica della campagna', error: error.message });
+  }
+});
+
+// Elimina una campagna
+router.delete('/campaigns/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const campaign = await Campaign.findById(id);
+
+    if (!campaign) {
+      return res.status(404).json({ message: 'Campagna non trovata' });
+    }
+
+    await campaign.remove();
+    res.status(200).json({ message: 'Campagna eliminata con successo' });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nell\'eliminazione della campagna', error: error.message });
+  }
+});
+
 
 // Funzione per generare link univoco
 const generateUniqueLink = (campaign, username) => {

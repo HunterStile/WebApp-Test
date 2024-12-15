@@ -4,9 +4,7 @@ import Navbar from './page/NavBar';
 import Home from './page/Home';
 import Login from './page/Login';
 import PrivateRoute from './components/PrivateRoute';
-import Oddsmatcher from './page/Oddsmatcher';
 import ConversionList from './page/ConversionList';
-import TriplaPuntata from './page/TriplaPuntata';
 import CampaignList from './page/CampaingList';
 import Admin from './page/private/Admin';
 import ManageCampaign from  './page/private/ManageCampaign';
@@ -30,9 +28,7 @@ function App() {
 
                   {/* Protected routes */}
                   <Route element={<PrivateRoute />}>
-                    <Route path="/oddsmatcher" element={<Oddsmatcher />} />
                     <Route path="/conversionlist" element={<ConversionList />} />
-                    <Route path="/tripla_puntata" element={<TriplaPuntata />} />
                     <Route path="/campaignlist" element={<CampaignList />} />
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/manage" element={<ManageCampaign />} />

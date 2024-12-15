@@ -42,18 +42,19 @@ function Navbar() {
             <Link to="/" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Home
             </Link>
-            <Link to="/oddsmatcher" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Oddsmatcher
+            <Link to="/admin" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+              Admin
+            </Link>
+            <Link to="/manage" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+              Manage
             </Link>
             <Link to="/conversionlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               ConversionList
             </Link>
-            <Link to="/tripla_puntata" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Tripla_Puntata
-            </Link>
             <Link to="/campaignlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              CampaignList
+              Campaignlist
             </Link>
+            
 
             {/* Expandable sections */}
             <div className="py-2">

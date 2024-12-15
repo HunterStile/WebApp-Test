@@ -5,10 +5,10 @@ const Campaign = require('../models/Campaign');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { name, realUrl } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan } = req.body;
 
-  if (!name || !realUrl) {
-    return res.status(400).json({ message: 'Nome e URL della campagna sono richiesti' });
+  if (!name || !realUrl || !description || !conditions || !commissionPlan) {
+    return res.status(400).json({ message: 'Nome, URL, descrizione, condizioni e piano commissionale sono richiesti' });
   }
 
   try {
@@ -18,7 +18,7 @@ router.post('/campaigns', async (req, res) => {
       return res.status(400).json({ message: 'La campagna esiste già' });
     }
 
-    const newCampaign = new Campaign({ name, realUrl });
+    const newCampaign = new Campaign({ name, realUrl, description, conditions, commissionPlan });
     await newCampaign.save();
 
     res.status(201).json({ message: 'Campagna aggiunta con successo', campaign: newCampaign });
@@ -30,10 +30,10 @@ router.post('/campaigns', async (req, res) => {
 // Modifica una campagna esistente
 router.patch('/campaigns/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, realUrl } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan } = req.body;
 
-  if (!name || !realUrl) {
-    return res.status(400).json({ message: 'Nome e URL della campagna sono richiesti' });
+  if (!name || !realUrl || !description || !conditions || !commissionPlan) {
+    return res.status(400).json({ message: 'Nome, URL, descrizione, condizioni e piano commissionale sono richiesti' });
   }
 
   try {
@@ -45,6 +45,10 @@ router.patch('/campaigns/:id', async (req, res) => {
 
     campaign.name = name;
     campaign.realUrl = realUrl;
+    campaign.description = description;
+    campaign.conditions = conditions;
+    campaign.commissionPlan = commissionPlan;
+
     await campaign.save();
 
     res.status(200).json({ message: 'Campagna modificata con successo', campaign });
@@ -52,6 +56,7 @@ router.patch('/campaigns/:id', async (req, res) => {
     res.status(500).json({ message: 'Errore nella modifica della campagna', error: error.message });
   }
 });
+
 
 // Elimina una campagna
 router.delete('/campaigns/:id', async (req, res) => {

@@ -6,6 +6,9 @@ const ManageCampaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [name, setName] = useState('');
   const [realUrl, setRealUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [conditions, setConditions] = useState('');
+  const [commissionPlan, setCommissionPlan] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [editCampaignId, setEditCampaignId] = useState(null);
@@ -27,10 +30,11 @@ const ManageCampaigns = () => {
 
   // Funzione per aggiungere o modificare una campagna
   const handleSubmit = async (e) => {
+    setMessage('');
     e.preventDefault();
 
-    if (!name || !realUrl) {
-      setMessage('Nome e URL della campagna sono richiesti');
+    if (!name || !realUrl || !description || !conditions || !commissionPlan) {
+      setMessage('Tutti i campi sono richiesti');
       setMessageType('error');
       return;
     }
@@ -38,18 +42,25 @@ const ManageCampaigns = () => {
     try {
       if (editCampaignId) {
         // Modifica campagna
-        const response = await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, { name, realUrl });
+        const response = await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, {
+          name, realUrl, description, conditions, commissionPlan
+        });
         setMessage('Campagna modificata con successo');
         setMessageType('success');
       } else {
         // Aggiungi nuova campagna
-        const response = await axios.post(`${API_BASE_URL}/admin/campaigns`, { name, realUrl });
+        const response = await axios.post(`${API_BASE_URL}/admin/campaigns`, {
+          name, realUrl, description, conditions, commissionPlan
+        });
         setMessage('Campagna aggiunta con successo');
         setMessageType('success');
       }
 
       setName('');
       setRealUrl('');
+      setDescription('');
+      setConditions('');
+      setCommissionPlan('');
       setEditCampaignId(null);
 
       // Ricarica le campagne
@@ -65,6 +76,9 @@ const ManageCampaigns = () => {
   const handleEdit = (campaign) => {
     setName(campaign.name);
     setRealUrl(campaign.realUrl);
+    setDescription(campaign.description);
+    setConditions(campaign.conditions);
+    setCommissionPlan(campaign.commissionPlan);
     setEditCampaignId(campaign._id);
   };
 
@@ -107,6 +121,30 @@ const ManageCampaigns = () => {
             required 
           />
         </div>
+        <div>
+          <label>Descrizione</label>
+          <textarea 
+            value={description} 
+            onChange={(e) => setDescription(e.target.value)} 
+            required 
+          />
+        </div>
+        <div>
+          <label>Condizioni</label>
+          <textarea 
+            value={conditions} 
+            onChange={(e) => setConditions(e.target.value)} 
+            required 
+          />
+        </div>
+        <div>
+          <label>Piano Commissionale</label>
+          <textarea 
+            value={commissionPlan} 
+            onChange={(e) => setCommissionPlan(e.target.value)} 
+            required 
+          />
+        </div>
         <button type="submit">
           {editCampaignId ? 'Modifica Campagna' : 'Aggiungi Campagna'}
         </button>
@@ -124,6 +162,9 @@ const ManageCampaigns = () => {
           <tr>
             <th>Nome Campagna</th>
             <th>URL Reale</th>
+            <th>Descrizione</th>
+            <th>Condizioni</th>
+            <th>Piano Commissionale</th>
             <th>Azione</th>
           </tr>
         </thead>
@@ -132,6 +173,9 @@ const ManageCampaigns = () => {
             <tr key={campaign._id}>
               <td>{campaign.name}</td>
               <td><a href={campaign.realUrl} target="_blank" rel="noopener noreferrer">{campaign.realUrl}</a></td>
+              <td>{campaign.description}</td>
+              <td>{campaign.conditions}</td>
+              <td>{campaign.commissionPlan}</td>
               <td>
                 <button onClick={() => handleEdit(campaign)}>Modifica</button>
                 <button onClick={() => handleDelete(campaign._id)}>Elimina</button>

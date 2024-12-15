@@ -11,6 +11,7 @@ import ConversionList from './page/ConversionList';
 import CampaignList from './page/CampaingList';
 import Admin from './page/private/Admin';
 import ManageCampaign from './page/private/ManageCampaign';
+import AllConversion from './page/private/AllConversion';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -46,6 +47,7 @@ function App() {
                     <Route element={<AdminPrivateRoute />}>
                       <Route path="/admin" element={<Admin />} />
                       <Route path="/admin/manage" element={<ManageCampaign />} />
+                      <Route path="/admin/allconversion" element={<AllConversion />} />
                     </Route>
 
                     {/* Legal routes */}

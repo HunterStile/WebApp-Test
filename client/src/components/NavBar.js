@@ -77,6 +77,9 @@ function Navbar() {
                 <Link to="/admin/manage" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   Manage
                 </Link>
+                <Link to="/admin/allconversion" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  All Conversion
+                </Link>
               </>
             )}
 

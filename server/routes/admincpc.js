@@ -1,14 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const CampaignRequest = require('../models/CampaignRequest');
+const Campaign = require('../models/Campaign');
 
-// Mappa delle campagne con gli URL reali
-const campaignUrls = {
-  BETANO: 'https://www.gambling-affiliation.com/cpc/v=g5MTrVQ96U0IQlw1NeFO-hIm1W43ZmVn0.gSTfMxo2s_GA7331V2&aff_var_1=',
-  ROLLETTO: 'https://www.gambling-affiliation.com/cpc/v=CDv-VvGTatah4ZD6IPtEqcDZjnem9BRZ3z2oz1PDuhg_GA7331V2&aff_var_1=',
-  TIKIAKA: 'https://www.gambling-affiliation.com/cpc/v=WD9KR0uuFFaj9029..91PF4Kwbtu9Re0s6ZO6fobNIk_GA7331V2&aff_var_1=',
-  CAZEURS: 'https://www.gambling-affiliation.com/cpc/v=Xb75XCL1vA3pLoGQnEc6OtsmD1AFzUlVf2Rm5zd.DwM_GA7331V2&aff_var_1=',
-};
+// Endpoint per aggiungere una nuova campagna
+router.post('/campaigns', async (req, res) => {
+  const { name, realUrl } = req.body;
+
+  if (!name || !realUrl) {
+    return res.status(400).json({ message: 'Nome e URL reale della campagna sono richiesti' });
+  }
+
+  try {
+    // Verifica se la campagna esiste già
+    const existingCampaign = await Campaign.findOne({ name });
+    if (existingCampaign) {
+      return res.status(400).json({ message: 'La campagna esiste già' });
+    }
+
+    // Aggiungi la nuova campagna al database
+    const newCampaign = new Campaign({ name, realUrl });
+    await newCampaign.save();
+
+    res.status(201).json({ message: 'Campagna aggiunta con successo', campaign: newCampaign });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nell\'aggiunta della campagna', error: error.message });
+  }
+});
 
 // Funzione per generare link univoco
 const generateUniqueLink = (campaign, username) => {
@@ -62,10 +80,17 @@ router.patch('/update-request/:id', async (req, res) => {
       return res.status(404).json({ message: 'Richiesta non trovata' });
     }
 
-    // Genera link univoco se approvato
+    // Trova l'URL reale della campagna
+    const campaign = await Campaign.findOne({ name: request.campaign });
+
+    if (!campaign) {
+      return res.status(404).json({ message: 'Campagna non trovata' });
+    }
+
+    // Genera il link univoco se approvato
     if (status === 'APPROVED') {
       const uniqueLink = generateUniqueLink(request.campaign, request.username);
-      const realRedirectUrl = campaignUrls[request.campaign] + request.username;
+      const realRedirectUrl = campaign.realUrl + request.username;
 
       request.status = status;
       request.uniqueLink = uniqueLink;

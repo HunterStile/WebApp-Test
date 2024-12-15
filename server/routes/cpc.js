@@ -2,17 +2,16 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Percorso al tuo modello User
 const CampaignRequest = require('../models/CampaignRequest')
-
-const campaigns = [
-  { name: 'BETANO' },
-  { name: 'ROLLETTO' },
-  { name: 'TIKIAKA' },
-  { name: 'CAZEURS' },
-];
+const Campaign = require('../models/Campaign');
 
 // Endpoint per ottenere tutte le campagne
-router.get('/campaigns', (req, res) => {
-  res.json(campaigns);
+router.get('/campaigns', async (req, res) => {
+  try {
+    const campaigns = await Campaign.find();
+    res.json(campaigns);
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nel recupero delle campagne', error: error.message });
+  }
 });
 
 // Rotta per richiedere campagna

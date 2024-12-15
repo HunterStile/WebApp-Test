@@ -9,6 +9,7 @@ import ConversionList from './page/ConversionList';
 import TriplaPuntata from './page/TriplaPuntata';
 import CampaignList from './page/CampaingList';
 import Admin from './page/private/Admin';
+import ManageCampaign from  './page/private/ManageCampaign';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext'; // Importa ConversionProvider
 import './App.css';
@@ -34,6 +35,8 @@ function App() {
                     <Route path="/tripla_puntata" element={<TriplaPuntata />} />
                     <Route path="/campaignlist" element={<CampaignList />} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/manage" element={<ManageCampaign />} />
+                    
                   </Route>
                 </Routes>
               </div>

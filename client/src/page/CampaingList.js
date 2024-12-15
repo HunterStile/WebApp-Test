@@ -3,26 +3,8 @@ import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
 import axios from 'axios';
 
-const campaigns = [
-  {
-    name: 'BETANO',
-    url: 'PLACEHOLDER',
-  },
-  {
-    name: 'ROLLETTO',
-    url: 'PLACEHOLDER',
-  },
-  {
-    name: 'TIKIAKA',
-    url: 'PLACEHOLDER',
-  },
-  {
-    name: 'CAZEURS',
-    url: 'PLACEHOLDER',
-  },
-];
-
 const CampaignRequestOverview = () => {
+  const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [userRequests, setUserRequests] = useState({
     pending: [],
@@ -32,6 +14,25 @@ const CampaignRequestOverview = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const { user } = useContext(AuthContext);
+
+  // Fetch campaigns from the server
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/cpc/campaigns`);
+        setCampaigns(response.data);
+      } catch (error) {
+        console.error('Errore nel recupero delle campagne:', error);
+        setMessage(
+          error.response?.data?.message || 
+          "Errore nel recupero delle campagne"
+        );
+        setMessageType('error');
+      }
+    };
+
+    fetchCampaigns();
+  }, []);
 
   // Fetch user requests when component mounts or user changes
   useEffect(() => {

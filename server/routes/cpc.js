@@ -3,6 +3,18 @@ const router = express.Router();
 const User = require('../models/User'); // Percorso al tuo modello User
 const CampaignRequest = require('../models/CampaignRequest')
 
+const campaigns = [
+  { name: 'BETANO' },
+  { name: 'ROLLETTO' },
+  { name: 'TIKIAKA' },
+  { name: 'CAZEURS' },
+];
+
+// Endpoint per ottenere tutte le campagne
+router.get('/campaigns', (req, res) => {
+  res.json(campaigns);
+});
+
 // Rotta per richiedere campagna
 router.post('/campaign-requests', async (req, res) => {
   const { campaign, username } = req.body;

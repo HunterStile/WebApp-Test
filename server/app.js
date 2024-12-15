@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/admin-auth')
-const oddsRoutes = require('./routes/odds');
 const gamblingRoutes = require('./routes/gambling');
 const redirectRoutes = require('./routes/cpc')
 const adminCampaignRoutes = require('./routes/admin-cpc');
@@ -37,7 +36,6 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
-app.use('/api/odds', oddsRoutes);
 app.use('/api/gambling', gamblingRoutes);
 app.use('/api/cpc', redirectRoutes);
 app.use('/api/admin', adminCampaignRoutes);

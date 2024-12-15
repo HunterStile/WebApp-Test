@@ -49,7 +49,7 @@ const ConversionList = () => {
                 <th className="p-2 border">Tipo</th>
                 <th className="p-2 border">Stato</th>
                 <th className="p-2 border">Commissione</th>
-                <th className="p-2 border">Sito</th>
+                <th className="p-2 border">Stato Campagnia</th>
               </tr>
             </thead>
             <tbody>
@@ -69,14 +69,14 @@ const ConversionList = () => {
                     <span
                       className={`
                         px-2 py-1 rounded text-xs
-                        ${conv.status === 'validated' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}
+                        ${conv.status === 'paid' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}
                       `}
                     >
                       {conv.status}
                     </span>
                   </td>
                   <td className="p-2 border">{conv.commission}</td>
-                  <td className="p-2 border">{conv.site_url}</td>
+                  <td className="p-2 border">{conv.campaign_status}</td>
                 </tr>
               ))}
             </tbody>

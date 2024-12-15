@@ -6,19 +6,19 @@ import axios from 'axios';
 const campaigns = [
   {
     name: 'BETANO',
-    url: 'https://www.gambling-affiliation.com/cpc/v=g5MTrVQ96U0IQlw1NeFO-hIm1W43ZmVn0.gSTfMxo2s_GA7331V2&aff_var_1=',
+    url: 'PLACEHOLDER',
   },
   {
     name: 'ROLLETTO',
-    url: 'https://www.gambling-affiliation.com/cpc/v=CDv-VvGTatah4ZD6IPtEqcDZjnem9BRZ3z2oz1PDuhg_GA7331V2&aff_var_1=',
+    url: 'PLACEHOLDER',
   },
   {
     name: 'TIKIAKA',
-    url: 'https://www.gambling-affiliation.com/cpc/v=WD9KR0uuFFaj9029..91PF4Kwbtu9Re0s6ZO6fobNIk_GA7331V2&aff_var_1=',
+    url: 'PLACEHOLDER',
   },
   {
     name: 'CAZEURS',
-    url: 'https://www.gambling-affiliation.com/cpc/v=Xb75XCL1vA3pLoGQnEc6OtsmD1AFzUlVf2Rm5zd.DwM_GA7331V2&aff_var_1=',
+    url: 'PLACEHOLDER',
   },
 ];
 

@@ -3,12 +3,12 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { ConversionContext } from '../context/ConversionContext';
 
 const monthNames = [
-  'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+  'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
   'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
 ];
 
 const monthShortNames = [
-  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 
+  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
   'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'
 ];
 
@@ -28,7 +28,7 @@ const Dashboard = () => {
   // Calcolo delle commissioni per mese con stato
   const monthlyCommissions = useMemo(() => {
     // Genera tutti i mesi dell'anno
-    const allMonths = Array.from({length: 12}, (_, index) => {
+    const allMonths = Array.from({ length: 12 }, (_, index) => {
       const monthKey = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
       return {
         month: monthKey,
@@ -44,7 +44,7 @@ const Dashboard = () => {
         const date = new Date(conversion.date);
         const monthKey = `${selectedYear}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const monthIndex = allMonths.findIndex(m => m.month === monthKey);
-        
+
         if (monthIndex !== -1) {
           if (conversion.status === 'paid') {
             allMonths[monthIndex].paidCommissions += parseFloat(conversion.commission) || 0;
@@ -57,7 +57,9 @@ const Dashboard = () => {
     return allMonths.map(month => ({
       ...month,
       paidCommissions: Number(month.paidCommissions.toFixed(2)),
-      onholdCommissions: Number(month.onholdCommissions.toFixed(2))
+      onholdCommissions: Number(month.onholdCommissions.toFixed(2)),
+      paidLabel: 'Convalidate',
+      onholdLabel: 'In Attesa'
     }));
   }, [conversions, selectedYear]);
 
@@ -78,13 +80,13 @@ const Dashboard = () => {
   return (
     <div className="dashboard p-4 bg-gray-900 text-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Dashboard Cliente</h1>
-      
+
       {/* Selettore Anno */}
       <div className="year-selector mb-4 flex items-center">
         <span className="mr-2 text-gray-400">Anno:</span>
         {availableYears.map(year => (
-          <button 
-            key={year} 
+          <button
+            key={year}
             onClick={() => setSelectedYear(year)}
             className={`
               px-3 py-1 rounded mr-2 
@@ -106,25 +108,41 @@ const Dashboard = () => {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={monthlyCommissions}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis 
-              dataKey="monthName" 
-              tick={{fill: 'white'}}
+            <XAxis
+              dataKey="monthName"
+              tick={{ fill: 'white' }}
             />
-            <YAxis 
-              label={{ value: '€', angle: -90, position: 'insideLeft', fill: 'white' }} 
-              tick={{fill: 'white'}}
+            <YAxis
+              label={{ value: '€', angle: -90, position: 'insideLeft', fill: 'white' }}
+              tick={{ fill: 'white' }}
             />
-            <Tooltip 
-              formatter={(value) => [`€ ${value.toFixed(2)}`, 'Commissioni']}
+            <Tooltip
+              formatter={(value, name) => {
+                if (name === 'paidCommissions') {
+                  return [`€ ${value.toFixed(2)}`, 'Convalidate'];
+                } else if (name === 'onholdCommissions') {
+                  return [`€ ${value.toFixed(2)}`, 'In Attesa'];
+                }
+                return [`€ ${value.toFixed(2)}`, name];
+              }}
               labelFormatter={(monthName) => monthName}
             />
-            <Legend />
-            <Bar 
-              dataKey="paidCommissions" 
-              fill="#10B981" 
+            <Legend
+              formatter={(value) => {
+                if (value === 'paidCommissions') {
+                  return 'Convalidate';
+                } else if (value === 'onholdCommissions') {
+                  return 'In Attesa';
+                }
+                return value;
+              }}
+            />
+            <Bar
+              dataKey="paidCommissions"
+              fill="#10B981"
               stackId="commissions"
             />
-            <Bar 
+            <Bar
               dataKey="onholdCommissions"
               fill="#F59E0B"
               stackId="commissions"
@@ -141,20 +159,20 @@ const Dashboard = () => {
             {conversions
               .filter(conv => new Date(conv.date).getFullYear() === selectedYear)
               .map((conv) => (
-              <li 
-                key={conv.conversion_id} 
-                className={`
+                <li
+                  key={conv.conversion_id}
+                  className={`
                   p-2 rounded
-                  ${conv.status === 'paid' ? 'bg-green-700' : 
-                    conv.status === 'onhold' ? 'bg-yellow-700' : 'bg-gray-600'}
+                  ${conv.status === 'paid' ? 'bg-green-700' :
+                      conv.status === 'onhold' ? 'bg-yellow-700' : 'bg-gray-600'}
                 `}
-              >
-                <p><strong>Campagna:</strong> {conv.campaign_name}</p>
-                <p><strong>Data:</strong> {new Date(conv.date).toLocaleDateString()}</p>
-                <p><strong>Commissione:</strong> € {parseFloat(conv.commission).toFixed(2)}</p>
-                <p><strong>Stato:</strong> {conv.status}</p>
-              </li>
-            ))}
+                >
+                  <p><strong>Campagna:</strong> {conv.campaign_name}</p>
+                  <p><strong>Data:</strong> {new Date(conv.date).toLocaleDateString()}</p>
+                  <p><strong>Commissione:</strong> € {parseFloat(conv.commission).toFixed(2)}</p>
+                  <p><strong>Stato:</strong> {conv.status}</p>
+                </li>
+              ))}
           </ul>
         ) : (
           <p>Nessuna conversione trovata per l'anno {selectedYear}.</p>

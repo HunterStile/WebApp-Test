@@ -1,50 +1,61 @@
-import React, { useContext, useMemo } from 'react';
-import { ConversionContext } from '../context/ConversionContext';
+import React, { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { AdminAuthContext } from '../context/AdminAuthContext';
+import { Link } from 'react-router-dom';
 
-const Dashboard = () => {
-  const { conversions, loading, error } = useContext(ConversionContext);
-
-  // Calcolo del totale delle commissioni
-  const totalCommission = useMemo(() => {
-    return conversions.reduce((sum, conversion) => {
-      return sum + (parseFloat(conversion.commission) || 0); // Somma solo valori validi
-    }, 0).toFixed(2); // Formatta con due decimali
-  }, [conversions]);
-
-  if (loading) {
-    return <div>Caricamento delle conversioni...</div>;
-  }
-
-  if (error) {
-    return <div>Errore: {error}</div>;
-  }
+function Home() {
+  const { user } = useContext(AuthContext);
+  const { admin } = useContext(AdminAuthContext);
 
   return (
-    <div className="dashboard p-4 bg-gray-800 text-white rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Dashboard Cliente</h1>
-      <div className="stat bg-gray-700 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold">Totale Commissioni Maturate</h2>
-        <p className="text-3xl font-bold text-green-400">€ {totalCommission}</p>
-      </div>
-      <div className="conversion-list bg-gray-700 p-4 rounded">
-        <h2 className="text-lg font-semibold mb-2">Dettaglio Conversioni</h2>
-        {conversions.length > 0 ? (
-          <ul className="space-y-2">
-            {conversions.map((conv) => (
-              <li key={conv.conversion_id} className="bg-gray-600 p-2 rounded">
-                <p><strong>Campagna:</strong> {conv.campaign_name}</p>
-                <p><strong>Data:</strong> {new Date(conv.date).toLocaleDateString()}</p>
-                <p><strong>Commissione:</strong> € {parseFloat(conv.commission).toFixed(2)}</p>
-                <p><strong>Stato:</strong> {conv.status}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nessuna conversione trovata.</p>
-        )}
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-blue-500 text-white p-6">
+        <h1 className="text-3xl font-bold text-center">Welcome to MyApp!</h1>
+        <p className="text-center text-lg mt-2">Your one-stop solution for managing campaigns, conversions, and more.</p>
+      </header>
+
+      {/* Main content */}
+      <main className="py-8">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Card 1: General Overview */}
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl font-semibold mb-4">Overview</h3>
+              <p className="text-gray-700 mb-4">Get a quick overview of your account, including your active campaigns, conversions, and performance metrics.</p>
+              <Link to="/dashboard" className="text-blue-500 hover:text-orange-600">Go to Dashboard</Link>
+            </div>
+
+            {/* Card 2: Campaign List - Only visible for normal users */}
+            {user && !admin && (
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-xl font-semibold mb-4">Campaigns</h3>
+                <p className="text-gray-700 mb-4">Explore and manage your ongoing campaigns, track performance, and optimize your results.</p>
+                <Link to="/campaignlist" className="text-blue-500 hover:text-orange-600">View Campaigns</Link>
+              </div>
+            )}
+
+            {/* Card 3: Admin Area - Only visible for admins */}
+            {admin && (
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-xl font-semibold mb-4">Admin Dashboard</h3>
+                <p className="text-gray-700 mb-4">Manage users, campaigns, and perform administrative tasks.</p>
+                <Link to="/admin" className="text-blue-500 hover:text-orange-600">Go to Admin Dashboard</Link>
+              </div>
+            )}
+
+            {/* Card 4: More Features */}
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl font-semibold mb-4">More Features</h3>
+              <p className="text-gray-700 mb-4">Discover more about affiliations, events, and your store with us.</p>
+              <Link to="/more" className="text-blue-500 hover:text-orange-600">Explore More</Link>
+            </div>
+          </div>
+        </div>
+      </main>
+
     </div>
   );
-};
+}
 
-export default Dashboard;
+export default Home;

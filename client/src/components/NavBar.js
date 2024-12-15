@@ -1,15 +1,24 @@
-// NavBar.js
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { AdminAuthContext } from '../context/AdminAuthContext'; 
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 function Navbar() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout: logoutUser } = useContext(AuthContext);
+  const { admin, logout: logoutAdmin } = useContext(AdminAuthContext); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const logout = () => {
+    if (admin) {
+      logoutAdmin(); 
+    } else {
+      logoutUser(); 
+    }
   };
 
   return (
@@ -39,22 +48,37 @@ function Navbar() {
 
         <nav className="flex-1">
           <div className="px-4 space-y-2">
+            {/* Link visibili a tutti gli utenti */}
             <Link to="/" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
               Home
             </Link>
-            <Link to="/admin" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Admin
-            </Link>
-            <Link to="/manage" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Manage
-            </Link>
-            <Link to="/conversionlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              ConversionList
-            </Link>
-            <Link to="/campaignlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Campaignlist
-            </Link>
-            
+
+            {/* Solo visibili per utenti normali */}
+            {user && !admin && (
+              <>
+                <Link to="/dashboard" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Dashboard
+                </Link>
+                <Link to="/conversionlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  ConversionList
+                </Link>
+                <Link to="/campaignlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Campaignlist
+                </Link>
+              </>
+            )}
+
+            {/* Link visibili solo per gli admin */}
+            {admin && (
+              <>
+                <Link to="/admin" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Admin
+                </Link>
+                <Link to="/manage" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Manage
+                </Link>
+              </>
+            )}
 
             {/* Expandable sections */}
             <div className="py-2">
@@ -74,11 +98,11 @@ function Navbar() {
 
         {/* User info section at bottom */}
         <div className="p-4 border-t border-gray-700">
-          {user ? (
+          {user || admin ? (
             <div className="space-y-2">
               {/* User Info */}
               <div className="flex flex-col space-y-2">
-                <span className="text-sm">{user}</span>
+                <span className="text-sm">{user || admin}</span>
                 <button
                   onClick={logout}
                   className="w-full bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm"
@@ -89,8 +113,8 @@ function Navbar() {
             </div>
           ) : (
             <div className="flex flex-col space-y-2">
-              <Link to="/login2" className="text-center text-gray-300 hover:text-white py-1">Login</Link>
-              <Link to="/register" className="text-center bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">Register</Link>
+              {/*<Link to="/register" className="text-center text-gray-300 hover:text-white py-1">register</Link>*/}
+              <Link to="/login2" className="text-center bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">Login</Link>
             </div>
           )}
         </div>

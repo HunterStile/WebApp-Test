@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/NavBar';
 import Home from './page/Home';
+import Dashboard from './page/Dashboard';
 import Login from './page/Login';
 import PrivateRoute from './components/PrivateRoute';
 import AdminPrivateRoute from './components/AdminPrivateRoute';
@@ -36,6 +37,7 @@ function App() {
 
                     {/* Protected routes per utenti normali */}
                     <Route element={<PrivateRoute />}>
+                      <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/conversionlist" element={<ConversionList />} />
                       <Route path="/campaignlist" element={<CampaignList />} />
                     </Route>

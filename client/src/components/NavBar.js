@@ -74,7 +74,7 @@ function Navbar() {
                 <Link to="/admin" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   Admin
                 </Link>
-                <Link to="/manage" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                <Link to="/admin/manage" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   Manage
                 </Link>
               </>

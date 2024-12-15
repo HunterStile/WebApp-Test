@@ -4,9 +4,9 @@ import Navbar from './components/NavBar';
 import Home from './page/Home';
 import Dashboard from './page/Dashboard';
 import Login from './page/Login';
-import PrivateRoute from './components/PrivateRoute';
-import AdminPrivateRoute from './components/AdminPrivateRoute';
-import AdminLogin from './page/AdminLogin';
+import PrivateRoute from './components/redirect/PrivateRoute';
+import AdminPrivateRoute from './components/redirect/AdminPrivateRoute';
+import AdminLogin from './page/private/AdminLogin';
 import ConversionList from './page/ConversionList';
 import CampaignList from './page/CampaingList';
 import Admin from './page/private/Admin';
@@ -45,7 +45,7 @@ function App() {
                     {/* Protected routes per Admin */}
                     <Route element={<AdminPrivateRoute />}>
                       <Route path="/admin" element={<Admin />} />
-                      <Route path="/manage" element={<ManageCampaign />} />
+                      <Route path="/admin/manage" element={<ManageCampaign />} />
                     </Route>
 
                     {/* Legal routes */}

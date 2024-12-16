@@ -5,7 +5,6 @@ import axios from 'axios';
 
 const CampaignRequestOverview = () => {
   const [campaigns, setCampaigns] = useState([]);
-  const [selectedCampaign, setSelectedCampaign] = useState('');
   const [userRequests, setUserRequests] = useState({
     pending: [],
     approved: [],
@@ -15,7 +14,7 @@ const CampaignRequestOverview = () => {
   const [messageType, setMessageType] = useState('');
   const { user } = useContext(AuthContext);
 
-  // Fetch campaigns from the server
+  // Carica le campagne disponibili
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
@@ -23,10 +22,7 @@ const CampaignRequestOverview = () => {
         setCampaigns(response.data);
       } catch (error) {
         console.error('Errore nel recupero delle campagne:', error);
-        setMessage(
-          error.response?.data?.message || 
-          "Errore nel recupero delle campagne"
-        );
+        setMessage('Errore nel recupero delle campagne');
         setMessageType('error');
       }
     };
@@ -34,7 +30,7 @@ const CampaignRequestOverview = () => {
     fetchCampaigns();
   }, []);
 
-  // Fetch user requests when component mounts or user changes
+  // Carica le richieste dell'utente
   useEffect(() => {
     const fetchUserRequests = async () => {
       if (!user) return;
@@ -44,20 +40,14 @@ const CampaignRequestOverview = () => {
           params: { username: user }
         });
 
-        // Categorizza correttamente le richieste
-        const categorizedRequests = {
+        setUserRequests({
           pending: response.data.pendingRequests || [],
           approved: response.data.approvedRequests || [],
           rejected: response.data.rejectedRequests || []
-        };
-
-        setUserRequests(categorizedRequests);
+        });
       } catch (error) {
         console.error('Errore nel recupero delle richieste:', error);
-        setMessage(
-          error.response?.data?.message || 
-          "Errore nel recupero delle richieste"
-        );
+        setMessage('Errore nel recupero delle richieste');
         setMessageType('error');
       }
     };
@@ -65,54 +55,34 @@ const CampaignRequestOverview = () => {
     fetchUserRequests();
   }, [user]);
 
-  const handleRequestCampaign = async () => {
+  const handleRequestCampaign = async (campaignName) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/cpc/campaign-requests`, {
-        campaign: selectedCampaign,
+        campaign: campaignName,
         username: user,
       });
 
-      // Aggiorna lo stato locale aggiungendo la nuova richiesta pending
-      setUserRequests(prev => ({
+      // Aggiorna lo stato locale aggiungendo la richiesta nella lista pending
+      setUserRequests((prev) => ({
         ...prev,
         pending: [...prev.pending, response.data]
       }));
 
-      setMessage('Richiesta campagna inviata');
+      setMessage(`Richiesta per la campagna "${campaignName}" inviata`);
       setMessageType('success');
     } catch (error) {
-      console.error('Errore nella richiesta:', error.response ? error.response.data : error.message);
-      
-      setMessage(
-        error.response?.data?.message || 
-        "Errore nell'invio della richiesta"
-      );
+      console.error('Errore nella richiesta:', error);
+      setMessage('Errore nell\'invio della richiesta');
       setMessageType('error');
     }
   };
 
-  // Render richieste in base allo stato
-  const renderRequestsList = (requests, title, statusClass) => (
-    requests.length > 0 && (
-      <div className={`request-section ${statusClass}`}>
-        <h3>{title}</h3>
-        {requests.map(request => (
-          <div key={request._id} className="request-card">
-            <p>Campagna: {request.campaign}</p>
-            <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
-            {request.uniqueLink && (
-              <div>
-                <p>Link Univoco: {API_BASE_URL + request.uniqueLink}</p>
-                {request.realRedirectUrl && (
-                  <p>URL Redirect: {request.realRedirectUrl}</p>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    )
-  );
+  const isCampaignRequested = (campaignName) => {
+    return (
+      userRequests.pending.some((req) => req.campaign === campaignName) ||
+      userRequests.approved.some((req) => req.campaign === campaignName)
+    );
+  };
 
   return (
     <div className="campaign-request-overview">
@@ -121,45 +91,83 @@ const CampaignRequestOverview = () => {
       {/* Sezione Richiesta Nuova Campagna */}
       <div className="new-campaign-request">
         <h2>Richiedi Nuova Campagna</h2>
-        <select 
-          value={selectedCampaign} 
-          onChange={(e) => setSelectedCampaign(e.target.value)}
-        >
-          <option value="">Seleziona Campagna</option>
-          {campaigns.map(campaign => (
-            <option key={campaign.name} value={campaign.name}>
-              {campaign.name}
-            </option>
-          ))}
-        </select>
-        <button 
-          onClick={handleRequestCampaign}
-          disabled={!selectedCampaign}
-        >
-          Richiedi Campagna
-        </button>
+        {campaigns.length > 0 ? (
+          campaigns.map((campaign) => (
+            <div key={campaign.name} className="campaign-item">
+              <h3>{campaign.name}</h3>
+              <p>{campaign.description}</p>
+              <p>{campaign.conditions}</p>
+              <p>{campaign.commissionPlan}</p>
+              <p>{campaign.status}</p>
+              <button
+                onClick={() => handleRequestCampaign(campaign.name)}
+                disabled={isCampaignRequested(campaign.name)}
+              >
+                {isCampaignRequested(campaign.name)
+                  ? 'In Attesa'
+                  : 'Richiedi Campagna'}
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>Nessuna campagna disponibile.</p>
+        )}
       </div>
 
       {/* Sezione Riepilogo Richieste */}
       <div className="requests-summary">
         <h2>Le Tue Richieste</h2>
-        
-        {renderRequestsList(userRequests.pending, 'Richieste in Attesa', 'pending-requests')}
-        {renderRequestsList(userRequests.approved, 'Richieste Approvate', 'approved-requests')}
-        {renderRequestsList(userRequests.rejected, 'Richieste Rifiutate', 'rejected-requests')}
-        
-        {/* Messaggio se non ci sono richieste */}
-        {Object.values(userRequests).every(list => list.length === 0) && (
+
+        {userRequests.pending.length > 0 && (
+          <div className="request-section pending-requests">
+            <h3>Richieste in Attesa</h3>
+            {userRequests.pending.map((request) => (
+              <div key={request._id} className="request-card">
+                <p>Campagna: {request.campaign}</p>
+                <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {userRequests.approved.length > 0 && (
+          <div className="request-section approved-requests">
+            <h3>Richieste Approvate</h3>
+            {userRequests.approved.map((request) => (
+              <div key={request._id} className="request-card">
+                <p>Campagna: {request.campaign}</p>
+                <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
+                {request.uniqueLink && (
+                  <p>Link Univoco: {API_BASE_URL + request.uniqueLink}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {userRequests.rejected.length > 0 && (
+          <div className="request-section rejected-requests">
+            <h3>Richieste Rifiutate</h3>
+            {userRequests.rejected.map((request) => (
+              <div key={request._id} className="request-card">
+                <p>Campagna: {request.campaign}</p>
+                <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {Object.values(userRequests).every((list) => list.length === 0) && (
           <p>Non hai ancora effettuato richieste di campagne.</p>
         )}
       </div>
 
       {/* Messaggio di stato */}
       {message && (
-        <div 
-          style={{ 
+        <div
+          style={{
             color: messageType === 'success' ? 'green' : 'red',
-            marginTop: '10px' 
+            marginTop: '10px',
           }}
         >
           {message}

@@ -127,12 +127,19 @@ const CampaignRequestOverview = () => {
         {userRequests.pending.length > 0 && (
           <div className="request-section pending-requests">
             <h3>Richieste in Attesa</h3>
-            {userRequests.pending.map((request) => (
-              <div key={request._id} className="request-card">
-                <p>Campagna: {request.campaign}</p>
-                <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
-              </div>
-            ))}
+            {userRequests.pending.map((request) => {
+              const campaignDetails = getCampaignDetails(request.campaign);
+
+              return (
+                <div key={request._id} className="request-card">
+                  <h4>{request.campaign}</h4>
+                  <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
+                  <p><strong>Description:</strong> {campaignDetails.description || 'N/A'}</p>
+                  <p><strong>Conditions:</strong> {campaignDetails.conditions || 'N/A'}</p>
+                  <p><strong>Commission Plan:</strong> {campaignDetails.commissionPlan || 'N/A'}</p>
+                </div>
+              );
+            })}
           </div>
         )}
 

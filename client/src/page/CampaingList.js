@@ -97,7 +97,10 @@ const CampaignRequestOverview = () => {
         <h2>Richiedi Nuova Campagna</h2>
         {campaigns.length > 0 ? (
           campaigns
-            .filter((campaign) => !isCampaignRequested(campaign.name)) // Filtra le campagne già richieste
+            .filter((campaign) =>
+              !isCampaignRequested(campaign.name) && // Esclude campagne approvate o in attesa
+              !userRequests.rejected.some((req) => req.campaign === campaign.name) // Esclude campagne rifiutate
+            )
             .map((campaign) => (
               <div key={campaign.name} className="campaign-item">
                 <h3>{campaign.name}</h3>
@@ -163,12 +166,19 @@ const CampaignRequestOverview = () => {
         {userRequests.rejected.length > 0 && (
           <div className="request-section rejected-requests">
             <h3>Richieste Rifiutate</h3>
-            {userRequests.rejected.map((request) => (
-              <div key={request._id} className="request-card">
-                <p>Campagna: {request.campaign}</p>
-                <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
-              </div>
-            ))}
+            {userRequests.rejected.map((request) => {
+              const campaignDetails = getCampaignDetails(request.campaign);
+
+              return (
+                <div key={request._id} className="request-card">
+                  <h4>{request.campaign}</h4>
+                  <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
+                  <p><strong>Description:</strong> {campaignDetails.description || 'N/A'}</p>
+                  <p><strong>Conditions:</strong> {campaignDetails.conditions || 'N/A'}</p>
+                  <p><strong>Commission Plan:</strong> {campaignDetails.commissionPlan || 'N/A'}</p>
+                </div>
+              );
+            })}
           </div>
         )}
 

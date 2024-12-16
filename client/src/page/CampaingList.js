@@ -84,6 +84,10 @@ const CampaignRequestOverview = () => {
     );
   };
 
+  const getCampaignDetails = (campaignName) => {
+    return campaigns.find((campaign) => campaign.name === campaignName) || {};
+  };
+
   return (
     <div className="campaign-request-overview">
       <h1>Gestione Campagne</h1>
@@ -92,23 +96,22 @@ const CampaignRequestOverview = () => {
       <div className="new-campaign-request">
         <h2>Richiedi Nuova Campagna</h2>
         {campaigns.length > 0 ? (
-          campaigns.map((campaign) => (
-            <div key={campaign.name} className="campaign-item">
-              <h3>{campaign.name}</h3>
-              <p>{campaign.description}</p>
-              <p>{campaign.conditions}</p>
-              <p>{campaign.commissionPlan}</p>
-              <p>{campaign.status}</p>
-              <button
-                onClick={() => handleRequestCampaign(campaign.name)}
-                disabled={isCampaignRequested(campaign.name)}
-              >
-                {isCampaignRequested(campaign.name)
-                  ? 'In Attesa'
-                  : 'Richiedi Campagna'}
-              </button>
-            </div>
-          ))
+          campaigns
+            .filter((campaign) => !isCampaignRequested(campaign.name)) // Filtra le campagne già richieste
+            .map((campaign) => (
+              <div key={campaign.name} className="campaign-item">
+                <h3>{campaign.name}</h3>
+                <p>{campaign.description}</p>
+                <p>{campaign.conditions}</p>
+                <p>{campaign.commissionPlan}</p>
+                <p>{campaign.status}</p>
+                <button
+                  onClick={() => handleRequestCampaign(campaign.name)}
+                >
+                  Richiedi Campagna
+                </button>
+              </div>
+            ))
         ) : (
           <p>Nessuna campagna disponibile.</p>
         )}
@@ -133,15 +136,27 @@ const CampaignRequestOverview = () => {
         {userRequests.approved.length > 0 && (
           <div className="request-section approved-requests">
             <h3>Richieste Approvate</h3>
-            {userRequests.approved.map((request) => (
-              <div key={request._id} className="request-card">
-                <p>Campagna: {request.campaign}</p>
-                <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
-                {request.uniqueLink && (
-                  <p>Link Univoco: {API_BASE_URL + request.uniqueLink}</p>
-                )}
-              </div>
-            ))}
+            {userRequests.approved.map((request) => {
+              const campaignDetails = getCampaignDetails(request.campaign);
+
+              return (
+                <div key={request._id} className="request-card">
+                  <h4>{request.campaign}</h4>
+                  <p>Data: {new Date(request.createdAt).toLocaleDateString()}</p>
+                  <p><strong>Description:</strong> {campaignDetails.description || 'N/A'}</p>
+                  <p><strong>Conditions:</strong> {campaignDetails.conditions || 'N/A'}</p>
+                  <p><strong>Commission Plan:</strong> {campaignDetails.commissionPlan || 'N/A'}</p>
+                  {request.uniqueLink && (
+                    <p>
+                      <strong>Link Univoco:</strong>{' '}
+                      <a href={request.uniqueLink} target="_blank" rel="noopener noreferrer">
+                        {API_BASE_URL + request.uniqueLink}
+                      </a>
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 

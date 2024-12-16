@@ -5,20 +5,26 @@ const Campaign = require('../models/Campaign');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { name, realUrl, description, conditions, commissionPlan } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status } = req.body;
 
-  if (!name || !realUrl || !description || !conditions || !commissionPlan) {
-    return res.status(400).json({ message: 'Nome, URL, descrizione, condizioni e piano commissionale sono richiesti' });
+  if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
+    return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
   }
 
   try {
-    // Controlla se la campagna esiste già
     const existingCampaign = await Campaign.findOne({ name });
     if (existingCampaign) {
       return res.status(400).json({ message: 'La campagna esiste già' });
     }
 
-    const newCampaign = new Campaign({ name, realUrl, description, conditions, commissionPlan });
+    const newCampaign = new Campaign({ 
+      name, 
+      realUrl, 
+      description, 
+      conditions, 
+      commissionPlan,
+      status 
+    });
     await newCampaign.save();
 
     res.status(201).json({ message: 'Campagna aggiunta con successo', campaign: newCampaign });
@@ -27,18 +33,18 @@ router.post('/campaigns', async (req, res) => {
   }
 });
 
+
 // Modifica una campagna esistente
 router.patch('/campaigns/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, realUrl, description, conditions, commissionPlan } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status } = req.body;
 
-  if (!name || !realUrl || !description || !conditions || !commissionPlan) {
-    return res.status(400).json({ message: 'Nome, URL, descrizione, condizioni e piano commissionale sono richiesti' });
+  if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
+    return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
   }
 
   try {
     const campaign = await Campaign.findById(id);
-
     if (!campaign) {
       return res.status(404).json({ message: 'Campagna non trovata' });
     }
@@ -48,6 +54,7 @@ router.patch('/campaigns/:id', async (req, res) => {
     campaign.description = description;
     campaign.conditions = conditions;
     campaign.commissionPlan = commissionPlan;
+    campaign.status = status;
 
     await campaign.save();
 

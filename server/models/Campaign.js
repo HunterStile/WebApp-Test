@@ -6,6 +6,11 @@ const campaignSchema = new mongoose.Schema({
   description: { type: String, required: true },
   conditions: { type: String, required: true },
   commissionPlan: { type: String, required: true },
+  status: { 
+    type: String, 
+    enum: ['attivo', 'disattivo'], 
+    default: 'attivo' 
+  }
 }, {
   timestamps: true,
 });

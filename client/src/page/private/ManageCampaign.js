@@ -9,6 +9,7 @@ const ManageCampaigns = () => {
   const [description, setDescription] = useState('');
   const [conditions, setConditions] = useState('');
   const [commissionPlan, setCommissionPlan] = useState('');
+  const [status, setStatus] = useState('attivo');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [editCampaignId, setEditCampaignId] = useState(null);
@@ -32,37 +33,39 @@ const ManageCampaigns = () => {
   const handleSubmit = async (e) => {
     setMessage('');
     e.preventDefault();
-
-    if (!name || !realUrl || !description || !conditions || !commissionPlan) {
+  
+    if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
       setMessage('Tutti i campi sono richiesti');
       setMessageType('error');
       return;
     }
-
+  
     try {
       if (editCampaignId) {
         // Modifica campagna
         const response = await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, {
-          name, realUrl, description, conditions, commissionPlan
+          name, realUrl, description, conditions, commissionPlan, status
         });
         setMessage('Campagna modificata con successo');
         setMessageType('success');
       } else {
         // Aggiungi nuova campagna
         const response = await axios.post(`${API_BASE_URL}/admin/campaigns`, {
-          name, realUrl, description, conditions, commissionPlan
+          name, realUrl, description, conditions, commissionPlan, status
         });
         setMessage('Campagna aggiunta con successo');
         setMessageType('success');
       }
-
+  
+      // Pulisci i campi dopo la richiesta
       setName('');
       setRealUrl('');
       setDescription('');
       setConditions('');
       setCommissionPlan('');
+      setStatus('attivo'); // Reset status al valore predefinito
       setEditCampaignId(null);
-
+  
       // Ricarica le campagne
       const updatedCampaigns = await axios.get(`${API_BASE_URL}/cpc/campaigns`);
       setCampaigns(updatedCampaigns.data);
@@ -70,7 +73,7 @@ const ManageCampaigns = () => {
       setMessage(error.response?.data?.message || 'Errore nell\'aggiunta o modifica della campagna');
       setMessageType('error');
     }
-  };
+  };  
 
   // Funzione per modificare una campagna
   const handleEdit = (campaign) => {
@@ -101,49 +104,60 @@ const ManageCampaigns = () => {
   return (
     <div className="manage-campaigns">
       <h2>Gestisci Campagne</h2>
-      
+
       <form onSubmit={handleSubmit}>
         <div>
           <label>Nome Campagna</label>
-          <input 
-            type="text" 
-            value={name} 
-            onChange={(e) => setName(e.target.value)} 
-            required 
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>URL Reale</label>
-          <input 
-            type="text" 
-            value={realUrl} 
-            onChange={(e) => setRealUrl(e.target.value)} 
-            required 
+          <input
+            type="text"
+            value={realUrl}
+            onChange={(e) => setRealUrl(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>Descrizione</label>
-          <textarea 
-            value={description} 
-            onChange={(e) => setDescription(e.target.value)} 
-            required 
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>Condizioni</label>
-          <textarea 
-            value={conditions} 
-            onChange={(e) => setConditions(e.target.value)} 
-            required 
+          <textarea
+            value={conditions}
+            onChange={(e) => setConditions(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>Piano Commissionale</label>
-          <textarea 
-            value={commissionPlan} 
-            onChange={(e) => setCommissionPlan(e.target.value)} 
-            required 
+          <textarea
+            value={commissionPlan}
+            onChange={(e) => setCommissionPlan(e.target.value)}
+            required
           />
+        </div>
+        <div>
+          <label>Status</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            required
+          >
+            <option value="attivo">Attivo</option>
+            <option value="disattivo">Disattivo</option>
+          </select>
         </div>
         <button type="submit">
           {editCampaignId ? 'Modifica Campagna' : 'Aggiungi Campagna'}
@@ -165,6 +179,7 @@ const ManageCampaigns = () => {
             <th>Descrizione</th>
             <th>Condizioni</th>
             <th>Piano Commissionale</th>
+            <th>Status</th>
             <th>Azione</th>
           </tr>
         </thead>
@@ -176,6 +191,7 @@ const ManageCampaigns = () => {
               <td>{campaign.description}</td>
               <td>{campaign.conditions}</td>
               <td>{campaign.commissionPlan}</td>
+              <td>{campaign.status}</td>
               <td>
                 <button onClick={() => handleEdit(campaign)}>Modifica</button>
                 <button onClick={() => handleDelete(campaign._id)}>Elimina</button>

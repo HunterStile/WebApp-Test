@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
+import { Trash2, Edit, Plus, X, Check } from 'lucide-react';
 
 const ManageCampaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
-  const [name, setName] = useState('');
-  const [realUrl, setRealUrl] = useState('');
-  const [description, setDescription] = useState('');
-  const [conditions, setConditions] = useState('');
-  const [commissionPlan, setCommissionPlan] = useState('');
-  const [status, setStatus] = useState('attivo');
+  const [formData, setFormData] = useState({
+    name: '',
+    realUrl: '',
+    description: '',
+    conditions: '',
+    commissionPlan: '',
+    status: 'attivo'
+  });
+  const [editCampaignId, setEditCampaignId] = useState(null);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
-  const [editCampaignId, setEditCampaignId] = useState(null);
 
-  // Carica tutte le campagne al montaggio del componente
+  // Fetch campaigns on component mount
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
@@ -29,71 +32,86 @@ const ManageCampaigns = () => {
     fetchCampaigns();
   }, []);
 
-  // Funzione per aggiungere o modificare una campagna
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit form for adding/editing campaign
   const handleSubmit = async (e) => {
-    setMessage('');
     e.preventDefault();
-  
+    setMessage('');
+
+    // Validate form
+    const { name, realUrl, description, conditions, commissionPlan, status } = formData;
     if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
       setMessage('Tutti i campi sono richiesti');
       setMessageType('error');
       return;
     }
-  
+
     try {
       if (editCampaignId) {
-        // Modifica campagna
-        const response = await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, {
-          name, realUrl, description, conditions, commissionPlan, status
-        });
+        // Edit existing campaign
+        await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, formData);
         setMessage('Campagna modificata con successo');
-        setMessageType('success');
       } else {
-        // Aggiungi nuova campagna
-        const response = await axios.post(`${API_BASE_URL}/admin/campaigns`, {
-          name, realUrl, description, conditions, commissionPlan, status
-        });
+        // Add new campaign
+        await axios.post(`${API_BASE_URL}/admin/campaigns`, formData);
         setMessage('Campagna aggiunta con successo');
-        setMessageType('success');
       }
-  
-      // Pulisci i campi dopo la richiesta
-      setName('');
-      setRealUrl('');
-      setDescription('');
-      setConditions('');
-      setCommissionPlan('');
-      setStatus('attivo'); // Reset status al valore predefinito
-      setEditCampaignId(null);
-  
-      // Ricarica le campagne
+
+      // Reset form and reload campaigns
+      resetForm();
       const updatedCampaigns = await axios.get(`${API_BASE_URL}/cpc/campaigns`);
       setCampaigns(updatedCampaigns.data);
+      
+      setMessageType('success');
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Errore nell\'aggiunta o modifica della campagna');
+      setMessage(error.response?.data?.message || 'Errore nell\'operazione');
       setMessageType('error');
     }
-  };  
+  };
 
-  // Funzione per modificare una campagna
+  // Reset form to initial state
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      realUrl: '',
+      description: '',
+      conditions: '',
+      commissionPlan: '',
+      status: 'attivo'
+    });
+    setEditCampaignId(null);
+  };
+
+  // Prepare campaign for editing
   const handleEdit = (campaign) => {
-    setName(campaign.name);
-    setRealUrl(campaign.realUrl);
-    setDescription(campaign.description);
-    setConditions(campaign.conditions);
-    setCommissionPlan(campaign.commissionPlan);
+    setFormData({
+      name: campaign.name,
+      realUrl: campaign.realUrl,
+      description: campaign.description,
+      conditions: campaign.conditions,
+      commissionPlan: campaign.commissionPlan,
+      status: campaign.status
+    });
     setEditCampaignId(campaign._id);
   };
 
-  // Funzione per eliminare una campagna
+  // Delete campaign
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/admin/campaigns/${id}`);
       setMessage('Campagna eliminata con successo');
       setMessageType('success');
 
-      // Ricarica le campagne
-      const updatedCampaigns = await axios.get(`${API_BASE_URL}/admin/campaigns`);
+      // Reload campaigns
+      const updatedCampaigns = await axios.get(`${API_BASE_URL}/cpc/campaigns`);
       setCampaigns(updatedCampaigns.data);
     } catch (error) {
       setMessage('Errore nell\'eliminazione della campagna');
@@ -102,104 +120,205 @@ const ManageCampaigns = () => {
   };
 
   return (
-    <div className="manage-campaigns">
-      <h2>Gestisci Campagne</h2>
+    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+          {editCampaignId ? 'Modifica Campagna' : 'Aggiungi Nuova Campagna'}
+        </h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Nome Campagna</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>URL Reale</label>
-          <input
-            type="text"
-            value={realUrl}
-            onChange={(e) => setRealUrl(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Descrizione</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Condizioni</label>
-          <textarea
-            value={conditions}
-            onChange={(e) => setConditions(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Piano Commissionale</label>
-          <textarea
-            value={commissionPlan}
-            onChange={(e) => setCommissionPlan(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            required
+        {/* Status Message */}
+        {message && (
+          <div 
+            className={`
+              mb-4 p-3 rounded-md text-sm font-medium 
+              ${messageType === 'success' 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+              }
+            `}
           >
-            <option value="attivo">Attivo</option>
-            <option value="disattivo">Disattivo</option>
-          </select>
-        </div>
-        <button type="submit">
-          {editCampaignId ? 'Modifica Campagna' : 'Aggiungi Campagna'}
-        </button>
-      </form>
+            {message}
+          </div>
+        )}
 
-      {message && (
-        <div style={{ color: messageType === 'success' ? 'green' : 'red' }}>
-          {message}
-        </div>
-      )}
+        {/* Campaign Form */}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nome Campagna</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">URL Reale</label>
+            <input
+              type="text"
+              name="realUrl"
+              value={formData.realUrl}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Condizioni</label>
+            <textarea
+              name="conditions"
+              value={formData.conditions}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Piano Commissionale</label>
+            <textarea
+              name="commissionPlan"
+              value={formData.commissionPlan}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="attivo">Attivo</option>
+              <option value="disattivo">Disattivo</option>
+            </select>
+          </div>
+          <div className="md:col-span-2 flex space-x-2">
+            <button 
+              type="submit" 
+              className="
+                flex items-center justify-center 
+                px-4 py-2 bg-blue-500 text-white 
+                rounded-md hover:bg-blue-600 
+                transition duration-300
+              "
+            >
+              {editCampaignId ? (
+                <>
+                  <Edit className="mr-2 w-5 h-5" /> Modifica Campagna
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 w-5 h-5" /> Aggiungi Campagna
+                </>
+              )}
+            </button>
+            {editCampaignId && (
+              <button 
+                type="button" 
+                onClick={resetForm}
+                className="
+                  flex items-center justify-center 
+                  px-4 py-2 bg-gray-200 text-gray-700 
+                  rounded-md hover:bg-gray-300 
+                  transition duration-300
+                "
+              >
+                <X className="mr-2 w-5 h-5" /> Annulla
+              </button>
+            )}
+          </div>
+        </form>
 
-      <h3>Campagne Esistenti</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome Campagna</th>
-            <th>URL Reale</th>
-            <th>Descrizione</th>
-            <th>Condizioni</th>
-            <th>Piano Commissionale</th>
-            <th>Status</th>
-            <th>Azione</th>
-          </tr>
-        </thead>
-        <tbody>
-          {campaigns.map((campaign) => (
-            <tr key={campaign._id}>
-              <td>{campaign.name}</td>
-              <td><a href={campaign.realUrl} target="_blank" rel="noopener noreferrer">{campaign.realUrl}</a></td>
-              <td>{campaign.description}</td>
-              <td>{campaign.conditions}</td>
-              <td>{campaign.commissionPlan}</td>
-              <td>{campaign.status}</td>
-              <td>
-                <button onClick={() => handleEdit(campaign)}>Modifica</button>
-                <button onClick={() => handleDelete(campaign._id)}>Elimina</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        {/* Campaigns Table */}
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Campagne Esistenti</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {campaigns.map((campaign) => (
+                  <tr key={campaign._id} className="hover:bg-gray-50">
+                    <td className="p-3">
+                      <div className="font-medium text-gray-900">{campaign.name}</div>
+                      <div className="text-sm text-gray-500 truncate max-w-xs">{campaign.description}</div>
+                    </td>
+                    <td className="p-3">
+                      <a 
+                        href={campaign.realUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline truncate max-w-xs block"
+                      >
+                        {campaign.realUrl}
+                      </a>
+                    </td>
+                    <td className="p-3">
+                      <span 
+                        className={`
+                          px-2 py-1 rounded-full text-xs font-medium
+                          ${campaign.status === 'attivo' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                          }
+                        `}
+                      >
+                        {campaign.status}
+                      </span>
+                    </td>
+                    <td className="p-3 flex space-x-2">
+                      <button 
+                        onClick={() => handleEdit(campaign)}
+                        className="text-blue-600 hover:text-blue-800 transition"
+                        title="Modifica"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(campaign._id)}
+                        className="text-red-600 hover:text-red-800 transition"
+                        title="Elimina"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {campaigns.length === 0 && (
+              <div className="text-center py-4 text-gray-500">
+                Nessuna campagna presente
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

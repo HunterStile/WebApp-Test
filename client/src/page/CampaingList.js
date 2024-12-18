@@ -146,18 +146,18 @@ const CampaignTable = () => {
                     {campaign.status ==='disattivo' && (
                       <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Campagna Disattivata</span>
                     )}
-                    {status === 'pending' && (
+                    {status === 'pending' && campaign.status ==='attivo' &&(
                       <span className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full">Pending</span>
                     )}
                     {status === 'rejected' && (
                       <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Rejected</span>
                     )}
-                    {status === 'not_requested' && (
+                    {status === 'not_requested' && campaign.status ==='attivo' && (
                       <span className="px-2 py-1 bg-gray-900/30 text-gray-300 rounded-full">Not Requested</span>
                     )}
                   </td>
                   <td className="p-3 border border-[#4c566a]">
-                    {status === 'approved' && campaign.status==='attivo' && requestDetails.uniqueLink && (
+                    {status === 'approved' && campaign.status==='attivo'  && requestDetails.uniqueLink && (
                       <div className="flex items-center space-x-2">
                         <a 
                           href={API_BASE_URL + requestDetails.uniqueLink} 
@@ -179,7 +179,7 @@ const CampaignTable = () => {
                         </button>
                       </div>
                     )}
-                    {status === 'not_requested' && (
+                    {status === 'not_requested' && campaign.status === 'attivo' && (
                       <button 
                         onClick={() => handleRequestCampaign(campaign.name)}
                         className="px-3 py-1 bg-blue-900/40 text-blue-300 rounded hover:bg-blue-900/60 flex items-center"

@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
 import { Search, Filter } from 'lucide-react';
+import { ConversionContext } from '../../context/ConversionContext';
 
 const ConversionsPage = () => {
   const [conversions, setConversions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const {updateConversions} = useContext(ConversionContext);
+  const [updating, setUpdating] = useState(false);
+    
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -37,6 +41,18 @@ const ConversionsPage = () => {
       handleError(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      setUpdating(true);
+      const newCount = await updateConversions();
+      alert(`Aggiornamento completato. Nuove conversioni: ${newCount}`);
+    } catch (err) {
+      alert('Errore durante l\'aggiornamento');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -85,6 +101,17 @@ const ConversionsPage = () => {
           {error}
         </div>
       )}
+
+        <button
+          onClick={handleUpdate}
+          disabled={updating}
+          className={`
+            px-4 py-2 rounded 
+            ${updating ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}
+          `}
+        >
+          {updating ? 'Aggiornamento...' : 'Aggiorna Conversioni'}
+        </button>
 
       {/* Filters Section */}
       <div className="bg-white shadow-md rounded-lg p-6">

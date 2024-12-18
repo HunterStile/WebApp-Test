@@ -119,7 +119,8 @@ const CampaignTable = () => {
               <th className="p-3 text-left border border-[#4c566a]">Description</th>
               <th className="p-3 text-left border border-[#4c566a]">Conditions</th>
               <th className="p-3 text-left border border-[#4c566a]">Commission Plan</th>
-              <th className="p-3 text-left border border-[#4c566a]">Status</th>
+              <th className="p-3 text-left border border-[#4c566a]">Stato campagna</th>
+              <th className="p-3 text-left border border-[#4c566a]">Stato richiesta</th>
               <th className="p-3 text-left border border-[#4c566a]">Actions</th>
             </tr>
           </thead>
@@ -134,6 +135,7 @@ const CampaignTable = () => {
                   <td className="p-3 border border-[#4c566a]">{campaign.description}</td>
                   <td className="p-3 border border-[#4c566a]">{campaign.conditions}</td>
                   <td className="p-3 border border-[#4c566a]">{campaign.commissionPlan}</td>
+                  <td className="p-3 border border-[#4c566a]">{campaign.status}</td>
                   <td className="p-3 border border-[#4c566a]">
                     {status === 'approved' && (
                       <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
@@ -149,7 +151,7 @@ const CampaignTable = () => {
                     )}
                   </td>
                   <td className="p-3 border border-[#4c566a]">
-                    {status === 'approved' && requestDetails.uniqueLink && (
+                    {status === 'approved' && campaign.status==='attivo' && requestDetails.uniqueLink && (
                       <div className="flex items-center space-x-2">
                         <a 
                           href={API_BASE_URL + requestDetails.uniqueLink} 
@@ -179,7 +181,7 @@ const CampaignTable = () => {
                         Request <ArrowRight className="ml-2 w-4 h-4" />
                       </button>
                     )}
-                    {(status === 'pending' || status === 'rejected') && (
+                    {(status === 'pending' || status === 'rejected' || campaign.status==='disattivo') && (
                       <span className="text-gray-400">No Action</span>
                     )}
                   </td>

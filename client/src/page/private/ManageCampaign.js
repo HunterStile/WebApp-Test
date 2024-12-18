@@ -255,10 +255,10 @@ const ManageCampaigns = () => {
             <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
+                  <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nome</th>
+                  <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">URL</th>
+                  <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                  <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">Azioni</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">

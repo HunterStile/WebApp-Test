@@ -54,7 +54,7 @@ const ConversionList = () => {
             </thead>
             <tbody>
               {conversions.map((conv) => (
-                <tr key={conv.conversion_id || conv._id} className="hover:bg-gray-50">
+                <tr key={conv.conversion_id || conv._id} className="text-white hover:bg-gray-50">
                   <td className="p-2 border">{conv.conversion_id}</td>
                   <td className="p-2 border">{conv.campaign_name}</td>
                   <td className="p-2 border">
@@ -69,7 +69,13 @@ const ConversionList = () => {
                     <span
                       className={`
                         px-2 py-1 rounded text-xs
-                        ${conv.status === 'paid' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}
+                        ${conv.status === 'paid' 
+                            ? 'bg-green-300 text-green-800' 
+                            : conv.status === 'validated'
+                            ? 'bg-green-100 text-green-800' 
+                            : conv.status === 'refused'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'}
                       `}
                     >
                       {conv.status}

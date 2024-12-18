@@ -204,27 +204,29 @@ const ConversionsPage = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-100 text-gray-700">
-                  <th className="p-3 text-left">Utente</th>
-                  <th className="p-3 text-left">Campagna</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-right">Importo</th>
-                  <th className="p-3 text-left">Data</th>
+                  <th className="text-white p-3 text-left">Utente</th>
+                  <th className="text-white p-3 text-left">Campagna</th>
+                  <th className="text-white p-3 text-left">Status</th>
+                  <th className="text-white p-3 text-right">Importo</th>
+                  <th className="text-white p-3 text-left">Data</th>
                 </tr>
               </thead>
               <tbody>
                 {conversions.map((conversion, index) => (
                   <tr 
                     key={index} 
-                    className="border-b hover:bg-gray-50 transition"
+                    className="border-b hover:bg-black-50 transition"
                   >
                     <td className="p-3">{conversion.aff_var}</td>
                     <td className="p-3">{conversion.campaign_name}</td>
                     <td className="p-3">
                       <span 
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          conversion.status === 'APPROVED' 
+                          conversion.status === 'paid' 
+                            ? 'bg-green-300 text-green-800' 
+                            : conversion.status === 'validated'
                             ? 'bg-green-100 text-green-800' 
-                            : conversion.status === 'REJECTED'
+                            : conversion.status === 'refused'
                             ? 'bg-red-100 text-red-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}

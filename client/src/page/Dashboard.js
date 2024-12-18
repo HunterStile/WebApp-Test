@@ -34,7 +34,8 @@ const Dashboard = () => {
         month: monthKey,
         monthName: monthNames[index],
         paidCommissions: 0,
-        onholdCommissions: 0
+        onholdCommissions: 0,
+        validatedCommissions: 0
       };
     });
 
@@ -51,6 +52,9 @@ const Dashboard = () => {
           } else if (conversion.status === 'onhold') {
             allMonths[monthIndex].onholdCommissions += parseFloat(conversion.commission) || 0;
           }
+          else if (conversion.status === 'validated') {
+            allMonths[monthIndex].validatedCommissions += parseFloat(conversion.commission) || 0;
+          }
         }
       });
 
@@ -58,8 +62,10 @@ const Dashboard = () => {
       ...month,
       paidCommissions: Number(month.paidCommissions.toFixed(2)),
       onholdCommissions: Number(month.onholdCommissions.toFixed(2)),
-      paidLabel: 'Convalidate',
-      onholdLabel: 'In Attesa'
+      validatedCommissions: Number(month.validatedCommissions.toFixed(2)),
+      paidLabel: 'Pagate',
+      onholdLabel: 'In Attesa',
+      validatedLabel: 'Convalidate'
     }));
   }, [conversions, selectedYear]);
 
@@ -119,9 +125,11 @@ const Dashboard = () => {
             <Tooltip
               formatter={(value, name) => {
                 if (name === 'paidCommissions') {
-                  return [`€ ${value.toFixed(2)}`, 'Convalidate'];
+                  return [`€ ${value.toFixed(2)}`, 'Pagate'];
                 } else if (name === 'onholdCommissions') {
                   return [`€ ${value.toFixed(2)}`, 'In Attesa'];
+                } else if (name === 'validatedCommissions') {
+                  return [`€ ${value.toFixed(2)}`, 'Convalidate'];
                 }
                 return [`€ ${value.toFixed(2)}`, name];
               }}
@@ -130,21 +138,29 @@ const Dashboard = () => {
             <Legend
               formatter={(value) => {
                 if (value === 'paidCommissions') {
-                  return 'Convalidate';
+                  return 'Pagate';
                 } else if (value === 'onholdCommissions') {
                   return 'In Attesa';
+                } else if (value === 'validatedCommissions') {
+                  return 'Convalidate';
                 }
+                
                 return value;
               }}
             />
             <Bar
               dataKey="paidCommissions"
-              fill="#10B981"
+              fill="#09895e"
               stackId="commissions"
             />
             <Bar
               dataKey="onholdCommissions"
               fill="#F59E0B"
+              stackId="commissions"
+            />
+            <Bar
+              dataKey="validatedCommissions"
+              fill="#10B981"
               stackId="commissions"
             />
           </BarChart>
@@ -164,7 +180,8 @@ const Dashboard = () => {
                   className={`
                   p-2 rounded
                   ${conv.status === 'paid' ? 'bg-green-700' :
-                      conv.status === 'onhold' ? 'bg-yellow-700' : 'bg-gray-600'}
+                      conv.status === 'onhold' ? 'bg-yellow-700' : 
+                      conv.status === 'validated' ? 'bg-green-400' :'bg-yellow-70'}
                 `}
                 >
                   <p><strong>Campagna:</strong> {conv.campaign_name}</p>

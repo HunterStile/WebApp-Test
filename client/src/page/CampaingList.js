@@ -119,7 +119,6 @@ const CampaignTable = () => {
               <th className="p-3 text-left border border-[#4c566a]">Description</th>
               <th className="p-3 text-left border border-[#4c566a]">Conditions</th>
               <th className="p-3 text-left border border-[#4c566a]">Commission Plan</th>
-              <th className="p-3 text-left border border-[#4c566a]">Stato campagna</th>
               <th className="p-3 text-left border border-[#4c566a]">Stato richiesta</th>
               <th className="p-3 text-left border border-[#4c566a]">Actions</th>
             </tr>
@@ -131,14 +130,21 @@ const CampaignTable = () => {
 
               return (
                 <tr key={campaign.name} className="border-b border-[#4c566a] hover:bg-[#4c566a]/30">
-                  <td className="p-3 border border-[#4c566a]">{campaign.name}</td>
+                  <td className="p-3 border border-[#4c566a]">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <span>{campaign.name}</span>
+                    </div>
+                  </td>
                   <td className="p-3 border border-[#4c566a]">{campaign.description}</td>
                   <td className="p-3 border border-[#4c566a]">{campaign.conditions}</td>
                   <td className="p-3 border border-[#4c566a]">{campaign.commissionPlan}</td>
-                  <td className="p-3 border border-[#4c566a]">{campaign.status}</td>
                   <td className="p-3 border border-[#4c566a]">
-                    {status === 'approved' && (
+                    {status === 'approved' && campaign.status ==='attivo' && (
                       <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
+                    )}
+                    {campaign.status ==='disattivo' && (
+                      <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Campagna Disattivata</span>
                     )}
                     {status === 'pending' && (
                       <span className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full">Pending</span>

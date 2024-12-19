@@ -29,11 +29,10 @@ router.post('/campaign-requests', async (req, res) => {
     const existingRequest = await CampaignRequest.findOne({
       username: username,
       campaign: campaign,
-      status: 'PENDING'
     });
 
     if (existingRequest) {
-      return res.status(400).json({ message: 'Hai già una richiesta pending per questa campagna' });
+      return res.status(400).json({ message: 'Hai già una richiesta per questa campagna' });
     }
 
     const newRequest = new CampaignRequest({

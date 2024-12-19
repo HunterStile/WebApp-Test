@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
-import { Check, X, Search, Copy, RefreshCw } from 'lucide-react';
+import { Check, X, Search, Copy, RefreshCw, Power } from 'lucide-react';
 
 const AdminCampaignManagement = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -71,6 +71,33 @@ const AdminCampaignManagement = () => {
     }
   };
 
+  const deactivateRequest = async (requestId) => {
+    try {
+      await updateRequestStatus(requestId, 'DEACTIVATED');
+      setMessage('Campagna disattivata con successo');
+      setMessageType('success');
+
+      if (selectedUsername) {
+        fetchUserRequests();
+      }
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'APPROVED':
+        return 'bg-green-100 text-green-800';
+      case 'REJECTED':
+        return 'bg-red-100 text-red-800';
+      case 'DEACTIVATED':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
   // Copy to clipboard
   const copyToClipboard = (link) => {
     navigator.clipboard.writeText(link).then(() => {
@@ -107,8 +134,8 @@ const AdminCampaignManagement = () => {
       {message && (
         <div
           className={`p-3 rounded-lg ${messageType === 'success'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800'
             }`}
         >
           {message}
@@ -181,70 +208,79 @@ const AdminCampaignManagement = () => {
         ) : (
           <div className="space-y-4">
             {userRequests.map(request => (
-              <div
-                key={request._id}
-                className="border rounded-lg p-4 hover:bg-gray-50 transition"
-              >
+              <div key={request._id} className="border rounded-lg p-4 hover:bg-gray-50 transition">
                 <div className="flex justify-between items-center mb-2">
                   <p className="font-medium text-gray-800">
                     <span className="font-bold">Campagna:</span> {request.campaign}
                   </p>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${request.status === 'APPROVED'
-                        ? 'bg-green-100 text-green-800'
-                        : request.status === 'REJECTED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                  >
-                    {request.status}
-                  </span>
-                  {/* Bottone di riapprovazione per richieste rifiutate */}
-                  {request.status === 'REJECTED' && (
-                    <button
-                      onClick={() => reapproveRequest(request._id)}
-                      className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition flex items-center"
-                      title="Riapprova campagna"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                    </button>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                      {request.status}
+                    </span>
+
+                    {/* Bottone di riapprovazione per richieste rifiutate o disattivate */}
+                    {(request.status === 'REJECTED' || request.status === 'DEACTIVATED') && (
+                      <button
+                        onClick={() => reapproveRequest(request._id)}
+                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition flex items-center"
+                        title="Riapprova campagna"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {/* Bottone di disattivazione per richieste approvate */}
+                    {request.status === 'APPROVED' && (
+                      <button
+                        onClick={() => deactivateRequest(request._id)}
+                        className="bg-gray-500 text-white p-2 rounded-full hover:bg-gray-600 transition flex items-center"
+                        title="Disattiva campagna"
+                      >
+                        <Power className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {request.uniqueLink && (
-                  <div className="flex items-center space-x-2 mt-2">
-                    <p className="text-gray-700">
-                      <span className="font-bold">Link:</span> {request.uniqueLink}
-                    </p>
-                    <button
-                      onClick={() => copyToClipboard(request.uniqueLink)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      {copiedLink === request.uniqueLink ? (
-                        <Check className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <Copy className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                )}
+                {/* Mostra link e URL solo se la campagna è approvata */}
+                {request.status === 'APPROVED' && (
+                  <>
+                    {request.uniqueLink && (
+                      <div className="flex items-center space-x-2 mt-2">
+                        <p className="text-gray-700">
+                          <span className="font-bold">Link:</span> {request.uniqueLink}
+                        </p>
+                        <button
+                          onClick={() => copyToClipboard(request.uniqueLink)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          {copiedLink === request.uniqueLink ? (
+                            <Check className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <Copy className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                    )}
 
-                {request.realRedirectUrl && (
-                  <div className="flex items-center space-x-2 mt-2">
-                    <p className="text-gray-700">
-                      <span className="font-bold">URL Redirect:</span> {request.realRedirectUrl}
-                    </p>
-                    <button
-                      onClick={() => copyToClipboard(request.realRedirectUrl)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      {copiedLink === request.realRedirectUrl ? (
-                        <Check className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <Copy className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
+                    {request.realRedirectUrl && (
+                      <div className="flex items-center space-x-2 mt-2">
+                        <p className="text-gray-700">
+                          <span className="font-bold">URL Redirect:</span> {request.realRedirectUrl}
+                        </p>
+                        <button
+                          onClick={() => copyToClipboard(request.realRedirectUrl)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          {copiedLink === request.realRedirectUrl ? (
+                            <Check className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <Copy className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}

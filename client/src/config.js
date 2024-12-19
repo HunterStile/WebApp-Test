@@ -1,5 +1,5 @@
 // client/src/config.js
-const API_BASE_URL = 'https://4ee6-212-171-48-194.ngrok-free.app/api'; 
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export const WS_BASE_URL = `ws://${window.location.host}`;
 

@@ -9,6 +9,7 @@ const CampaignTable = () => {
   const [userRequests, setUserRequests] = useState({
     pending: [],
     approved: [],
+    deactivated: [],
     rejected: []
   });
   const [copiedLink, setCopiedLink] = useState(null);
@@ -43,6 +44,7 @@ const CampaignTable = () => {
         setUserRequests({
           pending: response.data.pendingRequests || [],
           approved: response.data.approvedRequests || [],
+          deactivated: response.data.deactivatedRequests || [],
           rejected: response.data.rejectedRequests || []
         });
       } catch (error) {
@@ -81,6 +83,9 @@ const CampaignTable = () => {
   };
 
   const getRequestStatus = (campaignName) => {
+    if (userRequests.deactivated.some(req => req.campaign === campaignName)) {
+      return 'deactivated';
+    }
     if (userRequests.approved.some(req => req.campaign === campaignName)) {
       return 'approved';
     }
@@ -97,6 +102,7 @@ const CampaignTable = () => {
     return (
       userRequests.approved.find(req => req.campaign === campaignName) ||
       userRequests.pending.find(req => req.campaign === campaignName) ||
+      userRequests.deactivated.find(req => req.campaign === campaignName) ||
       userRequests.rejected.find(req => req.campaign === campaignName)
     );
   };
@@ -132,7 +138,7 @@ const CampaignTable = () => {
                 <tr key={campaign.name} className="border-b border-[#4c566a] hover:bg-[#4c566a]/30">
                   <td className="p-3 border border-[#4c566a]">
                     <div className="flex items-center space-x-2">
-                      <div className={`w-2 h-2 rounded-full ${campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <div className={`w-2 h-2 rounded-full ${status != 'deactivated' && campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
                       <span>{campaign.name}</span>
                     </div>
                   </td>
@@ -140,11 +146,14 @@ const CampaignTable = () => {
                   <td className="p-3 border border-[#4c566a]">{campaign.conditions}</td>
                   <td className="p-3 border border-[#4c566a]">{campaign.commissionPlan}</td>
                   <td className="p-3 border border-[#4c566a]">
-                    {status === 'approved' && campaign.status ==='attivo' && (
-                      <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
+                    {status === 'deactivated' && (
+                      <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full"> Disattivata</span>
                     )}
                     {campaign.status ==='disattivo' && (
                       <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Campagna Disattivata</span>
+                    )}
+                    {status === 'approved' && campaign.status ==='attivo' && (
+                      <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
                     )}
                     {status === 'pending' && campaign.status ==='attivo' &&(
                       <span className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full">Pending</span>
@@ -187,7 +196,7 @@ const CampaignTable = () => {
                         Request <ArrowRight className="ml-2 w-4 h-4" />
                       </button>
                     )}
-                    {(status === 'pending' || status === 'rejected' || campaign.status==='disattivo') && (
+                    {(status === 'pending' || status === 'rejected' || campaign.status==='disattivo' || status === 'deactivated') && (
                       <span className="text-gray-400">No Action</span>
                     )}
                   </td>

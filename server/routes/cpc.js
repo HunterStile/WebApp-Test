@@ -77,8 +77,14 @@ router.get('/user-requests', async (req, res) => {
       status: 'REJECTED'
     });
 
+    // Trova le richieste disattivate
+    const deactivatedRequests = await CampaignRequest.find({
+      username: username,
+      status: 'DEACTIVATED'
+    });
+
     // Restituisci tutte le richieste suddivise per stato
-    res.json({ pendingRequests, approvedRequests, rejectedRequests });
+    res.json({ pendingRequests, approvedRequests, deactivatedRequests, rejectedRequests });
   } catch (error) {
     console.error('Errore nel recupero delle richieste:', error);
     res.status(500).json({ 

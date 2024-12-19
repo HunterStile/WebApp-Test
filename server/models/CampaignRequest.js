@@ -12,7 +12,7 @@ const campaignRequestSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['PENDING', 'APPROVED', 'REJECTED'],
+        enum: ['PENDING', 'APPROVED', 'REJECTED', 'DEACTIVATED'],
         default: 'PENDING'
     },
     uniqueLink: {

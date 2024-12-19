@@ -143,7 +143,7 @@ router.patch('/update-request/:id', async (req, res) => {
       return res.status(404).json({ message: 'Campagna non trovata' });
     }
 
-    // Genera il link univoco se approvato o riapprovato
+    // Gestione dei vari stati
     if (status === 'APPROVED') {
       const uniqueLink = generateUniqueLink(request.campaign, request.username);
       const realRedirectUrl = campaign.realUrl + request.username;
@@ -152,10 +152,14 @@ router.patch('/update-request/:id', async (req, res) => {
       request.uniqueLink = uniqueLink;
       request.realRedirectUrl = realRedirectUrl;
       request.updatedAt = Date.now();
+    } else if (status === 'DEACTIVATED') {
+      request.status = status;
+      // Manteniamo il link e l'URL per possibile riattivazione
+      request.updatedAt = Date.now();
     } else {
       request.status = status;
-      request.uniqueLink = null;      // Rimuovi il link quando viene rifiutato
-      request.realRedirectUrl = null; // Rimuovi l'URL di redirect quando viene rifiutato
+      request.uniqueLink = null;
+      request.realRedirectUrl = null;
       request.updatedAt = Date.now();
     }
 

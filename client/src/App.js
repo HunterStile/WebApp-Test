@@ -29,44 +29,42 @@ function App() {
     <AuthProvider>
       <ConversionProvider>
         <AdminAuthProvider>
-          <MessageProvider>
-            <Router>
-              <div className="App min-h-screen bg-gray-900">
-                <Navbar />
-                <div className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
-                  <div className="container mx-auto p-4">
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/login2" element={<Login />} />
-                      <Route path="/admin/login" element={<AdminLogin />} />
+          <Router>
+            <div className="App min-h-screen bg-gray-900">
+              <Navbar />
+              <div className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
+                <div className="container mx-auto p-4">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login2" element={<Login />} />
+                    <Route path="/admin/login" element={<AdminLogin />} />
 
-                      {/* Protected routes per utenti normali */}
-                      <Route element={<PrivateRoute />}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/conversionlist" element={<ConversionList />} />
-                        <Route path="/campaignlist" element={<CampaignList />} />
-                        <Route path="/messages" element={<UserMessages />} />
-                      </Route>
+                    {/* Protected routes per utenti normali */}
+                    <Route element={<PrivateRoute />}>
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/conversionlist" element={<ConversionList />} />
+                      <Route path="/campaignlist" element={<CampaignList />} />
+                      <Route path="/messages" element={<UserMessages />} />
+                    </Route>
 
-                      {/* Protected routes per Admin */}
-                      <Route element={<AdminPrivateRoute />}>
-                        <Route path="/admin" element={<Admin />} />
-                        <Route path="/admin/manage" element={<ManageCampaign />} />
-                        <Route path="/admin/allconversion" element={<AllConversion />} />
-                        <Route path="/admin/messages" element={<AdminMessages />} />
-                      </Route>
+                    {/* Protected routes per Admin */}
+                    <Route element={<AdminPrivateRoute />}>
+                      <Route path="/admin" element={<Admin />} />
+                      <Route path="/admin/manage" element={<ManageCampaign />} />
+                      <Route path="/admin/allconversion" element={<AllConversion />} />
+                      <Route path="/admin/messages" element={<AdminMessages />} />
+                    </Route>
 
-                      {/* Legal routes */}
-                      <Route path="/termini" element={<Termini />} />
-                      <Route path="/privacy" element={<Privacy />} />
-                      <Route path="/cookie" element={<Cookies />} />
-                    </Routes>
-                  </div>
+                    {/* Legal routes */}
+                    <Route path="/termini" element={<Termini />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/cookie" element={<Cookies />} />
+                  </Routes>
                 </div>
-                <Footer />
               </div>
-            </Router>
-          </MessageProvider>
+              <Footer />
+            </div>
+          </Router>
         </AdminAuthProvider>
       </ConversionProvider>
     </AuthProvider>

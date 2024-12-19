@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
   const { username } = req.query;
 
   try {
-    const messages = await Message.find({ receiver: username }).sort({ timestamp: -1 });
+    const messages = await Message.find({ receiver: username }).sort({ timestamp: 1 });
     res.status(200).json(messages);
   } catch (error) {
     res.status(500).json({ message: 'Errore nel recupero dei messaggi' });
@@ -26,6 +26,17 @@ router.post('/', async (req, res) => {
     res.status(500).json({ message: 'Errore nell\'invio del messaggio' });
   }
 });
+
+// Mostra i messaggi inviati di un utente
+router.get('/sent', async (req, res) => {
+    const { username } = req.query;
+    try {
+      const messages = await Message.find({ sender: username }).sort({ timestamp: 1 });
+      res.status(200).json(messages);
+    } catch (error) {
+      res.status(500).json({ message: 'Errore nel recupero dei messaggi inviati' });
+    }
+  });
 
 // **Admin**
 // Recupera tutti i messaggi di tutti gli utenti
@@ -78,14 +89,4 @@ router.put('/admin/:id', async (req, res) => {
 });
 
 
-router.get('/sent', async (req, res) => {
-    const { username } = req.query;
-    try {
-      const messages = await Message.find({ sender: username }).sort({ timestamp: -1 });
-      res.status(200).json(messages);
-    } catch (error) {
-      res.status(500).json({ message: 'Errore nel recupero dei messaggi inviati' });
-    }
-  });
-  
 module.exports = router;

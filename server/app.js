@@ -7,6 +7,7 @@ const adminAuthRoutes = require('./routes/admin-auth')
 const gamblingRoutes = require('./routes/gambling');
 const redirectRoutes = require('./routes/cpc')
 const adminCampaignRoutes = require('./routes/admin-cpc');
+const messagesRoutes = require('./routes/messages');
 
 require('dotenv').config();
 const app = express();
@@ -39,7 +40,7 @@ app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/gambling', gamblingRoutes);
 app.use('/api/cpc', redirectRoutes);
 app.use('/api/admin', adminCampaignRoutes);
-
+app.use('/api/messages', messagesRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

@@ -65,6 +65,9 @@ function Navbar() {
                 <Link to="/campaignlist" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   Campaignlist
                 </Link>
+                <Link to="/messages" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Messaggi
+                </Link>
               </>
             )}
 
@@ -80,6 +83,10 @@ function Navbar() {
                 <Link to="/admin/allconversion" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   All Conversion
                 </Link>
+                <Link to="/admin/messages" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Messaggi
+                </Link>
+                
               </>
             )}
 

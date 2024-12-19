@@ -1,141 +1,231 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, MessageCircle, Clock, User } from 'lucide-react';
+import { MessageCircle, Send, Lock, Unlock, User, Clock, Filter } from 'lucide-react';
 import API_BASE_URL from '../../config';
 
-const AdminMessages = () => {
-  const [conversations, setConversations] = useState({});
-  const [activeConversation, setActiveConversation] = useState(null);
+const AdminThreads = () => {
+  const [threads, setThreads] = useState([]);
+  const [activeThread, setActiveThread] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'open', 'closed'
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const messagesEndRef = useRef(null);
 
-  const fetchMessages = async () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchThreads = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/messages/admin`);
-      
-      // Organizza i messaggi in conversazioni uniche
-      const groupedConversations = response.data.reduce((acc, message) => {
-        // Per i messaggi inviati dall'admin, usa il receiver come chiave
-        // Per i messaggi ricevuti dall'admin, usa il sender come chiave
-        const conversationKey = message.sender === 'admin' ? message.receiver : message.sender;
-        
-        if (!acc[conversationKey]) {
-          acc[conversationKey] = [];
-        }
-        
-        acc[conversationKey].push({
-          ...message,
-          // Il messaggio è 'sent' se l'admin è il mittente, altrimenti è 'received'
-          type: message.sender === 'admin' ? 'sent' : 'received'
-        });
-        return acc;
-      }, {});
+      const response = await axios.get(`${API_BASE_URL}/threads/admin`);
+      setThreads(response.data);
+    } catch (error) {
+      console.error('Error fetching threads:', error);
+    }
+  };
 
-      // Ordina i messaggi in ogni conversazione per data
-      Object.keys(groupedConversations).forEach(key => {
-        groupedConversations[key].sort((a, b) => 
-          new Date(a.timestamp) - new Date(b.timestamp)
-        );
-      });
-
-      setConversations(groupedConversations);
-      setLoading(false);
-    } catch (err) {
-      console.error('Errore nel recupero dei messaggi:', err);
-      setError('Errore nel recupero dei messaggi');
-      setLoading(false);
+  const fetchMessages = async (threadId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/threads/${threadId}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
     }
   };
 
   useEffect(() => {
-    fetchMessages();
+    fetchThreads();
   }, []);
+
+  useEffect(() => {
+    if (activeThread) {
+      fetchMessages(activeThread._id);
+    }
+  }, [activeThread]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !activeConversation) return;
+    if (!newMessage.trim() || !activeThread) return;
 
     try {
-      // Usa l'endpoint admin per inviare un nuovo messaggio
-      await axios.post(`${API_BASE_URL}/messages/admin`, {
-        receiver: activeConversation,
-        subject: 'RE: Conversazione',
-        content: newMessage,
+      await axios.post(`${API_BASE_URL}/threads/${activeThread._id}/messages`, {
+        sender: 'admin',
+        content: newMessage
       });
       
       setNewMessage('');
-      fetchMessages();
-    } catch (err) {
-      console.error('Errore nell\'invio della risposta:', err);
-      alert('Errore nell\'invio della risposta');
+      fetchMessages(activeThread._id);
+      fetchThreads();
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-screen bg-gray-900 text-blue-200">Caricamento...</div>;
-  if (error) return <div className="text-red-400 p-4 bg-gray-900">{error}</div>;
+  const toggleThreadStatus = async (threadId) => {
+    try {
+      await axios.patch(`${API_BASE_URL}/threads/${threadId}/toggle-status`);
+      fetchThreads();
+      if (activeThread?._id === threadId) {
+        setActiveThread(prev => ({ ...prev, isOpen: !prev.isOpen }));
+      }
+    } catch (error) {
+      console.error('Error toggling thread status:', error);
+    }
+  };
+
+  const filteredThreads = threads.filter(thread => {
+    const matchesStatus = 
+      filterStatus === 'all' ? true :
+      filterStatus === 'open' ? thread.isOpen :
+      !thread.isOpen;
+    
+    const matchesSearch = 
+      thread.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      thread.creator.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesStatus && matchesSearch;
+  });
 
   return (
     <div className="flex h-screen bg-gray-900">
-      {/* Sidebar delle conversazioni */}
       <div className="w-1/3 bg-gray-800 border-r border-gray-700">
         <div className="p-4 border-b border-gray-700">
-          <h1 className="text-xl font-bold text-blue-200 flex items-center gap-2">
+          <h1 className="text-xl font-bold text-blue-200 flex items-center gap-2 mb-4">
             <MessageCircle size={24} />
-            Dashboard Admin
+            Gestione Thread
           </h1>
+          
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Cerca thread o utente..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterStatus('all')}
+                className={`px-3 py-1 rounded-lg ${
+                  filterStatus === 'all' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-700 text-gray-300'
+                }`}
+              >
+                Tutti
+              </button>
+              <button
+                onClick={() => setFilterStatus('open')}
+                className={`px-3 py-1 rounded-lg ${
+                  filterStatus === 'open' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-700 text-gray-300'
+                }`}
+              >
+                Aperti
+              </button>
+              <button
+                onClick={() => setFilterStatus('closed')}
+                className={`px-3 py-1 rounded-lg ${
+                  filterStatus === 'closed' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-700 text-gray-300'
+                }`}
+              >
+                Chiusi
+              </button>
+            </div>
+          </div>
         </div>
+        
         <div className="overflow-y-auto h-full">
-          {Object.entries(conversations).map(([userId, messages]) => (
+          {filteredThreads.map(thread => (
             <div
-              key={userId}
-              onClick={() => setActiveConversation(userId)}
+              key={thread._id}
+              onClick={() => setActiveThread(thread)}
               className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-750 ${
-                activeConversation === userId ? 'bg-gray-700' : ''
+                activeThread?._id === thread._id ? 'bg-gray-700' : ''
               }`}
             >
-              <div className="font-semibold text-blue-200 flex items-center gap-2">
-                <User size={18} />
-                {userId}
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="font-semibold text-blue-200 flex items-center gap-2">
+                    <User size={16} />
+                    {thread.creator}
+                  </div>
+                  <div className="text-sm text-gray-300 mt-1">{thread.subject}</div>
+                </div>
+                {!thread.isOpen && <Lock size={16} className="text-red-400" />}
               </div>
-              {messages[messages.length - 1] && (
-                <>
-                  <div className="text-sm text-gray-400 truncate mt-1">
-                    {messages[messages.length - 1].content}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <Clock size={14} />
-                    {new Date(messages[messages.length - 1].timestamp).toLocaleString()}
-                  </div>
-                </>
+              
+              {thread.lastMessage && (
+                <div className="text-sm text-gray-400 mt-2">
+                  {thread.lastMessage.content.substring(0, 50)}...
+                </div>
               )}
+              
+              <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Clock size={14} />
+                  {new Date(thread.lastActivity).toLocaleDateString()}
+                </div>
+                <div>
+                  {thread.messageCount} messaggi
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Area principale dei messaggi */}
       <div className="flex-1 flex flex-col bg-gray-900">
-        {activeConversation ? (
+        {activeThread ? (
           <>
             <div className="p-4 border-b border-gray-700 bg-gray-800">
-              <h2 className="text-lg font-semibold text-blue-200 flex items-center gap-2">
-                <User size={20} />
-                {activeConversation}
-              </h2>
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="text-sm text-gray-400">Thread di {activeThread.creator}</div>
+                  <h2 className="text-lg font-semibold text-blue-200">{activeThread.subject}</h2>
+                </div>
+                <button
+                  onClick={() => toggleThreadStatus(activeThread._id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                    activeThread.isOpen 
+                      ? 'bg-red-600 hover:bg-red-700 text-white' 
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  {activeThread.isOpen ? (
+                    <>
+                      <Lock size={16} />
+                      Chiudi Thread
+                    </>
+                  ) : (
+                    <>
+                      <Unlock size={16} />
+                      Riapri Thread
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {conversations[activeConversation]?.map((message, index) => (
+              {messages.map((message) => (
                 <div
-                  key={message._id || index}
-                  className={`flex ${
-                    message.type === 'sent' ? 'justify-end' : 'justify-start'
-                  }`}
+                  key={message._id}
+                  className={`flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
                     className={`max-w-[70%] p-3 rounded-lg ${
-                      message.type === 'sent'
+                      message.sender === 'admin'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-700 text-gray-100'
                     }`}
@@ -147,6 +237,7 @@ const AdminMessages = () => {
                   </div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             <form onSubmit={handleSendMessage} className="p-4 bg-gray-800 border-t border-gray-700">
@@ -160,7 +251,7 @@ const AdminMessages = () => {
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <Send size={20} />
                 </button>
@@ -169,7 +260,7 @@ const AdminMessages = () => {
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">
-            Seleziona una conversazione per visualizzare i messaggi
+            Seleziona un thread per visualizzare e gestire i messaggi
           </div>
         )}
       </div>
@@ -177,4 +268,4 @@ const AdminMessages = () => {
   );
 };
 
-export default AdminMessages;
+export default AdminThreads;

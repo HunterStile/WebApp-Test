@@ -45,7 +45,7 @@ function App() {
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/conversionlist" element={<ConversionList />} />
                         <Route path="/campaignlist" element={<CampaignList />} />
-                        <Route path="/usermessages" element={<UserMessages />} />
+                        <Route path="/messages" element={<UserMessages />} />
                       </Route>
 
                       {/* Protected routes per Admin */}

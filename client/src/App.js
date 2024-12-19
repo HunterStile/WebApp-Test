@@ -17,7 +17,6 @@ import AllConversion from './page/private/AllConversion';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
-import { MessageProvider } from './context/MessageContext';
 import Footer from './components/Footer';
 import Termini from './components/Termini';
 import Privacy from './components/Privacy';

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
 import axios from 'axios';
-import { Copy, Check, X, ArrowRight } from 'lucide-react';
+import { Copy, Check, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 
 const CampaignTable = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -14,6 +14,7 @@ const CampaignTable = () => {
   });
   const [copiedLink, setCopiedLink] = useState(null);
   const [message, setMessage] = useState('');
+  const [expandedRows, setExpandedRows] = useState({});
   const { user } = useContext(AuthContext);
 
   // Fetch campaigns
@@ -82,6 +83,13 @@ const CampaignTable = () => {
     });
   };
 
+  const toggleRowExpansion = (campaignName) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [campaignName]: !prev[campaignName]
+    }));
+  };
+
   const getRequestStatus = (campaignName) => {
     if (userRequests.deactivated.some(req => req.campaign === campaignName)) {
       return 'deactivated';
@@ -122,8 +130,6 @@ const CampaignTable = () => {
           <thead>
             <tr className="bg-[#434c5e]">
               <th className="p-3 text-left border border-[#4c566a]">Campaign Name</th>
-              <th className="p-3 text-left border border-[#4c566a]">Description</th>
-              <th className="p-3 text-left border border-[#4c566a]">Conditions</th>
               <th className="p-3 text-left border border-[#4c566a]">Commission Plan</th>
               <th className="p-3 text-left border border-[#4c566a]">Stato richiesta</th>
               <th className="p-3 text-left border border-[#4c566a]">Actions</th>
@@ -133,74 +139,99 @@ const CampaignTable = () => {
             {campaigns.map((campaign) => {
               const status = getRequestStatus(campaign.name);
               const requestDetails = getRequestDetails(campaign.name);
+              const isExpanded = expandedRows[campaign.name];
 
               return (
-                <tr key={campaign.name} className="border-b border-[#4c566a] hover:bg-[#4c566a]/30">
-                  <td className="p-3 border border-[#4c566a]">
-                    <div className="flex items-center space-x-2">
-                      <div className={`w-2 h-2 rounded-full ${status != 'deactivated' && campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <span>{campaign.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-3 border border-[#4c566a]">{campaign.description}</td>
-                  <td className="p-3 border border-[#4c566a]">{campaign.conditions}</td>
-                  <td className="p-3 border border-[#4c566a]">{campaign.commissionPlan}</td>
-                  <td className="p-3 border border-[#4c566a]">
-                    {status === 'deactivated' && (
-                      <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full"> Disattivata</span>
-                    )}
-                    {campaign.status ==='disattivo' && (
-                      <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Campagna Disattivata</span>
-                    )}
-                    {status === 'approved' && campaign.status ==='attivo' && (
-                      <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
-                    )}
-                    {status === 'pending' && campaign.status ==='attivo' &&(
-                      <span className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full">Pending</span>
-                    )}
-                    {status === 'rejected' && (
-                      <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Rejected</span>
-                    )}
-                    {status === 'not_requested' && campaign.status ==='attivo' && (
-                      <span className="px-2 py-1 bg-gray-900/30 text-gray-300 rounded-full">Not Requested</span>
-                    )}
-                  </td>
-                  <td className="p-3 border border-[#4c566a]">
-                    {status === 'approved' && campaign.status==='attivo'  && requestDetails.uniqueLink && (
+                <>
+                  <tr key={campaign.name} className="border-b border-[#4c566a] hover:bg-[#4c566a]/30">
+                    <td className="p-3 border border-[#4c566a]">
                       <div className="flex items-center space-x-2">
-                        <a 
-                          href={API_BASE_URL + requestDetails.uniqueLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 hover:underline"
-                        >
-                          View Link
-                        </a>
-                        <button 
-                          onClick={() => copyToClipboard(API_BASE_URL + requestDetails.uniqueLink)}
-                          className="text-gray-400 hover:text-gray-200"
-                        >
-                          {copiedLink === API_BASE_URL + requestDetails.uniqueLink ? (
-                            <Check className="w-5 h-5 text-green-300" />
-                          ) : (
-                            <Copy className="w-5 h-5" />
-                          )}
-                        </button>
+                        <div className={`w-2 h-2 rounded-full ${status != 'deactivated' && campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <span>{campaign.name}</span>
                       </div>
-                    )}
-                    {status === 'not_requested' && campaign.status === 'attivo' && (
-                      <button 
-                        onClick={() => handleRequestCampaign(campaign.name)}
-                        className="px-3 py-1 bg-blue-900/40 text-blue-300 rounded hover:bg-blue-900/60 flex items-center"
-                      >
-                        Request <ArrowRight className="ml-2 w-4 h-4" />
-                      </button>
-                    )}
-                    {(status === 'pending' || status === 'rejected' || campaign.status==='disattivo' || status === 'deactivated') && (
-                      <span className="text-gray-400">No Action</span>
-                    )}
-                  </td>
-                </tr>
+                    </td>
+                    <td 
+                      className="p-3 border border-[#4c566a] cursor-pointer hover:bg-[#4c566a]"
+                      onClick={() => toggleRowExpansion(campaign.name)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{campaign.commissionPlan}</span>
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </div>
+                    </td>
+                    <td className="p-3 border border-[#4c566a]">
+                      {status === 'deactivated' && (
+                        <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Disattivata</span>
+                      )}
+                      {campaign.status === 'disattivo' && (
+                        <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Campagna Disattivata</span>
+                      )}
+                      {status === 'approved' && campaign.status === 'attivo' && (
+                        <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
+                      )}
+                      {status === 'pending' && campaign.status === 'attivo' && (
+                        <span className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full">Pending</span>
+                      )}
+                      {status === 'rejected' && (
+                        <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Rejected</span>
+                      )}
+                      {status === 'not_requested' && campaign.status === 'attivo' && (
+                        <span className="px-2 py-1 bg-gray-900/30 text-gray-300 rounded-full">Not Requested</span>
+                      )}
+                    </td>
+                    <td className="p-3 border border-[#4c566a]">
+                      {status === 'approved' && campaign.status === 'attivo' && requestDetails.uniqueLink && (
+                        <div className="flex items-center space-x-2">
+                          <a 
+                            href={API_BASE_URL + requestDetails.uniqueLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 hover:underline"
+                          >
+                            View Link
+                          </a>
+                          <button 
+                            onClick={() => copyToClipboard(API_BASE_URL + requestDetails.uniqueLink)}
+                            className="text-gray-400 hover:text-gray-200"
+                          >
+                            {copiedLink === API_BASE_URL + requestDetails.uniqueLink ? (
+                              <Check className="w-5 h-5 text-green-300" />
+                            ) : (
+                              <Copy className="w-5 h-5" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+                      {status === 'not_requested' && campaign.status === 'attivo' && (
+                        <button 
+                          onClick={() => handleRequestCampaign(campaign.name)}
+                          className="px-3 py-1 bg-blue-900/40 text-blue-300 rounded hover:bg-blue-900/60 flex items-center"
+                        >
+                          Request <ArrowRight className="ml-2 w-4 h-4" />
+                        </button>
+                      )}
+                      {(status === 'pending' || status === 'rejected' || campaign.status === 'disattivo' || status === 'deactivated') && (
+                        <span className="text-gray-400">No Action</span>
+                      )}
+                    </td>
+                  </tr>
+                  {isExpanded && (
+                    <tr className="bg-[#2e3440]">
+                      <td colSpan="4" className="p-4 border border-[#4c566a]">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h3 className="font-semibold text-[#88c0d0] mb-2">Description</h3>
+                            <p>{campaign.description}</p>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-[#88c0d0] mb-2">Conditions</h3>
+                            <p>{campaign.conditions}</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               );
             })}
           </tbody>

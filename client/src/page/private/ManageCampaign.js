@@ -11,7 +11,9 @@ const ManageCampaigns = () => {
     description: '',
     conditions: '',
     commissionPlan: '',
-    status: 'attivo'
+    status: 'attivo',
+    type: 'sport',
+    country: ''    
   });
   const [editCampaignId, setEditCampaignId] = useState(null);
   const [message, setMessage] = useState('');
@@ -47,8 +49,8 @@ const ManageCampaigns = () => {
     setMessage('');
 
     // Validate form
-    const { name, realUrl, description, conditions, commissionPlan, status } = formData;
-    if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
+    const { name, realUrl, description, conditions, commissionPlan, status, type, country } = formData;
+    if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
       setMessage('Tutti i campi sono richiesti');
       setMessageType('error');
       return;
@@ -85,7 +87,9 @@ const ManageCampaigns = () => {
       description: '',
       conditions: '',
       commissionPlan: '',
-      status: 'attivo'
+      status: 'attivo',
+      type: 'sport',
+      country: ''
     });
     setEditCampaignId(null);
   };
@@ -98,7 +102,9 @@ const ManageCampaigns = () => {
       description: campaign.description,
       conditions: campaign.conditions,
       commissionPlan: campaign.commissionPlan,
-      status: campaign.status
+      status: campaign.status,
+      type: campaign.type,
+      country: campaign.country
     });
     setEditCampaignId(campaign._id);
   };
@@ -195,6 +201,33 @@ const ManageCampaigns = () => {
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows="3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Campagna</label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="Sport">Sport</option>
+              <option value="Casino">Casino</option>
+              <option value="Sport/Casino">Sport/Casino</option>
+              <option value="Crypto">Crypto</option>
+              <option value="Financial Broker">Financial Broker</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Paese Campagna</label>
+            <input
+              type="text"
+              name="country"
+              value={formData.country}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>

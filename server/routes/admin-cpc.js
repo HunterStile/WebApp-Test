@@ -5,9 +5,9 @@ const Campaign = require('../models/Campaign');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { name, realUrl, description, conditions, commissionPlan, status } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status, type, country } = req.body;
 
-  if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
+  if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
   }
 
@@ -23,7 +23,9 @@ router.post('/campaigns', async (req, res) => {
       description, 
       conditions, 
       commissionPlan,
-      status 
+      status,
+      type,
+      country
     });
     await newCampaign.save();
 
@@ -33,13 +35,12 @@ router.post('/campaigns', async (req, res) => {
   }
 });
 
-
 // Modifica una campagna esistente
 router.patch('/campaigns/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, realUrl, description, conditions, commissionPlan, status } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status, type, country } = req.body;
 
-  if (!name || !realUrl || !description || !conditions || !commissionPlan || !status) {
+  if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
   }
 
@@ -55,6 +56,8 @@ router.patch('/campaigns/:id', async (req, res) => {
     campaign.conditions = conditions;
     campaign.commissionPlan = commissionPlan;
     campaign.status = status;
+    campaign.type = type;
+    campaign.country = country;
 
     await campaign.save();
 
@@ -63,7 +66,6 @@ router.patch('/campaigns/:id', async (req, res) => {
     res.status(500).json({ message: 'Errore nella modifica della campagna', error: error.message });
   }
 });
-
 
 // Elimina una campagna
 router.delete('/campaigns/:id', async (req, res) => {
@@ -82,7 +84,6 @@ router.delete('/campaigns/:id', async (req, res) => {
     res.status(500).json({ message: 'Errore nell\'eliminazione della campagna', error: error.message });
   }
 });
-
 
 // Funzione per generare link univoco
 const generateUniqueLink = (campaign, username) => {
@@ -136,14 +137,12 @@ router.patch('/update-request/:id', async (req, res) => {
       return res.status(404).json({ message: 'Richiesta non trovata' });
     }
 
-    // Trova l'URL reale della campagna
     const campaign = await Campaign.findOne({ name: request.campaign });
 
     if (!campaign) {
       return res.status(404).json({ message: 'Campagna non trovata' });
     }
 
-    // Gestione dei vari stati
     if (status === 'APPROVED') {
       const uniqueLink = generateUniqueLink(request.campaign, request.username);
       const realRedirectUrl = campaign.realUrl + request.username;
@@ -154,7 +153,6 @@ router.patch('/update-request/:id', async (req, res) => {
       request.updatedAt = Date.now();
     } else if (status === 'DEACTIVATED') {
       request.status = status;
-      // Manteniamo il link e l'URL per possibile riattivazione
       request.updatedAt = Date.now();
     } else {
       request.status = status;

@@ -3,6 +3,8 @@ import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
 import axios from 'axios';
 import { Copy, Check, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import CampaignLogo from '../components/utils/CampaignLogo';
+import CountryFlag from '../components/utils/CountryFlag';
 
 const CampaignTable = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -131,12 +133,14 @@ const CampaignTable = () => {
             <col className="w-1/4" />
             <col className="w-1/6" />
             <col className="w-1/6" />
+            <col className="w-1/7" />
             <col className="w-1/6" />
             <col className="w-1/6" />
             <col className="w-1/6" />
           </colgroup>
           <thead>
             <tr className="bg-[#434c5e]">
+              <th className="p-3 text-left border border-[#4c566a]">Brand Logo</th>
               <th className="p-3 text-left border border-[#4c566a]">Campaign Name</th>
               <th className="p-3 text-left border border-[#4c566a]">Type</th>
               <th className="p-3 text-left border border-[#4c566a]">Country</th>
@@ -157,6 +161,11 @@ const CampaignTable = () => {
                     <td className="p-3 border border-[#4c566a]">
                       <div className="flex items-center space-x-2">
                         <div className={`w-2 h-2 rounded-full ${status != 'deactivated' && campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <CampaignLogo campaignName={campaign.name} />
+                      </div>
+                    </td>
+                    <td className="p-3 border border-[#4c566a]">
+                      <div className="flex items-center space-x-2">
                         <span className="truncate">{campaign.name}</span>
                       </div>
                     </td>
@@ -164,7 +173,9 @@ const CampaignTable = () => {
                       <span className="capitalize truncate">{campaign.type}</span>
                     </td>
                     <td className="p-3 border border-[#4c566a]">
-                      <span className="truncate">{campaign.country}</span>
+                      <div className="flex items-center space-x-2">
+                        <CountryFlag country={campaign.country} />
+                      </div>
                     </td>
                     <td className="p-3 border border-[#4c566a] cursor-pointer hover:bg-[#4c566a]" onClick={() => toggleRowExpansion(campaign.name)}>
                       <div className="flex items-center justify-between">
@@ -234,7 +245,7 @@ const CampaignTable = () => {
                   </tr>
                   {isExpanded && (
                     <tr className="bg-[#2e3440]">
-                      <td colSpan="6" className="p-4 border border-[#4c566a]">
+                      <td colSpan="7" className="p-4 border border-[#4c566a]">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <h3 className="font-semibold text-[#88c0d0] mb-2">Description</h3>

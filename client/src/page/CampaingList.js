@@ -166,7 +166,7 @@ const CampaignTable = () => {
                     </td>
                     <td className="p-3 border border-[#4c566a]">
                       <div className="flex items-center space-x-2">
-                        <span className="truncate">{campaign.name}</span>
+                        <span className="truncate">{campaign.mappedName || campaign.name} </span>
                       </div>
                     </td>
                     <td className="p-3 border border-[#4c566a]">

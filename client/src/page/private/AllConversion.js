@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ConversionContext } from '../../context/ConversionContext';
 
 const ConversionsPage = () => {
@@ -10,7 +10,11 @@ const ConversionsPage = () => {
   const [error, setError] = useState(null);
   const {updateConversions} = useContext(ConversionContext);
   const [updating, setUpdating] = useState(false);
-    
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [itemsPerPage] = useState(10);
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -20,28 +24,116 @@ const ConversionsPage = () => {
     type: '',
     startDate: '',
     endDate: '',
+    page: 1,
+    limit: 10
   });
 
   const [total, setTotal] = useState(0);
 
   // Fetch conversions
-  const fetchConversions = async () => {
+  const fetchConversions = async (page = currentPage) => {
     setLoading(true);
     setError(null);
 
     try {
-      const { aff_var, status, campaign_name, type, startDate, endDate } = filters;
+      const { aff_var, status, campaign_name, type, startDate, endDate, limit } = filters;
       const response = await axios.get(`${API_BASE_URL}/gambling/conversions`, {
-        params: { aff_var, status, campaign_name, type, startDate, endDate },
+        params: { 
+          aff_var, 
+          status, 
+          campaign_name, 
+          type, 
+          startDate, 
+          endDate,
+          page,
+          limit
+        },
       });
 
       setConversions(response.data.conversions);
       setTotal(response.data.total);
+      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (err) {
       handleError(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    fetchConversions(newPage);
+  };
+
+  const renderPagination = () => {
+    const maxVisiblePages = 3;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-1 mx-1 rounded ${
+            currentPage === i
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return (
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 flex items-center"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Precedente
+        </button>
+        {startPage > 1 && (
+          <>
+            <button
+              onClick={() => handlePageChange(1)}
+              className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="px-2">...</span>}
+          </>
+        )}
+        {pages}
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="px-2">...</span>}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 flex items-center"
+        >
+          Successivo
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </button>
+      </div>
+    );
   };
 
   const handleUpdate = async () => {
@@ -84,6 +176,12 @@ const ConversionsPage = () => {
       startDate: '',
       endDate: '',
     });
+  };
+
+  // Reset to first page when filters change
+  const handleFilterSubmit = () => {
+    setCurrentPage(1);
+    fetchConversions(1);
   };
 
   // Initial and filter application effects
@@ -203,7 +301,7 @@ const ConversionsPage = () => {
             Resetta Filtri
           </button>
           <button 
-            onClick={fetchConversions}
+            onClick={handleFilterSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition flex items-center"
           >
             <Search className="w-5 h-5 mr-2" /> Applica Filtri
@@ -220,6 +318,9 @@ const ConversionsPage = () => {
           <p className="text-gray-600">
             Totale: <span className="font-bold">{total} conversioni</span>
           </p>
+          <p className="text-sm">
+              Pagina {currentPage} di {totalPages}
+          </p>
         </div>
 
         {loading ? (
@@ -227,6 +328,7 @@ const ConversionsPage = () => {
         ) : conversions.length === 0 ? (
           <p className="text-gray-500 text-center">Nessuna conversione trovata</p>
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
@@ -268,6 +370,8 @@ const ConversionsPage = () => {
               </tbody>
             </table>
           </div>
+          {renderPagination()}
+          </>
         )}
       </div>
     </div>

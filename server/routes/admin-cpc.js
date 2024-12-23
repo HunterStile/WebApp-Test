@@ -5,7 +5,7 @@ const Campaign = require('../models/Campaign');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { name, realUrl, description, conditions, commissionPlan, status, type, country , mappedName, requiresMapping } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status = 'attivo', type = 'Sport', country , mappedName, requiresMapping } = req.body;
 
   if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
@@ -17,6 +17,11 @@ router.post('/campaigns', async (req, res) => {
       return res.status(400).json({ message: 'La campagna esiste già' });
     }
 
+    // Se requiresMapping è true, verifica che mappedName sia presente
+     if (requiresMapping && !mappedName) {
+      return res.status(400).json({ message: 'Il nome mappato è richiesto quando requiresMapping è attivo' });
+    }
+
     const newCampaign = new Campaign({ 
       name, 
       realUrl, 
@@ -26,8 +31,8 @@ router.post('/campaigns', async (req, res) => {
       status,
       type,
       country,
-      mappedName, 
-      requiresMapping
+      mappedName:  requiresMapping ? mappedName : '',
+      requiresMapping: Boolean(requiresMapping)
     });
     await newCampaign.save();
 
@@ -52,6 +57,11 @@ router.patch('/campaigns/:id', async (req, res) => {
       return res.status(404).json({ message: 'Campagna non trovata' });
     }
 
+    // Se requiresMapping è true, verifica che mappedName sia presente
+    if (requiresMapping && !mappedName) {
+      return res.status(400).json({ message: 'Il nome mappato è richiesto quando requiresMapping è attivo' });
+    }
+
     campaign.name = name;
     campaign.realUrl = realUrl;
     campaign.description = description;
@@ -60,8 +70,8 @@ router.patch('/campaigns/:id', async (req, res) => {
     campaign.status = status;
     campaign.type = type;
     campaign.country = country;
-    campaign.mappedName = mappedName;  
-    campaign.requiresMapping = requiresMapping; 
+    campaign.mappedName = requiresMapping ? mappedName : ''; // Se non richiede mapping, imposta stringa vuota
+    campaign.requiresMapping = Boolean(requiresMapping); // Converti esplicitamente a booleano
 
     await campaign.save();
 

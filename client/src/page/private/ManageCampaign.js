@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
-import { Trash2, Edit, Plus, X, Check } from 'lucide-react';
+import { Trash2, Edit, Plus, X, Search } from 'lucide-react';
 
 const ManageCampaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
     realUrl: '',
@@ -12,7 +15,7 @@ const ManageCampaigns = () => {
     conditions: '',
     commissionPlan: '',
     status: 'attivo',
-    type: 'sport',
+    type: 'Sport',
     country: '',
     mappedName: '',
     requiresMapping: false
@@ -21,12 +24,16 @@ const ManageCampaigns = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
+  // Pagination settings
+  const itemsPerPage = 10;
+
   // Fetch campaigns on component mount
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/cpc/campaigns`);
         setCampaigns(response.data);
+        setFilteredCampaigns(response.data);
       } catch (error) {
         setMessage('Errore nel recupero delle campagne');
         setMessageType('error');
@@ -35,6 +42,27 @@ const ManageCampaigns = () => {
 
     fetchCampaigns();
   }, []);
+
+  // Search functionality
+  useEffect(() => {
+    const filtered = campaigns.filter(campaign =>
+      campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      campaign.realUrl.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (campaign.mappedName && campaign.mappedName.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+    setFilteredCampaigns(filtered);
+    setCurrentPage(1); // Reset to first page when searching
+  }, [searchQuery, campaigns]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCampaigns = filteredCampaigns.slice(startIndex, endIndex);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -45,7 +73,7 @@ const ManageCampaigns = () => {
     }));
   };
 
-  // Submit form for adding/editing campaign
+  // Submit form modificato per gestire correttamente i campi
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -58,14 +86,21 @@ const ManageCampaigns = () => {
       return;
     }
 
+    // Prepara i dati da inviare
+    const submitData = {
+      ...formData,
+      // Se requiresMapping è false, azzera anche mappedName
+      mappedName: formData.requiresMapping ? formData.mappedName : ''
+    };
+
     try {
       if (editCampaignId) {
         // Edit existing campaign
-        await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, formData);
+        await axios.patch(`${API_BASE_URL}/admin/campaigns/${editCampaignId}`, submitData);
         setMessage('Campagna modificata con successo');
       } else {
         // Add new campaign
-        await axios.post(`${API_BASE_URL}/admin/campaigns`, formData);
+        await axios.post(`${API_BASE_URL}/admin/campaigns`, submitData);
         setMessage('Campagna aggiunta con successo');
       }
 
@@ -90,7 +125,7 @@ const ManageCampaigns = () => {
       conditions: '',
       commissionPlan: '',
       status: 'attivo',
-      type: 'sport',
+      type: 'Sport',
       country: '',
       mappedName: '',  // Aggiungi questo
       requiresMapping: false  // Aggiungi questo
@@ -109,7 +144,8 @@ const ManageCampaigns = () => {
       status: campaign.status,
       type: campaign.type,
       country: campaign.country,
-      mappedName: campaign.mappedName,
+      mappedName: campaign.mappedName || '',
+      requiresMapping: Boolean(campaign.requiresMapping)
     });
     setEditCampaignId(campaign._id);
   };
@@ -128,6 +164,43 @@ const ManageCampaigns = () => {
       setMessage('Errore nell\'eliminazione della campagna');
       setMessageType('error');
     }
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-1 mx-1 rounded ${currentPage === i
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return (
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Precedente
+        </button>
+        {pages}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Successivo
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -313,9 +386,25 @@ const ManageCampaigns = () => {
           </div>
         </form>
 
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Cerca campagna..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
         {/* Campaigns Table */}
         <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Campagne Esistenti</h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Campagne Esistenti ({filteredCampaigns.length} totali)
+          </h3>
           <div className="overflow-x-auto">
             <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
               <thead className="bg-gray-100">
@@ -327,7 +416,7 @@ const ManageCampaigns = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {campaigns.map((campaign) => (
+                {currentCampaigns.map((campaign) => (
                   <tr key={campaign._id} className="hover:bg-gray-50">
                     <td className="p-3">
                       <div className="font-medium text-gray-900">
@@ -339,7 +428,7 @@ const ManageCampaigns = () => {
                         )}
                       </div>
                       <div className="text-sm text-gray-500 truncate max-w-xs">
-                        {campaign.description}
+                        {campaign.commissionPlan}
                       </div>
                     </td>
                     <td className="p-3">
@@ -385,12 +474,16 @@ const ManageCampaigns = () => {
                 ))}
               </tbody>
             </table>
-            {campaigns.length === 0 && (
+            {filteredCampaigns.length === 0 && (
               <div className="text-center py-4 text-gray-500">
-                Nessuna campagna presente
+                {searchQuery
+                  ? 'Nessuna campagna trovata'
+                  : 'Nessuna campagna presente'}
               </div>
             )}
           </div>
+          {/* Pagination */}
+          {filteredCampaigns.length > 0 && renderPagination()}
         </div>
       </div>
     </div>

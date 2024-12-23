@@ -2,12 +2,35 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import API_BASE_URL from '../config';
 import axios from 'axios';
-import { Copy, Check, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  X
+} from 'lucide-react';
 import CampaignLogo from '../components/utils/CampaignLogo';
 import CountryFlag from '../components/utils/CountryFlag';
 
 const CampaignTable = () => {
   const [campaigns, setCampaigns] = useState([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    status: '',
+    type: '',
+    country: '',
+    requestStatus: ''
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const itemsPerPage = 10;
+
   const [userRequests, setUserRequests] = useState({
     pending: [],
     approved: [],
@@ -58,6 +81,24 @@ const CampaignTable = () => {
 
     fetchUserRequests();
   }, [user]);
+
+  // Filter logic
+  useEffect(() => {
+    const filtered = campaigns.filter(campaign => {
+      const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        campaign.mappedName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesType = !filters.type || campaign.type === filters.type;
+      const matchesCountry = !filters.country || campaign.country === filters.country;
+      const matchesStatus = !filters.status || campaign.status === filters.status;
+      const matchesRequestStatus = !filters.requestStatus || getRequestStatus(campaign.name) === filters.requestStatus;
+
+      return matchesSearch && matchesType && matchesCountry && matchesStatus && matchesRequestStatus;
+    });
+
+    setFilteredCampaigns(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [filters, searchTerm, campaigns]);
 
   const handleRequestCampaign = async (campaignName) => {
     try {
@@ -117,6 +158,30 @@ const CampaignTable = () => {
     );
   };
 
+  // Extract unique values for filter options
+  const uniqueTypes = [...new Set(campaigns.map(c => c.type))];
+  const uniqueCountries = [...new Set(campaigns.map(c => c.country))];
+  const requestStatuses = ['approved', 'pending', 'rejected', 'not_requested', 'deactivated'];
+
+  // Reset filters
+  const resetFilters = () => {
+    setFilters({
+      status: '',
+      type: '',
+      country: '',
+      requestStatus: ''
+    });
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  // Pagination
+  const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
+  const currentCampaigns = filteredCampaigns.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-[#81a1c1] border-b-2 border-[#5e81ac] pb-2">Campaign Management</h1>
@@ -126,7 +191,72 @@ const CampaignTable = () => {
           {message}
         </div>
       )}
+      {/* Filters Section */}
+      <div className="mb-6 space-y-4">
+        <div className="flex flex-wrap gap-4 items-center justify-between bg-[#3b4252] p-4 rounded-lg">
+          {/* Search Bar */}
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search campaigns..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+            />
+          </div>
 
+          {/* Filter Dropdowns */}
+          <div className="flex flex-wrap gap-4">
+            {/* Type Filter */}
+            <select
+              value={filters.type}
+              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+            >
+              <option value="">All Types</option>
+              {uniqueTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+
+            {/* Country Filter */}
+            <select
+              value={filters.country}
+              onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
+              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+            >
+              <option value="">All Countries</option>
+              {uniqueCountries.map(country => (
+                <option key={country} value={country}>{country}</option>
+              ))}
+            </select>
+
+            {/* Request Status Filter */}
+            <select
+              value={filters.requestStatus}
+              onChange={(e) => setFilters(prev => ({ ...prev, requestStatus: e.target.value }))}
+              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+            >
+              <option value="">All Request Status</option>
+              {requestStatuses.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+
+            {/* Reset Filters Button */}
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-2 px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] hover:bg-[#434c5e]"
+            >
+              <X className="w-4 h-4" />
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full table-fixed border-collapse bg-[#3b4252] text-[#e1e1e1]">
           <colgroup>
@@ -150,7 +280,7 @@ const CampaignTable = () => {
             </tr>
           </thead>
           <tbody>
-            {campaigns.map((campaign) => {
+            {currentCampaigns.map((campaign) => {
               const status = getRequestStatus(campaign.name);
               const requestDetails = getRequestDetails(campaign.name);
               const isExpanded = expandedRows[campaign.name];
@@ -265,6 +395,48 @@ const CampaignTable = () => {
           </tbody>
         </table>
       </div>
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between bg-[#3b4252] p-4 rounded-lg">
+          <div className="text-[#e1e1e1]">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredCampaigns.length)} of {filteredCampaigns.length} entries
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <span className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1]">
+              {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
     </div>
   );
 };

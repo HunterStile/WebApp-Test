@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 const conversionSchema = new mongoose.Schema({
   conversion_id: { type: String, required: true, unique: true },
+  original_campaign_name: { type: String, required: true },
   campaign_name: { type: String, required: true },
   site_url: { type: String },
   date: { type: Date, default: Date.now },

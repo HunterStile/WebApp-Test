@@ -5,7 +5,7 @@ const Campaign = require('../models/Campaign');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { name, realUrl, description, conditions, commissionPlan, status, type, country } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status, type, country , mappedName, requiresMapping } = req.body;
 
   if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
@@ -25,7 +25,9 @@ router.post('/campaigns', async (req, res) => {
       commissionPlan,
       status,
       type,
-      country
+      country,
+      mappedName, 
+      requiresMapping
     });
     await newCampaign.save();
 
@@ -38,7 +40,7 @@ router.post('/campaigns', async (req, res) => {
 // Modifica una campagna esistente
 router.patch('/campaigns/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, realUrl, description, conditions, commissionPlan, status, type, country } = req.body;
+  const { name, realUrl, description, conditions, commissionPlan, status, type, country, mappedName, requiresMapping } = req.body;
 
   if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
@@ -58,6 +60,8 @@ router.patch('/campaigns/:id', async (req, res) => {
     campaign.status = status;
     campaign.type = type;
     campaign.country = country;
+    campaign.mappedName = mappedName;  
+    campaign.requiresMapping = requiresMapping; 
 
     await campaign.save();
 

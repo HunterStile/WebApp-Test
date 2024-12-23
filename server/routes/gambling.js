@@ -2,6 +2,7 @@
 const express = require('express');
 const axios = require('axios');
 const Conversion = require('../models/Conversion');
+const Campaign = require('../models/Campaign');
 const router = express.Router();
 
 router.get('/fetch-conversions', async (req, res) => {
@@ -18,6 +19,19 @@ router.get('/fetch-conversions', async (req, res) => {
     const formattedEndDate = endDate.toISOString().split('T')[0];
 
     console.log(`Fetching conversions from ${formattedStartDate} to ${formattedEndDate}`);
+
+    // Recupera tutte le campagne che richiedono rimappatura
+    const mappingCampaigns = await Campaign.find({ 
+      requiresMapping: true 
+    }, 'name mappedName');
+
+    // Crea l'oggetto di mappatura
+    const campaignNameMapping = mappingCampaigns.reduce((acc, campaign) => {
+      if (campaign.mappedName) {
+        acc[campaign.name] = campaign.mappedName;
+      }
+      return acc;
+    }, {});
 
     const response = await axios.get(apiUrl, {
       params: {
@@ -48,16 +62,18 @@ router.get('/fetch-conversions', async (req, res) => {
 
     console.log('Risposta API completa:', JSON.stringify(response.data, null, 2));
 
-    // Salva conversioni in MongoDB con commissione ridotta
-    const conversions = response.data.conversions.map(conv => {
-      // Calcola la nuova commissione sottraendo 20€
+     // Usa la mappatura nelle conversioni
+     const conversions = response.data.conversions.map(conv => {
       let adjustedCommission = parseFloat(conv.commission) - 20;
-      // Assicurati che la commissione non sia negativa
       adjustedCommission = Math.max(0, adjustedCommission);
+
+      // Usa la mappatura dal database
+      const mappedCampaignName = campaignNameMapping[conv.campaign_name] || conv.campaign_name;
 
       return {
         conversion_id: conv.conversion_id,
-        campaign_name: conv.campaign_name,
+        campaign_name: mappedCampaignName,
+        original_campaign_name: conv.campaign_name,
         site_url: conv.site_url,
         date: new Date(conv.date),
         type: conv.type,

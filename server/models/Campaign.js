@@ -16,7 +16,9 @@ const campaignSchema = new mongoose.Schema({
     type: String, 
     enum: ['attivo', 'disattivo'], 
     default: 'attivo' 
-  }
+  },
+  mappedName: { type: String },
+  requiresMapping: { type: Boolean, default: false }
 }, {
   timestamps: true,
 });

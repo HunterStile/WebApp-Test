@@ -13,7 +13,9 @@ const ManageCampaigns = () => {
     commissionPlan: '',
     status: 'attivo',
     type: 'sport',
-    country: ''    
+    country: '',
+    mappedName: '',
+    requiresMapping: false
   });
   const [editCampaignId, setEditCampaignId] = useState(null);
   const [message, setMessage] = useState('');
@@ -34,12 +36,12 @@ const ManageCampaigns = () => {
     fetchCampaigns();
   }, []);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -71,7 +73,7 @@ const ManageCampaigns = () => {
       resetForm();
       const updatedCampaigns = await axios.get(`${API_BASE_URL}/cpc/campaigns`);
       setCampaigns(updatedCampaigns.data);
-      
+
       setMessageType('success');
     } catch (error) {
       setMessage(error.response?.data?.message || 'Errore nell\'operazione');
@@ -89,7 +91,9 @@ const ManageCampaigns = () => {
       commissionPlan: '',
       status: 'attivo',
       type: 'sport',
-      country: ''
+      country: '',
+      mappedName: '',  // Aggiungi questo
+      requiresMapping: false  // Aggiungi questo
     });
     setEditCampaignId(null);
   };
@@ -104,7 +108,8 @@ const ManageCampaigns = () => {
       commissionPlan: campaign.commissionPlan,
       status: campaign.status,
       type: campaign.type,
-      country: campaign.country
+      country: campaign.country,
+      mappedName: campaign.mappedName,
     });
     setEditCampaignId(campaign._id);
   };
@@ -134,11 +139,11 @@ const ManageCampaigns = () => {
 
         {/* Status Message */}
         {message && (
-          <div 
+          <div
             className={`
               mb-4 p-3 rounded-md text-sm font-medium 
-              ${messageType === 'success' 
-                ? 'bg-green-100 text-green-800' 
+              ${messageType === 'success'
+                ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800'
               }
             `}
@@ -160,6 +165,33 @@ const ManageCampaigns = () => {
               required
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Richiede Rimappatura
+            </label>
+            <input
+              type="checkbox"
+              name="requiresMapping"
+              checked={formData.requiresMapping}
+              onChange={handleInputChange}
+              className="mr-2"
+            />
+          </div>
+
+          {formData.requiresMapping && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nome Rimappato
+              </label>
+              <input
+                type="text"
+                name="mappedName"
+                value={formData.mappedName}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">URL Reale</label>
             <input
@@ -245,8 +277,8 @@ const ManageCampaigns = () => {
             </select>
           </div>
           <div className="md:col-span-2 flex space-x-2">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="
                 flex items-center justify-center 
                 px-4 py-2 bg-blue-500 text-white 
@@ -265,8 +297,8 @@ const ManageCampaigns = () => {
               )}
             </button>
             {editCampaignId && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={resetForm}
                 className="
                   flex items-center justify-center 
@@ -298,13 +330,22 @@ const ManageCampaigns = () => {
                 {campaigns.map((campaign) => (
                   <tr key={campaign._id} className="hover:bg-gray-50">
                     <td className="p-3">
-                      <div className="font-medium text-gray-900">{campaign.name}</div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">{campaign.description}</div>
+                      <div className="font-medium text-gray-900">
+                        {campaign.name}
+                        {campaign.requiresMapping && campaign.mappedName && (
+                          <span className="ml-2 text-sm text-blue-600">
+                            → {campaign.mappedName}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500 truncate max-w-xs">
+                        {campaign.description}
+                      </div>
                     </td>
                     <td className="p-3">
-                      <a 
-                        href={campaign.realUrl} 
-                        target="_blank" 
+                      <a
+                        href={campaign.realUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline truncate max-w-xs block"
                       >
@@ -312,11 +353,11 @@ const ManageCampaigns = () => {
                       </a>
                     </td>
                     <td className="p-3">
-                      <span 
+                      <span
                         className={`
                           px-2 py-1 rounded-full text-xs font-medium
-                          ${campaign.status === 'attivo' 
-                            ? 'bg-green-100 text-green-800' 
+                          ${campaign.status === 'attivo'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                           }
                         `}
@@ -325,14 +366,14 @@ const ManageCampaigns = () => {
                       </span>
                     </td>
                     <td className="p-3 flex space-x-2">
-                      <button 
+                      <button
                         onClick={() => handleEdit(campaign)}
                         className="text-blue-600 hover:text-blue-800 transition"
                         title="Modifica"
                       >
                         <Edit className="w-5 h-5" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(campaign._id)}
                         className="text-red-600 hover:text-red-800 transition"
                         title="Elimina"

@@ -1,17 +1,21 @@
 import React from 'react';
 
-// Importa le immagini dagli assets
+// Estrae il nome del brand dalla stringa della campagna
+const extractBrandName = (campaignName) => {
+  // Prende tutto ciò che viene prima del primo " - "
+  const brandName = campaignName.split(' - ')[0];
+  return brandName
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
 const importLogo = (campaignName) => {
   try {
-    // Converte il nome della campagna nel formato del file
-    const formattedName = campaignName
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-      
-    // Importa dinamicamente l'immagine
-    return require(`../../assets/images/campaigns/${formattedName}.png`);
+    // Usa solo il nome del brand per cercare l'immagine
+    const brandName = extractBrandName(campaignName);
+    return require(`../../assets/images/campaigns/${brandName}.png`);
   } catch (error) {
     // Se l'immagine non esiste, usa il logo di default
     return require('../../assets/images/campaigns/default-logo.png');

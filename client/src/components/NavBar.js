@@ -48,10 +48,7 @@ function Navbar() {
 
         <nav className="flex-1">
           <div className="px-4 space-y-2">
-            {/* Link visibili a tutti gli utenti */}
-            <Link to="/" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
-              Home
-            </Link>
+            
 
             {/* Solo visibili per utenti normali */}
             {user && !admin && (

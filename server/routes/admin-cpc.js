@@ -100,9 +100,9 @@ router.delete('/campaigns/:id', async (req, res) => {
 });
 
 // Funzione per generare link univoco
-const generateUniqueLink = (campaign, username) => {
-  const randomValue = Math.random().toString(36).substr(2, 8);
-  return `/cpc/${randomValue}?campaign=${campaign}&username=${username}`;
+const generateUniqueLink = () => {
+  const randomValue = Math.random().toString(36).substr(2, 12);
+  return `/cpc/${randomValue}`;
 };
 
 // Recupera tutte le richieste per un utente specifico
@@ -158,7 +158,7 @@ router.patch('/update-request/:id', async (req, res) => {
     }
 
     if (status === 'APPROVED') {
-      const uniqueLink = generateUniqueLink(request.campaign, request.username);
+      const uniqueLink = generateUniqueLink();
       const realRedirectUrl = campaign.realUrl + request.username;
 
       request.status = status;

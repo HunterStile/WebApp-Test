@@ -1,7 +1,7 @@
-import React, { useContext, useMemo, useState, useEffect } from 'react';
+import React, { useState, useMemo, useContext, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ConversionContext } from '../context/ConversionContext';
-import { AuthContext } from '../context/AuthContext'; // Importiamo il contesto Auth
+import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
@@ -15,13 +15,19 @@ const monthShortNames = [
   'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'
 ];
 
+const monthRangeOptions = [
+  { value: 6, label: '6 mesi' },
+  { value: 12, label: '12 mesi' },
+  { value: 18, label: '18 mesi' },
+  { value: 24, label: '24 mesi' }
+];
+
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const { conversions, loading, error } = useContext(ConversionContext);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [monthRange, setMonthRange] = useState(12);
   const [totalClicks, setTotalClicks] = useState(0);
-  const [cplCount, setCplCount] = useState(0);
-  const [cpaCount, setCpaCount] = useState(0);
+  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
 
   useEffect(() => {
     const fetchTotalClicks = async () => {
@@ -35,236 +41,316 @@ const Dashboard = () => {
       }
     };
     fetchTotalClicks();
-  }, []);
+  }, [user]);
 
-  useEffect(() => {
-    const cpl = conversions.filter(conv => conv.type === 'cpl').length;
-    const cpa = conversions.filter(conv => conv.type === 'cpa').length;
-    setCplCount(cpl);
-    setCpaCount(cpa);
+  // First, update the yearFilteredData calculation to consider viewMode
+  const yearFilteredData = useMemo(() => {
+    // Per la vista annuale, prendiamo tutti i dati
+    let filteredConversions;
+    if (viewMode === 'yearly') {
+      filteredConversions = [...conversions]; // Tutti i dati
+    } else {
+      // Per la vista mensile, manteniamo il filtro esistente
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setMonth(endDate.getMonth() - monthRange + 1);
+
+      filteredConversions = conversions.filter(conv => {
+        const convDate = new Date(conv.date);
+        return convDate >= startDate && convDate <= endDate;
+      });
+    }
+
+    const cplCount = filteredConversions.filter(conv => conv.type === 'cpl').length;
+    const cpaCount = filteredConversions.filter(conv => conv.type === 'cpa').length;
+    const totalConversions = cplCount + cpaCount;
+
+    return {
+      cplCount,
+      cpaCount,
+      totalConversions,
+      cplPercentage: totalConversions > 0 ? ((cplCount / totalConversions) * 100).toFixed(2) : 0,
+      cpaPercentage: totalConversions > 0 ? ((cpaCount / totalConversions) * 100).toFixed(2) : 0,
+    };
+  }, [conversions, monthRange, viewMode]); // Aggiunto viewMode alle dipendenze
+
+  // Update filteredData calculation
+  const filteredData = useMemo(() => {
+    if (viewMode === 'yearly') {
+      // Per la vista annuale, restituiamo tutti i dati
+      return [...conversions];
+    } else {
+      // Per la vista mensile, manteniamo il filtro esistente
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setMonth(endDate.getMonth() - monthRange + 1);
+
+      return conversions.filter(conv => {
+        const convDate = new Date(conv.date);
+        return convDate >= startDate && convDate <= endDate;
+      });
+    }
+  }, [conversions, monthRange, viewMode]); // Aggiunto viewMode alle dipendenze
+
+  // Update totalPeriodCommissions calculation
+  const totalPeriodCommissions = useMemo(() => {
+    if (viewMode === 'yearly') {
+      // Per la vista annuale, sommiamo tutte le commissioni
+      return conversions.reduce((sum, conv) => sum + (parseFloat(conv.commission) || 0), 0).toFixed(2);
+    } else {
+      // Per la vista mensile, manteniamo il calcolo esistente
+      return filteredData.reduce((sum, conv) => sum + (parseFloat(conv.commission) || 0), 0).toFixed(2);
+    }
+  }, [conversions, filteredData, viewMode]); // Aggiunto viewMode e conversions alle dipendenze
+
+  const yearlyCommissions = useMemo(() => {
+    const yearlyData = {};
+
+    conversions.forEach(conversion => {
+      const year = new Date(conversion.date).getFullYear();
+      if (!yearlyData[year]) {
+        yearlyData[year] = {
+          year,
+          paidCommissions: 0,
+          onholdCommissions: 0,
+          validatedCommissions: 0
+        };
+      }
+
+      const commission = parseFloat(conversion.commission) || 0;
+      if (conversion.status === 'paid') {
+        yearlyData[year].paidCommissions += commission;
+      } else if (conversion.status === 'onhold') {
+        yearlyData[year].onholdCommissions += commission;
+      } else if (conversion.status === 'validated') {
+        yearlyData[year].validatedCommissions += commission;
+      }
+    });
+
+    return Object.values(yearlyData)
+      .map(data => ({
+        ...data,
+        paidCommissions: Number(data.paidCommissions.toFixed(2)),
+        onholdCommissions: Number(data.onholdCommissions.toFixed(2)),
+        validatedCommissions: Number(data.validatedCommissions.toFixed(2))
+      }))
+      .sort((a, b) => a.year - b.year);
   }, [conversions]);
-  // Calcolo del totale delle commissioni
-  const totalCommission = useMemo(() => {
-    return conversions
-      .filter(conversion => new Date(conversion.date).getFullYear() === selectedYear)
-      .reduce((sum, conversion) => {
-        return sum + (parseFloat(conversion.commission) || 0);
-      }, 0).toFixed(2);
-  }, [conversions, selectedYear]);
 
-  // Calcolo delle commissioni per mese con stato
   const monthlyCommissions = useMemo(() => {
-    // Genera tutti i mesi dell'anno
-    const allMonths = Array.from({ length: 12 }, (_, index) => {
-      const monthKey = `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
+    const months = new Array(monthRange).fill(0).map((_, index) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - (monthRange - 1) + index);
       return {
-        month: monthKey,
-        monthName: monthNames[index],
+        monthKey: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+        monthName: monthShortNames[date.getMonth()],
+        year: date.getFullYear(),
         paidCommissions: 0,
         onholdCommissions: 0,
         validatedCommissions: 0
       };
     });
 
-    conversions
-      .filter(conversion => new Date(conversion.date).getFullYear() === selectedYear)
-      .forEach((conversion) => {
-        const date = new Date(conversion.date);
-        const monthKey = `${selectedYear}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        const monthIndex = allMonths.findIndex(m => m.month === monthKey);
+    filteredData.forEach(conversion => {
+      const date = new Date(conversion.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthIndex = months.findIndex(m => m.monthKey === monthKey);
 
-        if (monthIndex !== -1) {
-          if (conversion.status === 'paid') {
-            allMonths[monthIndex].paidCommissions += parseFloat(conversion.commission) || 0;
-          } else if (conversion.status === 'onhold') {
-            allMonths[monthIndex].onholdCommissions += parseFloat(conversion.commission) || 0;
-          }
-          else if (conversion.status === 'validated') {
-            allMonths[monthIndex].validatedCommissions += parseFloat(conversion.commission) || 0;
-          }
+      if (monthIndex !== -1) {
+        if (conversion.status === 'paid') {
+          months[monthIndex].paidCommissions += parseFloat(conversion.commission) || 0;
+        } else if (conversion.status === 'onhold') {
+          months[monthIndex].onholdCommissions += parseFloat(conversion.commission) || 0;
+        } else if (conversion.status === 'validated') {
+          months[monthIndex].validatedCommissions += parseFloat(conversion.commission) || 0;
         }
-      });
+      }
+    });
 
-    return allMonths.map(month => ({
+    return months.map(month => ({
       ...month,
+      monthLabel: `${month.monthName} ${month.year}`,
       paidCommissions: Number(month.paidCommissions.toFixed(2)),
       onholdCommissions: Number(month.onholdCommissions.toFixed(2)),
-      validatedCommissions: Number(month.validatedCommissions.toFixed(2)),
-      paidLabel: 'Pagate',
-      onholdLabel: 'In Attesa',
-      validatedLabel: 'Convalidate'
+      validatedCommissions: Number(month.validatedCommissions.toFixed(2))
     }));
-  }, [conversions, selectedYear]);
+  }, [filteredData, monthRange]);
 
-  // Calcola gli anni disponibili
-  const availableYears = useMemo(() => {
-    const years = [...new Set(conversions.map(conv => new Date(conv.date).getFullYear()))];
-    return years.sort((a, b) => a - b);
-  }, [conversions]);
+  const renderChart = () => {
+    const data = viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions;
+    const xDataKey = viewMode === 'yearly' ? 'year' : 'monthLabel';
 
-  if (loading) {
-    return <div>Caricamento delle conversioni...</div>;
-  }
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <XAxis
+            dataKey={xDataKey}
+            tick={{ fill: 'white' }}
+            angle={viewMode === 'yearly' ? 0 : -45}
+            textAnchor={viewMode === 'yearly' ? 'middle' : 'end'}
+            height={viewMode === 'yearly' ? 30 : 70}
+          />
+          <YAxis
+            tick={{ fill: 'white' }}
+            label={{ value: '€', angle: -90, position: 'insideLeft', fill: 'white' }}
+          />
+          <Tooltip
+            formatter={(value, name) => [
+              `€ ${value}`,
+              name === 'paidCommissions' ? 'Pagate' :
+                name === 'onholdCommissions' ? 'In Attesa' : 'Convalidate'
+            ]}
+            contentStyle={{ backgroundColor: '#1F2937', border: 'none' }}
+            itemStyle={{ color: '#fff' }}
+          />
+          <Legend
+            formatter={(value) =>
+              value === 'paidCommissions' ? 'Pagate' :
+                value === 'onholdCommissions' ? 'In Attesa' : 'Convalidate'
+            }
+          />
+          <Bar dataKey="paidCommissions" stackId="a" fill="#09895e" />
+          <Bar dataKey="onholdCommissions" stackId="a" fill="#F59E0B" />
+          <Bar dataKey="validatedCommissions" stackId="a" fill="#10B981" />
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  };
 
-  if (error) {
-    return <div>Errore: {error}</div>;
-  }
-
-  const totalConversions = cplCount + cpaCount;
-  const cplPercentage = totalConversions > 0 ? ((cplCount / totalConversions) * 100).toFixed(2) : 0;
-  const cpaPercentage = totalConversions > 0 ? ((cpaCount / totalConversions) * 100).toFixed(2) : 0;
+  if (loading) return <div className="p-4">Caricamento...</div>;
+  if (error) return <div className="p-4 text-red-500">Errore: {error}</div>;
 
   return (
-    <div className="dashboard p-4 bg-gray-900 text-white rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Dashboard Cliente</h1>
+    <div className="p-6 bg-gray-900 text-white rounded-lg shadow-lg">
+      {/* Header con Welcome e Logout */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard Cliente</h1>
+          {user && <p className="text-lg mt-2">Benvenuto, {user}!</p>}
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-lg">
+            Totale Periodo: <span className="font-bold text-green-400">€ {totalPeriodCommissions}</span>
+          </span>
+          {user && (
+            <button onClick={logout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700">
+              Logout
+            </button>
+          )}
+        </div>
+      </div>
 
-      {/* Messaggio di Benvenuto */}
-      {user ? (
-        <div className="mb-4">
-          <p className="text-lg">Benvenuto, {user}!</p>
+      {/* View Toggle Buttons */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex space-x-4">
           <button
-            onClick={logout}
-            className="mt-2 bg-red-600 text-white py-1 px-3 rounded"
+            onClick={() => setViewMode('monthly')}
+            className={`px-4 py-2 rounded transition-colors ${viewMode === 'monthly'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
           >
-            Logout
+            Vista Mensile
+          </button>
+          <button
+            onClick={() => setViewMode('yearly')}
+            className={`px-4 py-2 rounded transition-colors ${viewMode === 'yearly'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+          >
+            Vista Annuale
           </button>
         </div>
-      ) : (
-        <div className="mb-4">
-          <p className="text-lg">Non sei loggato. Per favore accedi per visualizzare il tuo dashboard.</p>
+      </div>
+
+      {/* Filtri Periodo (solo per vista mensile) */}
+      {viewMode === 'monthly' && (
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-400">Visualizza:</span>
+            {monthRangeOptions.map(option => (
+              <button
+                key={option.value}
+                onClick={() => setMonthRange(option.value)}
+                className={`px-3 py-1 rounded transition-colors ${monthRange === option.value
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Selettore Anno */}
-      <div className="year-selector mb-4 flex items-center">
-        <span className="mr-2 text-gray-400">Anno:</span>
-        {availableYears.map(year => (
-          <button
-            key={year}
-            onClick={() => setSelectedYear(year)}
-            className={`
-              px-3 py-1 rounded mr-2 
-              ${selectedYear === year ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300'}
-            `}
-          >
-            {year}
-          </button>
-        ))}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">Totale Click</h3>
+          <p className="text-2xl font-bold text-green-400">{totalClicks}</p>
+        </div>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">CPL</h3>
+          <p className="text-2xl font-bold text-green-400">{yearFilteredData.cplCount}</p>
+          <p className="text-sm text-gray-400">({yearFilteredData.cplPercentage}%)</p>
+        </div>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">CPA</h3>
+          <p className="text-2xl font-bold text-green-400">{yearFilteredData.cpaCount}</p>
+          <p className="text-sm text-gray-400">({yearFilteredData.cpaPercentage}%)</p>
+        </div>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">Totale Conversioni</h3>
+          <p className="text-2xl font-bold text-green-400">{yearFilteredData.totalConversions}</p>
+        </div>
       </div>
 
-      <div className="stat bg-gray-800 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold">Totale Commissioni Maturate</h2>
-        <p className="text-3xl font-bold text-green-400">€ {totalCommission}</p>
+      {/* Grafico */}
+      <div className="bg-gray-800 p-6 rounded-lg mb-6">
+        <h2 className="text-xl font-semibold mb-4">
+          {viewMode === 'yearly' ? 'Andamento Annuale Commissioni' : 'Andamento Mensile Commissioni'}
+        </h2>
+        <div className="h-96">
+          {renderChart()}
+        </div>
       </div>
 
-      <div className="stat bg-gray-800 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold">Totale Clicks</h2>
-        <p className="text-3xl font-bold text-green-400">{totalClicks}</p>
-      </div>
-
-      <div className="stat bg-gray-800 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold">Totale Conversioni CPL</h2>
-        <p className="text-3xl font-bold text-green-400">{cplCount}</p>
-      </div>
-
-      <div className="stat bg-gray-800 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold">Totale Conversioni CPA</h2>
-        <p className="text-3xl font-bold text-green-400">{cpaCount}</p>
-      </div>
-
-      <div className="stat bg-gray-800 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold">Distribuzione Conversioni</h2>
-        <p className="text-3xl font-bold text-green-400">CPL: {cplPercentage}%</p>
-        <p className="text-3xl font-bold text-green-400">CPA: {cpaPercentage}%</p>
-      </div>
-
-      <div className="monthly-chart bg-gray-800 p-4 rounded mb-4">
-        <h2 className="text-lg font-semibold mb-4">Commissioni Mensili {selectedYear}</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={monthlyCommissions}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis
-              dataKey="monthName"
-              tick={{ fill: 'white' }}
-            />
-            <YAxis
-              label={{ value: '€', angle: -90, position: 'insideLeft', fill: 'white' }}
-              tick={{ fill: 'white' }}
-            />
-            <Tooltip
-              formatter={(value, name) => {
-                if (name === 'paidCommissions') {
-                  return [`€ ${value.toFixed(2)}`, 'Pagate'];
-                } else if (name === 'onholdCommissions') {
-                  return [`€ ${value.toFixed(2)}`, 'In Attesa'];
-                } else if (name === 'validatedCommissions') {
-                  return [`€ ${value.toFixed(2)}`, 'Convalidate'];
-                }
-                return [`€ ${value.toFixed(2)}`, name];
-              }}
-              labelFormatter={(monthName) => monthName}
-            />
-            <Legend
-              formatter={(value) => {
-                if (value === 'paidCommissions') {
-                  return 'Pagate';
-                } else if (value === 'onholdCommissions') {
-                  return 'In Attesa';
-                } else if (value === 'validatedCommissions') {
-                  return 'Convalidate';
-                }
-
-                return value;
-              }}
-            />
-            <Bar
-              dataKey="paidCommissions"
-              fill="#09895e"
-              stackId="commissions"
-            />
-            <Bar
-              dataKey="onholdCommissions"
-              fill="#F59E0B"
-              stackId="commissions"
-            />
-            <Bar
-              dataKey="validatedCommissions"
-              fill="#10B981"
-              stackId="commissions"
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Lista Conversioni - opzionale, puoi commentare se non serve */}
-      <div className="conversion-list bg-gray-800 p-4 rounded">
-        <h2 className="text-lg font-semibold mb-2">Dettaglio Conversioni</h2>
-        {conversions.filter(conv => new Date(conv.date).getFullYear() === selectedYear).length > 0 ? (
-          <ul className="space-y-2">
-            {conversions
-              .filter(conv => new Date(conv.date).getFullYear() === selectedYear)
-              .sort((a, b) => new Date(b.date) - new Date(a.date)) // Ordina per data, più recente prima
-              .slice(0, 5) // Prendi solo le prime 5 conversioni
+      {/* Lista Conversioni */}
+      <div className="bg-gray-800 p-4 rounded-lg">
+        <h2 className="text-lg font-semibold mb-4">Ultime Conversioni</h2>
+        {filteredData.length > 0 ? (
+          <div className="space-y-2">
+            {filteredData
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .slice(0, 5)
               .map((conv) => (
-                <li
+                <div
                   key={conv.conversion_id}
-                  className={`
-              p-2 rounded
-              ${conv.status === 'paid' ? 'bg-green-700' :
-                      conv.status === 'onhold' ? 'bg-yellow-700' :
-                        conv.status === 'validated' ? 'bg-green-400' : 'bg-yellow-70'}
-            `}
+                  className={`p-3 rounded ${conv.status === 'paid' ? 'bg-green-700' :
+                    conv.status === 'onhold' ? 'bg-yellow-700' :
+                      conv.status === 'validated' ? 'bg-green-400' : 'bg-gray-700'
+                    }`}
                 >
-                  <p><strong>Campagna:</strong> {conv.campaign_name}</p>
-                  <p><strong>Data:</strong> {new Date(conv.date).toLocaleDateString()}</p>
-                  <p><strong>Commissione:</strong> € {parseFloat(conv.commission).toFixed(2)}</p>
-                  <p><strong>Tipo:</strong> {conv.type}</p>
-                  <p><strong>Stato:</strong> {conv.status}</p>
-                </li>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold">{conv.campaign_name}</p>
+                      <p className="text-sm text-gray-300">
+                        {new Date(conv.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">€ {parseFloat(conv.commission).toFixed(2)}</p>
+                      <p className="text-sm text-gray-300">{conv.type.toUpperCase()}</p>
+                    </div>
+                  </div>
+                </div>
               ))}
-          </ul>
+          </div>
         ) : (
-          <p>Nessuna conversione trovata per l'anno {selectedYear}.</p>
+          <p>Nessuna conversione nel periodo selezionato.</p>
         )}
       </div>
     </div>

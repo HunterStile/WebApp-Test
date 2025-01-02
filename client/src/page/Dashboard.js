@@ -20,12 +20,14 @@ const Dashboard = () => {
   const { conversions, loading, error } = useContext(ConversionContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [totalClicks, setTotalClicks] = useState(0);
+  const [cplCount, setCplCount] = useState(0);
+  const [cpaCount, setCpaCount] = useState(0);
 
   useEffect(() => {
     const fetchTotalClicks = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, {
-          params: { username: user }  
+          params: { username: user }
         });
         setTotalClicks(response.data.totalClicks);
       } catch (error) {
@@ -33,8 +35,14 @@ const Dashboard = () => {
       }
     };
     fetchTotalClicks();
-  }, []); 
+  }, []);
 
+  useEffect(() => {
+    const cpl = conversions.filter(conv => conv.type === 'cpl').length;
+    const cpa = conversions.filter(conv => conv.type === 'cpa').length;
+    setCplCount(cpl);
+    setCpaCount(cpa);
+  }, [conversions]);
   // Calcolo del totale delle commissioni
   const totalCommission = useMemo(() => {
     return conversions
@@ -102,6 +110,10 @@ const Dashboard = () => {
     return <div>Errore: {error}</div>;
   }
 
+  const totalConversions = cplCount + cpaCount;
+  const cplPercentage = totalConversions > 0 ? ((cplCount / totalConversions) * 100).toFixed(2) : 0;
+  const cpaPercentage = totalConversions > 0 ? ((cpaCount / totalConversions) * 100).toFixed(2) : 0;
+
   return (
     <div className="dashboard p-4 bg-gray-900 text-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Dashboard Cliente</h1>
@@ -150,6 +162,22 @@ const Dashboard = () => {
         <p className="text-3xl font-bold text-green-400">{totalClicks}</p>
       </div>
 
+      <div className="stat bg-gray-800 p-4 rounded mb-4">
+        <h2 className="text-lg font-semibold">Totale Conversioni CPL</h2>
+        <p className="text-3xl font-bold text-green-400">{cplCount}</p>
+      </div>
+
+      <div className="stat bg-gray-800 p-4 rounded mb-4">
+        <h2 className="text-lg font-semibold">Totale Conversioni CPA</h2>
+        <p className="text-3xl font-bold text-green-400">{cpaCount}</p>
+      </div>
+
+      <div className="stat bg-gray-800 p-4 rounded mb-4">
+        <h2 className="text-lg font-semibold">Distribuzione Conversioni</h2>
+        <p className="text-3xl font-bold text-green-400">CPL: {cplPercentage}%</p>
+        <p className="text-3xl font-bold text-green-400">CPA: {cpaPercentage}%</p>
+      </div>
+
       <div className="monthly-chart bg-gray-800 p-4 rounded mb-4">
         <h2 className="text-lg font-semibold mb-4">Commissioni Mensili {selectedYear}</h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -185,7 +213,7 @@ const Dashboard = () => {
                 } else if (value === 'validatedCommissions') {
                   return 'Convalidate';
                 }
-                
+
                 return value;
               }}
             />
@@ -215,19 +243,22 @@ const Dashboard = () => {
           <ul className="space-y-2">
             {conversions
               .filter(conv => new Date(conv.date).getFullYear() === selectedYear)
+              .sort((a, b) => new Date(b.date) - new Date(a.date)) // Ordina per data, più recente prima
+              .slice(0, 5) // Prendi solo le prime 5 conversioni
               .map((conv) => (
                 <li
                   key={conv.conversion_id}
                   className={`
-                  p-2 rounded
-                  ${conv.status === 'paid' ? 'bg-green-700' :
-                      conv.status === 'onhold' ? 'bg-yellow-700' : 
-                      conv.status === 'validated' ? 'bg-green-400' :'bg-yellow-70'}
-                `}
+              p-2 rounded
+              ${conv.status === 'paid' ? 'bg-green-700' :
+                      conv.status === 'onhold' ? 'bg-yellow-700' :
+                        conv.status === 'validated' ? 'bg-green-400' : 'bg-yellow-70'}
+            `}
                 >
                   <p><strong>Campagna:</strong> {conv.campaign_name}</p>
                   <p><strong>Data:</strong> {new Date(conv.date).toLocaleDateString()}</p>
                   <p><strong>Commissione:</strong> € {parseFloat(conv.commission).toFixed(2)}</p>
+                  <p><strong>Tipo:</strong> {conv.type}</p>
                   <p><strong>Stato:</strong> {conv.status}</p>
                 </li>
               ))}

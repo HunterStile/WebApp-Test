@@ -96,62 +96,70 @@ router.get('/user-requests', async (req, res) => {
 // Rotta per ottenere il totale dei click filtrati per username
 router.get('/total-clicks', async (req, res) => {
   try {
-    const { username } = req.query; // Prendi il parametro username dalla query
+    const { username, startDate, endDate, viewMode } = req.query;
 
-    if (!username) {
-      return res.status(400).json({ message: 'Il parametro username è richiesto.' });
+    let query = { username: username };
+
+    // Se siamo in modalità mensile e abbiamo date di inizio e fine
+    if (viewMode === 'monthly' && startDate && endDate) {
+      query['clicksHistory.timestamp'] = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
     }
 
-    // Somma di tutti i valori del campo 'clicks' per l'utente specificato
-    const totalClicks = await CampaignRequest.aggregate([
-      {
-        $match: { username } // Filtra i documenti per il campo 'username'
-      },
-      {
-        $group: {
-          _id: null, // Non raggruppiamo per alcun campo
-          totalClicks: { $sum: "$clicks" } // Somma dei valori di 'clicks'
-        }
-      }
-    ]);
+    const campaigns = await CampaignRequest.find(query);
+    
+    let totalClicks = 0;
 
-    // Se non ci sono documenti, restituisci 0
-    const total = totalClicks.length > 0 ? totalClicks[0].totalClicks : 0;
+    if (viewMode === 'monthly' && startDate && endDate) {
+      // Conta solo i click nel range di date specificato
+      campaigns.forEach(campaign => {
+        const filteredClicks = campaign.clicksHistory.filter(click => 
+          click.timestamp >= new Date(startDate) && 
+          click.timestamp <= new Date(endDate)
+        );
+        totalClicks += filteredClicks.length;
+      });
+    } else {
+      // In modalità annuale, conta tutti i click
+      totalClicks = campaigns.reduce((sum, campaign) => sum + campaign.clicksHistory.length, 0);
+    }
 
-    res.json({ totalClicks: total });
+    res.json({ totalClicks });
   } catch (error) {
-    console.error('Errore nel calcolo dei click totali:', error);
-    res.status(500).json({ 
-      message: 'Errore nel calcolo dei click totali', 
-      error: error.message 
-    });
+    console.error('Errore nel recupero dei click totali:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
   }
 });
 
 router.get('/:uniqueLink', async (req, res) => {
   try {
-    // Ricostruisci l'intero percorso senza "/api" per il confronto
-    const relativePath = req.originalUrl.replace('/api', ''); // Elimina solo '/api'
-
+    const relativePath = req.originalUrl.replace('/api', '');
     console.log('Percorso richiesto:', relativePath);
 
-    // Cerchiamo nel DB usando il percorso corretto
     const campaignRequest = await CampaignRequest.findOne({ uniqueLink: relativePath });
 
     if (!campaignRequest) {
       return res.status(404).send('Link non trovato.');
     }
 
-    // Verifica che lo stato sia "APPROVED"
     if (campaignRequest.status !== 'APPROVED') {
       return res.status(403).send('Il link non è ancora approvato.');
     }
 
-    // Incrementa il numero di click
+    // Incrementa il contatore generale
     campaignRequest.clicks += 1;
+
+    // Aggiungi il nuovo click con timestamp
+    campaignRequest.clicksHistory.push({
+      timestamp: new Date(),
+      ip: req.ip, // opzionale
+      userAgent: req.headers['user-agent'] // opzionale
+    });
+
     await campaignRequest.save();
 
-    // Reindirizzamento all'URL reale
     console.log('Reindirizzamento a:', campaignRequest.realRedirectUrl);
     return res.redirect(campaignRequest.realRedirectUrl);
 

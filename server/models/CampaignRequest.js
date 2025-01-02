@@ -25,6 +25,11 @@ const campaignRequestSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    clicksHistory: [{
+        timestamp: { type: Date, default: Date.now },
+        ip: String,
+        userAgent: String
+      }],
     createdAt: {
         type: Date,
         default: Date.now

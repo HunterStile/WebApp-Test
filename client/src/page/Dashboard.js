@@ -32,16 +32,30 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchTotalClicks = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, {
-          params: { username: user }
-        });
+        let params = { 
+          username: user,
+          viewMode: viewMode
+        };
+  
+        // Aggiungi date solo se siamo in modalità mensile
+        if (viewMode === 'monthly') {
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setMonth(endDate.getMonth() - monthRange + 1);
+          
+          params.startDate = startDate.toISOString();
+          params.endDate = endDate.toISOString();
+        }
+  
+        const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, { params });
         setTotalClicks(response.data.totalClicks);
       } catch (error) {
         console.error('Errore nel recupero dei click totali:', error);
       }
     };
+    
     fetchTotalClicks();
-  }, [user]);
+  }, [user, viewMode, monthRange]); // Aggiungi viewMode e monthRange alle dipendenze
 
   // First, update the yearFilteredData calculation to consider viewMode
   const yearFilteredData = useMemo(() => {

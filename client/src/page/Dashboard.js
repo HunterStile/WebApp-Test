@@ -4,6 +4,7 @@ import { ConversionContext } from '../context/ConversionContext';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import API_BASE_URL from '../config';
+import ClicksConversionChart from '../components/Clickconversion';
 
 const monthNames = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -28,35 +29,62 @@ const Dashboard = () => {
   const [monthRange, setMonthRange] = useState(12);
   const [totalClicks, setTotalClicks] = useState(0);
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
+  const [clicksHistory, setClicksHistory] = useState([]);
+  const [clicksLoading, setClicksLoading] = useState(false);
+  const [clicksError, setClicksError] = useState(null);
 
   useEffect(() => {
     const fetchTotalClicks = async () => {
       try {
-        let params = { 
+        let params = {
           username: user,
           viewMode: viewMode
         };
-  
+
         // Aggiungi date solo se siamo in modalità mensile
         if (viewMode === 'monthly') {
           const endDate = new Date();
           const startDate = new Date();
           startDate.setMonth(endDate.getMonth() - monthRange + 1);
-          
+
           params.startDate = startDate.toISOString();
           params.endDate = endDate.toISOString();
         }
-  
+
         const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, { params });
         setTotalClicks(response.data.totalClicks);
       } catch (error) {
         console.error('Errore nel recupero dei click totali:', error);
       }
     };
-    
+
     fetchTotalClicks();
   }, [user, viewMode, monthRange]); // Aggiungi viewMode e monthRange alle dipendenze
 
+  useEffect(() => {
+    const fetchClicksHistory = async () => {
+      setClicksLoading(true);
+      try {
+        const response = await axios.get(`${API_BASE_URL}/cpc/clicks-history`, {
+          params: {
+            username: user,
+            days: 30 // o 90 oil periodo che preferisci
+          }
+        });
+        setClicksHistory(response.data.clicksHistory);
+      } catch (error) {
+        console.error('Errore nel recupero della cronologia dei click:', error);
+        setClicksError(error.message);
+      } finally {
+        setClicksLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchClicksHistory();
+    }
+  }, [user]);
+  
   // First, update the yearFilteredData calculation to consider viewMode
   const yearFilteredData = useMemo(() => {
     // Per la vista annuale, prendiamo tutti i dati
@@ -117,6 +145,30 @@ const Dashboard = () => {
     }
   }, [conversions, filteredData, viewMode]); // Aggiunto viewMode e conversions alle dipendenze
 
+  // Funzione per generare gli anni mancanti
+  const generateMissingYears = (data, minYears = 6) => {
+    const currentYear = new Date().getFullYear();
+    const firstYear = Math.min(...data.map(item => item.year));
+    const years = new Set(data.map(item => item.year));
+
+    // Aggiungi i 5 anni precedenti all'anno corrente
+    for (let i = 0; i < minYears; i++) {
+      years.add(currentYear - i);
+    }
+
+    // Aggiungi tutti gli anni successivi al primo anno di commissione
+    for (let year = firstYear; year <= currentYear; year++) {
+      years.add(year);
+    }
+
+    return Array.from(years).sort((a, b) => a - b).map(year => ({
+      year,
+      paidCommissions: 0,
+      onholdCommissions: 0,
+      validatedCommissions: 0
+    }));
+  };
+
   const yearlyCommissions = useMemo(() => {
     const yearlyData = {};
 
@@ -141,14 +193,14 @@ const Dashboard = () => {
       }
     });
 
-    return Object.values(yearlyData)
-      .map(data => ({
-        ...data,
-        paidCommissions: Number(data.paidCommissions.toFixed(2)),
-        onholdCommissions: Number(data.onholdCommissions.toFixed(2)),
-        validatedCommissions: Number(data.validatedCommissions.toFixed(2))
-      }))
-      .sort((a, b) => a.year - b.year);
+    // Genera gli anni mancanti
+    const completeData = generateMissingYears(Object.values(yearlyData));
+
+    // Unisci i dati esistenti con gli anni mancanti
+    return completeData.map(yearData => ({
+      ...yearData,
+      ...yearlyData[yearData.year]
+    })).sort((a, b) => a.year - b.year);
   }, [conversions]);
 
   const monthlyCommissions = useMemo(() => {
@@ -330,6 +382,26 @@ const Dashboard = () => {
         <div className="h-96">
           {renderChart()}
         </div>
+      </div>
+
+      {/* Grafico Clicks e Conversioni */}
+      <div className="bg-gray-800 p-6 rounded-lg mb-6">
+        <h2 className="text-xl font-semibold mb-4">Andamento Click e Conversioni</h2>
+        {clicksLoading ? (
+          <div className="h-96 flex items-center justify-center">
+            <p>Caricamento dati...</p>
+          </div>
+        ) : clicksError ? (
+          <div className="h-96 flex items-center justify-center">
+            <p className="text-red-500">Errore: {clicksError}</p>
+          </div>
+        ) : (
+          <ClicksConversionChart
+            conversions={filteredData}
+            clicksHistory={clicksHistory}
+            days={30}
+          />
+        )}
       </div>
 
       {/* Lista Conversioni */}

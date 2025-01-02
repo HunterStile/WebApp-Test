@@ -93,6 +93,67 @@ router.get('/user-requests', async (req, res) => {
   }
 });
 
+router.get('/clicks-history', async (req, res) => {
+  try {
+    const { username, days } = req.query;
+    
+    if (!username) {
+      return res.status(400).json({ error: 'Username richiesto' });
+    }
+
+    // Calcola la data di inizio basata sui giorni richiesti
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - (parseInt(days) || 30));
+
+    // Trova tutte le campagne dell'utente
+    const campaigns = await CampaignRequest.find({ 
+      username,
+      'clicksHistory.timestamp': {
+        $gte: startDate,
+        $lte: endDate
+      }
+    });
+
+    // Estrai e appiattisci tutti i click da tutte le campagne
+    let allClicks = [];
+    campaigns.forEach(campaign => {
+      const filteredClicks = campaign.clicksHistory.filter(click => 
+        click.timestamp >= startDate && 
+        click.timestamp <= endDate
+      );
+      
+      // Aggiungi informazioni della campagna a ogni click
+      const campaignClicks = filteredClicks.map(click => ({
+        ...click.toObject(),
+        campaignName: campaign.campaign,
+        uniqueLink: campaign.uniqueLink
+      }));
+      
+      allClicks = allClicks.concat(campaignClicks);
+    });
+
+    // Ordina i click per timestamp in ordine decrescente
+    allClicks.sort((a, b) => b.timestamp - a.timestamp);
+
+    res.json({
+      clicksHistory: allClicks,
+      totalClicks: allClicks.length,
+      period: {
+        start: startDate,
+        end: endDate
+      }
+    });
+
+  } catch (error) {
+    console.error('Errore nel recupero della cronologia dei click:', error);
+    res.status(500).json({ 
+      error: 'Errore interno del server',
+      message: error.message 
+    });
+  }
+});
+
 // Rotta per ottenere il totale dei click filtrati per username
 router.get('/total-clicks', async (req, res) => {
   try {

@@ -93,11 +93,20 @@ router.get('/user-requests', async (req, res) => {
   }
 });
 
-// Rotta per ottenere il totale dei click
+// Rotta per ottenere il totale dei click filtrati per username
 router.get('/total-clicks', async (req, res) => {
   try {
-    // Somma di tutti i valori del campo 'clicks' nella collezione CampaignRequest
+    const { username } = req.query; // Prendi il parametro username dalla query
+
+    if (!username) {
+      return res.status(400).json({ message: 'Il parametro username è richiesto.' });
+    }
+
+    // Somma di tutti i valori del campo 'clicks' per l'utente specificato
     const totalClicks = await CampaignRequest.aggregate([
+      {
+        $match: { username } // Filtra i documenti per il campo 'username'
+      },
       {
         $group: {
           _id: null, // Non raggruppiamo per alcun campo
@@ -118,7 +127,6 @@ router.get('/total-clicks', async (req, res) => {
     });
   }
 });
-
 
 router.get('/:uniqueLink', async (req, res) => {
   try {

@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ConversionContext } from '../context/ConversionContext';
+import { AuthContext } from '../context/AuthContext'; // Importiamo il contesto Auth
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
@@ -15,6 +16,7 @@ const monthShortNames = [
 ];
 
 const Dashboard = () => {
+  const { user, logout } = useContext(AuthContext);
   const { conversions, loading, error } = useContext(ConversionContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [totalClicks, setTotalClicks] = useState(0);
@@ -22,15 +24,16 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchTotalClicks = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`);
+        const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, {
+          params: { username: user }  
+        });
         setTotalClicks(response.data.totalClicks);
       } catch (error) {
         console.error('Errore nel recupero dei click totali:', error);
       }
     };
-
     fetchTotalClicks();
-  }, []);
+  }, []); 
 
   // Calcolo del totale delle commissioni
   const totalCommission = useMemo(() => {
@@ -102,6 +105,23 @@ const Dashboard = () => {
   return (
     <div className="dashboard p-4 bg-gray-900 text-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Dashboard Cliente</h1>
+
+      {/* Messaggio di Benvenuto */}
+      {user ? (
+        <div className="mb-4">
+          <p className="text-lg">Benvenuto, {user}!</p>
+          <button
+            onClick={logout}
+            className="mt-2 bg-red-600 text-white py-1 px-3 rounded"
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <div className="mb-4">
+          <p className="text-lg">Non sei loggato. Per favore accedi per visualizzare il tuo dashboard.</p>
+        </div>
+      )}
 
       {/* Selettore Anno */}
       <div className="year-selector mb-4 flex items-center">

@@ -3,9 +3,9 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
-const adminAuthRoutes = require('./routes/admin-auth')
+const adminAuthRoutes = require('./routes/admin-auth');
 const gamblingRoutes = require('./routes/gambling');
-const redirectRoutes = require('./routes/cpc')
+const redirectRoutes = require('./routes/cpc');
 const adminCampaignRoutes = require('./routes/admin-cpc');
 const threadRoutes = require('./routes/threads');
 
@@ -40,7 +40,7 @@ app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/gambling', gamblingRoutes);
 app.use('/api/cpc', redirectRoutes);
 app.use('/api/admin', adminCampaignRoutes);
-app.use('/api/threads',threadRoutes);
+app.use('/api/threads', threadRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

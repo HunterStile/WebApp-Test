@@ -1,6 +1,8 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ConversionContext } from '../context/ConversionContext';
+import axios from 'axios';
+import API_BASE_URL from '../config';
 
 const monthNames = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -15,6 +17,20 @@ const monthShortNames = [
 const Dashboard = () => {
   const { conversions, loading, error } = useContext(ConversionContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [totalClicks, setTotalClicks] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalClicks = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`);
+        setTotalClicks(response.data.totalClicks);
+      } catch (error) {
+        console.error('Errore nel recupero dei click totali:', error);
+      }
+    };
+
+    fetchTotalClicks();
+  }, []);
 
   // Calcolo del totale delle commissioni
   const totalCommission = useMemo(() => {
@@ -107,6 +123,11 @@ const Dashboard = () => {
       <div className="stat bg-gray-800 p-4 rounded mb-4">
         <h2 className="text-lg font-semibold">Totale Commissioni Maturate</h2>
         <p className="text-3xl font-bold text-green-400">€ {totalCommission}</p>
+      </div>
+
+      <div className="stat bg-gray-800 p-4 rounded mb-4">
+        <h2 className="text-lg font-semibold">Totale Clicks</h2>
+        <p className="text-3xl font-bold text-green-400">{totalClicks}</p>
       </div>
 
       <div className="monthly-chart bg-gray-800 p-4 rounded mb-4">

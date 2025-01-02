@@ -93,6 +93,33 @@ router.get('/user-requests', async (req, res) => {
   }
 });
 
+// Rotta per ottenere il totale dei click
+router.get('/total-clicks', async (req, res) => {
+  try {
+    // Somma di tutti i valori del campo 'clicks' nella collezione CampaignRequest
+    const totalClicks = await CampaignRequest.aggregate([
+      {
+        $group: {
+          _id: null, // Non raggruppiamo per alcun campo
+          totalClicks: { $sum: "$clicks" } // Somma dei valori di 'clicks'
+        }
+      }
+    ]);
+
+    // Se non ci sono documenti, restituisci 0
+    const total = totalClicks.length > 0 ? totalClicks[0].totalClicks : 0;
+
+    res.json({ totalClicks: total });
+  } catch (error) {
+    console.error('Errore nel calcolo dei click totali:', error);
+    res.status(500).json({ 
+      message: 'Errore nel calcolo dei click totali', 
+      error: error.message 
+    });
+  }
+});
+
+
 router.get('/:uniqueLink', async (req, res) => {
   try {
     // Ricostruisci l'intero percorso senza "/api" per il confronto
@@ -112,6 +139,10 @@ router.get('/:uniqueLink', async (req, res) => {
       return res.status(403).send('Il link non è ancora approvato.');
     }
 
+    // Incrementa il numero di click
+    campaignRequest.clicks += 1;
+    await campaignRequest.save();
+
     // Reindirizzamento all'URL reale
     console.log('Reindirizzamento a:', campaignRequest.realRedirectUrl);
     return res.redirect(campaignRequest.realRedirectUrl);
@@ -121,5 +152,7 @@ router.get('/:uniqueLink', async (req, res) => {
     return res.status(500).send('Errore interno del server.');
   }
 });
+
+
 
 module.exports = router;

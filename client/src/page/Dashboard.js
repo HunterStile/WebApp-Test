@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useContext, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ConversionContext } from '../context/ConversionContext';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import API_BASE_URL from '../config';
-import ClicksConversionChart from '../components/Clickconversion';
+import ClicksConversionChart from '../components/charts/Clickconversion';
+import CommissionsChart from '../components/charts/CommissionsChart';
 
 const monthNames = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -84,7 +84,7 @@ const Dashboard = () => {
       fetchClicksHistory();
     }
   }, [user]);
-  
+
   // First, update the yearFilteredData calculation to consider viewMode
   const yearFilteredData = useMemo(() => {
     // Per la vista annuale, prendiamo tutti i dati
@@ -242,51 +242,10 @@ const Dashboard = () => {
     }));
   }, [filteredData, monthRange]);
 
-  const renderChart = () => {
-    const data = viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions;
-    const xDataKey = viewMode === 'yearly' ? 'year' : 'monthLabel';
-
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis
-            dataKey={xDataKey}
-            tick={{ fill: 'white' }}
-            angle={viewMode === 'yearly' ? 0 : -45}
-            textAnchor={viewMode === 'yearly' ? 'middle' : 'end'}
-            height={viewMode === 'yearly' ? 30 : 70}
-          />
-          <YAxis
-            tick={{ fill: 'white' }}
-            label={{ value: '€', angle: -90, position: 'insideLeft', fill: 'white' }}
-          />
-          <Tooltip
-            formatter={(value, name) => [
-              `€ ${value}`,
-              name === 'paidCommissions' ? 'Pagate' :
-                name === 'onholdCommissions' ? 'In Attesa' : 'Convalidate'
-            ]}
-            contentStyle={{ backgroundColor: '#1F2937', border: 'none' }}
-            itemStyle={{ color: '#fff' }}
-          />
-          <Legend
-            formatter={(value) =>
-              value === 'paidCommissions' ? 'Pagate' :
-                value === 'onholdCommissions' ? 'In Attesa' : 'Convalidate'
-            }
-          />
-          <Bar dataKey="paidCommissions" stackId="a" fill="#09895e" />
-          <Bar dataKey="onholdCommissions" stackId="a" fill="#F59E0B" />
-          <Bar dataKey="validatedCommissions" stackId="a" fill="#10B981" />
-        </BarChart>
-      </ResponsiveContainer>
-    );
-  };
-
   if (loading) return <div className="p-4">Caricamento...</div>;
   if (error) return <div className="p-4 text-red-500">Errore: {error}</div>;
 
+  // Main Page Content
   return (
     <div className="p-6 bg-gray-900 text-white rounded-lg shadow-lg">
       {/* Header con Welcome e Logout */}
@@ -374,15 +333,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Grafico */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-4">
-          {viewMode === 'yearly' ? 'Andamento Annuale Commissioni' : 'Andamento Mensile Commissioni'}
-        </h2>
-        <div className="h-96">
-          {renderChart()}
-        </div>
-      </div>
+      {/* Grafico Commissioni */}
+      <CommissionsChart
+        data={viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions}
+        viewMode={viewMode}
+      />
 
       {/* Grafico Clicks e Conversioni */}
       <div className="bg-gray-800 p-6 rounded-lg mb-6">

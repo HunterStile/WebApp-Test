@@ -1,5 +1,5 @@
 // Auth.js
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LockIcon, UserIcon, MailIcon, Globe, Type } from 'lucide-react';
@@ -7,6 +7,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 
 function Auth() {
   const [isRegister, setIsRegister] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -20,9 +21,10 @@ function Auth() {
     newsletterSubscription: false,
     captcha: '',
   });
-  
+
   const { login, register } = useContext(AuthContext);
   const navigate = useNavigate();
+  const recaptchaRef = useRef(null);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -30,6 +32,8 @@ function Auth() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    // Resetta l'errore quando l'utente inizia a modificare i campi
+    setError('');
   };
 
   const handleCaptchaChange = (value) => {
@@ -57,6 +61,7 @@ function Auth() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');   // Reset error on new submission
     if (!validateForm()) return;
 
     try {
@@ -74,12 +79,20 @@ function Auth() {
           captcha: formData.captcha
         });
         setIsRegister(false);
-      }else {
+      } else {
         await login(formData.username, formData.password);
         navigate('/');
       }
     } catch (error) {
-      alert(isRegister ? 'Registrazione fallita' : 'Login fallito');
+      // Gestione degli errori più dettagliata
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
+      } else {
+        setError(isRegister ? 'Errore durante la registrazione' : 'Login fallito');
+        // Resetta il token reCAPTCHA
+        setFormData({ ...formData, captcha: '' });
+      }
+      recaptchaRef.current.reset(); // Resetta il widget reCAPTCHA
     }
   };
 
@@ -94,7 +107,14 @@ function Auth() {
     <div className="container-auth">
       <div className="form-wrapper">
         <h2 className="form-title">{isRegister ? 'Registrati' : 'Login'}</h2>
-        
+
+        {/* Aggiungiamo il box per mostrare gli errori */}
+        {error && (
+          <div className="text-red-600 bg-red-50 px-3 py-3 mb-4 rounded-md text-center">
+            {error}
+          </div>
+        )}
+
         <form className="form" onSubmit={handleSubmit}>
           <div className="input-group">
             <div className="input-wrapper">
@@ -210,6 +230,7 @@ function Auth() {
 
                 <div className="captcha-wrapper">
                   <ReCAPTCHA
+                    ref={recaptchaRef}
                     sitekey="6Le7rq4qAAAAAIscf8sTUGkNE8UTWBWNeTN4XEaQ"
                     onChange={handleCaptchaChange}
                   />

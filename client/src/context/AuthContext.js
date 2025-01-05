@@ -16,7 +16,10 @@ export const AuthProvider = ({ children }) => {
       setUser(username);
       localStorage.setItem('user', username);
     } catch (error) {
-      console.error('Login fallito:', error);
+      if (error.response && error.response.data && error.response.data.error) {
+        throw error; // Passa l'errore al componente per la gestione
+      }
+      throw new Error('Errore durante il login');
     }
   };
 
@@ -46,8 +49,11 @@ export const AuthProvider = ({ children }) => {
       
       return response.data;
     } catch (error) {
-      console.error('Registrazione fallita:', error);
-      throw error;
+       // Gestione più dettagliata degli errori
+       if (error.response && error.response.data && error.response.data.error) {
+        throw error; // Passa l'errore specifico al componente
+      }
+      throw new Error('Errore durante la registrazione');
     }
   };
 

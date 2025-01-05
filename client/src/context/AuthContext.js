@@ -27,14 +27,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Funzione per effettuare la registrazione
-  const register = async (username, password) => {
+  const register = async (userData) => {
     try {
-      // Chiamata all'API per la registrazione
-      await axios.post(`${API_BASE_URL}/auth/register`, { username, password });
-      alert('Registrazione riuscita! Procedi con il login.');
+      console.log('Captcha token being sent:', userData.captcha);
+      console.log('Dati inviati per la registrazione:', userData);
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+        username: userData.username,
+        password: userData.password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        country: userData.country,
+        language: userData.language,
+        acceptedTerms: userData.acceptedTerms,
+        newsletterSubscription: userData.newsletterSubscription,
+        captchaToken: userData.captcha
+      });
+      
+      return response.data;
     } catch (error) {
       console.error('Registrazione fallita:', error);
-      throw new Error('Registrazione fallita');
+      throw error;
     }
   };
 

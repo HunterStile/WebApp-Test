@@ -19,7 +19,7 @@ async function verifyCaptcha(token) {
       null,
       {
         params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY || '6Le7rq4qAAAAANqavAhHdixP2StY2tpgzPg3xx7o',
+          secret: process.env.RECAPTCHA_SECRET_KEY,
           response: token
         }
       }

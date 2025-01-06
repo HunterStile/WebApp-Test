@@ -37,7 +37,6 @@ function Auth() {
   };
 
   const handleCaptchaChange = (value) => {
-    console.log('Captcha value received:', value);
     setFormData(prev => ({ ...prev, captcha: value }));
   };
 

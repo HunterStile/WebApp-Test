@@ -32,8 +32,6 @@ export const AuthProvider = ({ children }) => {
   // Funzione per effettuare la registrazione
   const register = async (userData) => {
     try {
-      console.log('Captcha token being sent:', userData.captcha);
-      console.log('Dati inviati per la registrazione:', userData);
       const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         username: userData.username,
         password: userData.password,

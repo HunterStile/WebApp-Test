@@ -3,7 +3,6 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const axios = require('axios');
-require('dotenv').config();
 
 // Validazione email
 const isValidEmail = (email) => {
@@ -24,7 +23,6 @@ async function verifyCaptcha(token) {
         }
       }
     );
-    console.log('Risposta verifica captcha:', response.data);
     return response.data.success;
   } catch (error) {
     console.error('Errore verifica captcha:', error);
@@ -46,8 +44,6 @@ router.post('/register', async (req, res) => {
     newsletterSubscription,
     captchaToken
   } = req.body;
-  console.log('Captcha token ricevuto:', captchaToken);
-  console.log('Dati ricevuti per la registrazione:', req.body);
   
   try {
     // Validazione campi

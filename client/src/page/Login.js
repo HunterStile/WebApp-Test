@@ -7,6 +7,8 @@ import homeimage from "../assets/images/home1.png"
 function Auth() {
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -20,6 +22,93 @@ function Auth() {
     newsletterSubscription: false,
     captcha: '',
   });
+
+  const countryOptions = [
+    { value: 'AF', label: 'Afghanistan' },
+    { value: 'AL', label: 'Albania' },
+    { value: 'DZ', label: 'Algeria' },
+    { value: 'AD', label: 'Andorra' },
+    { value: 'AO', label: 'Angola' },
+    { value: 'AR', label: 'Argentina' },
+    { value: 'AM', label: 'Armenia' },
+    { value: 'AU', label: 'Australia' },
+    { value: 'AT', label: 'Austria' },
+    { value: 'AZ', label: 'Azerbaijan' },
+    { value: 'BS', label: 'Bahamas' },
+    { value: 'BH', label: 'Bahrain' },
+    { value: 'BD', label: 'Bangladesh' },
+    { value: 'BE', label: 'Belgium' },
+    { value: 'BR', label: 'Brazil' },
+    { value: 'BG', label: 'Bulgaria' },
+    { value: 'CA', label: 'Canada' },
+    { value: 'CL', label: 'Chile' },
+    { value: 'CN', label: 'China' },
+    { value: 'CO', label: 'Colombia' },
+    { value: 'HR', label: 'Croatia' },
+    { value: 'CU', label: 'Cuba' },
+    { value: 'CY', label: 'Cyprus' },
+    { value: 'CZ', label: 'Czech Republic' },
+    { value: 'DK', label: 'Denmark' },
+    { value: 'EC', label: 'Ecuador' },
+    { value: 'EG', label: 'Egypt' },
+    { value: 'EE', label: 'Estonia' },
+    { value: 'FI', label: 'Finland' },
+    { value: 'FR', label: 'France' },
+    { value: 'DE', label: 'Germany' },
+    { value: 'GR', label: 'Greece' },
+    { value: 'HK', label: 'Hong Kong' },
+    { value: 'HU', label: 'Hungary' },
+    { value: 'IS', label: 'Iceland' },
+    { value: 'IN', label: 'India' },
+    { value: 'ID', label: 'Indonesia' },
+    { value: 'IR', label: 'Iran' },
+    { value: 'IQ', label: 'Iraq' },
+    { value: 'IE', label: 'Ireland' },
+    { value: 'IL', label: 'Israel' },
+    { value: 'IT', label: 'Italy' },
+    { value: 'JP', label: 'Japan' },
+    { value: 'KR', label: 'Korea, South' },
+    { value: 'KW', label: 'Kuwait' },
+    { value: 'LV', label: 'Latvia' },
+    { value: 'LB', label: 'Lebanon' },
+    { value: 'LI', label: 'Liechtenstein' },
+    { value: 'LT', label: 'Lithuania' },
+    { value: 'LU', label: 'Luxembourg' },
+    { value: 'MY', label: 'Malaysia' },
+    { value: 'MT', label: 'Malta' },
+    { value: 'MX', label: 'Mexico' },
+    { value: 'MC', label: 'Monaco' },
+    { value: 'MA', label: 'Morocco' },
+    { value: 'NL', label: 'Netherlands' },
+    { value: 'NZ', label: 'New Zealand' },
+    { value: 'NO', label: 'Norway' },
+    { value: 'PK', label: 'Pakistan' },
+    { value: 'PE', label: 'Peru' },
+    { value: 'PH', label: 'Philippines' },
+    { value: 'PL', label: 'Poland' },
+    { value: 'PT', label: 'Portugal' },
+    { value: 'QA', label: 'Qatar' },
+    { value: 'RO', label: 'Romania' },
+    { value: 'RU', label: 'Russia' },
+    { value: 'SA', label: 'Saudi Arabia' },
+    { value: 'SG', label: 'Singapore' },
+    { value: 'SK', label: 'Slovakia' },
+    { value: 'SI', label: 'Slovenia' },
+    { value: 'ZA', label: 'South Africa' },
+    { value: 'ES', label: 'Spain' },
+    { value: 'SE', label: 'Sweden' },
+    { value: 'CH', label: 'Switzerland' },
+    { value: 'TW', label: 'Taiwan' },
+    { value: 'TH', label: 'Thailand' },
+    { value: 'TR', label: 'Turkey' },
+    { value: 'UA', label: 'Ukraine' },
+    { value: 'AE', label: 'United Arab Emirates' },
+    { value: 'GB', label: 'United Kingdom' },
+    { value: 'US', label: 'United States' },
+    { value: 'UY', label: 'Uruguay' },
+    { value: 'VE', label: 'Venezuela' },
+    { value: 'VN', label: 'Vietnam' },
+  ].sort((a, b) => a.label.localeCompare(b.label));
 
   const { login, register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -52,6 +141,20 @@ function Auth() {
         setError('Devi accettare i termini e le condizioni');
         return false;
       }
+      // Validazione campi obbligatori per la registrazione
+      const requiredFields = ['username', 'password', 'firstName', 'lastName', 'email', 'language', 'country'];
+      for (const field of requiredFields) {
+        if (!formData[field]) {
+          setError('Tutti i campi sono obbligatori');
+          return false;
+        }
+      }
+    } else {
+      // Validazione campi obbligatori per il login
+      if (!formData.username || !formData.password) {
+        setError('Username e password sono obbligatori');
+        return false;
+      }
     }
     return true;
   };
@@ -59,13 +162,31 @@ function Auth() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (!validateForm()) return;
 
+    setIsLoading(true);
+
     try {
       if (isRegister) {
-        await register(formData);
-        setIsRegister(false);
+        await register({
+          username: formData.username,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          country: formData.country,
+          language: formData.language,
+          acceptedTerms: formData.acceptedTerms,
+          newsletterSubscription: formData.newsletterSubscription,
+          captcha: formData.captcha
+        });
+        setSuccess('Account created successfully! Redirecting to login...');
+        setTimeout(() => {
+          setIsRegister(false);
+          setSuccess('');
+        }, 2000);
       } else {
         await login(formData.username, formData.password);
         navigate('/');
@@ -79,6 +200,8 @@ function Auth() {
       if (recaptchaRef.current) {
         recaptchaRef.current.reset();
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,6 +226,12 @@ function Auth() {
               {error && (
                 <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 w-full">
                   {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 w-full">
+                  {success}
                 </div>
               )}
 
@@ -177,6 +306,21 @@ function Auth() {
                     />
 
                     <select
+                      name="country"
+                      required
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
+                    >
+                      <option value="">Select Country</option>
+                      {countryOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
                       name="language"
                       required
                       value={formData.language}
@@ -230,9 +374,20 @@ function Auth() {
                 <div className="flex justify-center w-full">
                   <button
                     type="submit"
-                    className="w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-colors shadow-[0_0_10px_rgba(28,75,67,0.5)]"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-colors shadow-[0_0_10px_rgba(28,75,67,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    {isRegister ? 'Create Account' : 'Login'}
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {isRegister ? 'Creating Account...' : 'Logging in...'}
+                      </>
+                    ) : (
+                      isRegister ? 'Create Account' : 'Login'
+                    )}
                   </button>
                 </div>
               </form>

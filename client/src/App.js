@@ -14,6 +14,8 @@ import Admin from './page/private/Admin';
 import AdminMessages from './page/private/AdminMessages';
 import ManageCampaign from './page/private/ManageCampaign';
 import AllConversion from './page/private/AllConversion';
+import UserAnnouncements from './page/Announcements';
+import AdminAnnouncements from './page/private/AdminAnnouncement';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -58,6 +60,7 @@ function App() {
                   <Route path="/conversionlist" element={<ConversionList />} />
                   <Route path="/campaignlist" element={<CampaignList />} />
                   <Route path="/messages" element={<UserMessages />} />
+                  <Route path="/announcements" element={<UserAnnouncements />} />
                 </Route>
 
                 {/* Protected routes per Admin */}
@@ -66,6 +69,7 @@ function App() {
                   <Route path="/admin/manage" element={<ManageCampaign />} />
                   <Route path="/admin/allconversion" element={<AllConversion />} />
                   <Route path="/admin/messages" element={<AdminMessages />} />
+                  <Route path="/admin/announcements" element={<AdminAnnouncements />} />
                 </Route>
 
                 {/* Legal routes */}

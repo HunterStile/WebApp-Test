@@ -8,6 +8,7 @@ const gamblingRoutes = require('./routes/gambling');
 const redirectRoutes = require('./routes/cpc');
 const adminCampaignRoutes = require('./routes/admin-cpc');
 const threadRoutes = require('./routes/threads');
+const announcementsRouter = require('./routes/announcements');
 
 require('dotenv').config();
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/gambling', gamblingRoutes);
 app.use('/api/cpc', redirectRoutes);
 app.use('/api/admin', adminCampaignRoutes);
 app.use('/api/threads', threadRoutes);
+app.use('/api/announcements', announcementsRouter);
 
 // Catch-all route
 app.get('*', (req, res) => {

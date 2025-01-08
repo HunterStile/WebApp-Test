@@ -65,6 +65,9 @@ function Navbar() {
                 <Link to="/messages" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   Messaggi
                 </Link>
+                <Link to="/announcements" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Annunci
+                </Link>
               </>
             )}
 
@@ -82,6 +85,9 @@ function Navbar() {
                 </Link>
                 <Link to="/admin/messages" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
                   Messaggi
+                </Link>
+                <Link to="/admin/announcements" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded">
+                  Annunci
                 </Link>
                 
               </>

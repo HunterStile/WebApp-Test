@@ -32,7 +32,7 @@ function Layout({ children }) {
   const showNavbar = !['/', '/login2'].includes(location.pathname);
 
   return (
-    <div className="App min-h-screen bg-gray-900">
+    <div className="App min-h-screen bg-white">
       {showNavbar && <Navbar />}
       <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen`}>
         <div className="container mx-auto p-4">{children}</div>

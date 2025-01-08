@@ -216,10 +216,10 @@ function Auth() {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Form Section */}
       <div className="w-full md:w-1/2 p-4 md:p-8 flex items-center justify-center bg-white order-2 md:order-1">
-        <div className="w-full max-w-md">
-          <div className="rounded-[18px] w-full flex flex-col items-center gap-1.5 bg-gray-100 p-4 md:p-6 shadow-xs">
+        <div className="flex w-full items-center justify-center bg-white-a700 px-14 py-44 md:flex-col md:p-5">
+          <div className="flex w-[40%] flex-col items-center gap-1.5 rounded-[18px] bg-gray-100 p-2 shadow-xs md:w-full md:px-5">
             <div className="flex flex-col items-center w-full">
-              <h1 className="text-6xl md:text-6xl font-semibold mb-6 md:mb-8 text-[#1e1e1e] text-center">
+              <h1 className="text-6xl md:text-6xl font-semibold mb-6 mt-6 md:mb-8 text-[#1e1e1e] text-center">
                 {isRegister ? 'Sign up' : 'Log in'}
               </h1>
 
@@ -246,7 +246,7 @@ function Auth() {
                         placeholder="First Name"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                        className="w-[210px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
                       />
                     </div>
                     <div>
@@ -257,7 +257,7 @@ function Auth() {
                         placeholder="Last Name"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                        className="w-[217px] h-[50px] mr-16 p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
                       />
                     </div>
                   </div>
@@ -270,7 +270,7 @@ function Auth() {
                   placeholder="Username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                  className="w-[450px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
                 />
 
                 <input
@@ -280,7 +280,7 @@ function Auth() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                  className="w-[450px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
                 />
 
                 {isRegister && (
@@ -292,7 +292,7 @@ function Auth() {
                       placeholder="Confirm Password"
                       value={formData.passwordConfirmation}
                       onChange={handleInputChange}
-                      className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                      className="w-[450px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
                     />
 
                     <input
@@ -302,7 +302,7 @@ function Auth() {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                      className="w-[450px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
                     />
 
                     <select
@@ -310,7 +310,7 @@ function Auth() {
                       required
                       value={formData.country}
                       onChange={handleInputChange}
-                      className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
+                      className="w-[450px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
                     >
                       <option value="">Select Country</option>
                       {countryOptions.map(option => (
@@ -325,7 +325,7 @@ function Auth() {
                       required
                       value={formData.language}
                       onChange={handleInputChange}
-                      className="w-full p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
+                      className="w-[450px] h-[50px] ml-20 p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
                     >
                       <option value="">Select Language</option>
                       {languageOptions.map(option => (
@@ -342,7 +342,7 @@ function Auth() {
                           name="acceptedTerms"
                           checked={formData.acceptedTerms}
                           onChange={handleInputChange}
-                          className="rounded border-gray-300"
+                          className="ml-20 w-3 rounded border-gray-300"
                         />
                         <span>I accept the terms and conditions</span>
                       </label>
@@ -353,14 +353,14 @@ function Auth() {
                           name="newsletterSubscription"
                           checked={formData.newsletterSubscription}
                           onChange={handleInputChange}
-                          className="rounded border-gray-300"
+                          className="ml-20 w-3 rounded border-gray-300"
                         />
                         <span>Subscribe to newsletter</span>
                       </label>
                     </div>
 
                     <div className="w-full flex justify-center">
-                      <div className="transform scale-90 md:scale-100">
+                      <div className="transform scale-60 md:scale-100">
                         <ReCAPTCHA
                           ref={recaptchaRef}
                           sitekey="6Le7rq4qAAAAAIscf8sTUGkNE8UTWBWNeTN4XEaQ"
@@ -375,7 +375,7 @@ function Auth() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-colors shadow-[0_0_10px_rgba(28,75,67,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="w-1/3 py-3 px-4 bg-[#1F2421] text-white rounded-lg hover:bg-gray-800 font-medium transition-colors shadow-[0_0_10px_rgba(28,75,67,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     {isLoading ? (
                       <>
@@ -411,7 +411,7 @@ function Auth() {
         <img
           src={homeimage}
           alt="Welcome illustration"
-          className="max-w-full md:max-w-md w-full object-contain"
+          className="min-w-[110%] md:max-w-md w-full object-contain"
         />
       </div>
     </div>

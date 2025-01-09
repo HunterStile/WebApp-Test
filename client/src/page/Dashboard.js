@@ -247,108 +247,104 @@ const Dashboard = () => {
 
   // Main Page Content
   return (
-    <div className="p-6 bg-gray-900 text-white rounded-lg shadow-lg">
-      {/* Header con Welcome e Logout */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard Cliente</h1>
-          {user && <p className="text-lg mt-2">Benvenuto, {user}!</p>}
+    <div className="p-8 bg-white rounded-xl">
+      {/* Header with Welcome and Logout */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gray-200 rounded-full" /> {/* User avatar placeholder */}
+          <div>
+            {user && <h1 className="text-xl font-semibold">BENTORNATO, {user}</h1>}
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-lg">
-            Totale Periodo: <span className="font-bold text-green-400">€ {totalPeriodCommissions}</span>
-          </span>
+        <div className="flex items-center gap-4">
           {user && (
-            <button onClick={logout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700">
-              Logout
+            <button onClick={logout} className="text-gray-600 hover:text-gray-800">
+              •••
             </button>
           )}
         </div>
       </div>
 
-      {/* View Toggle Buttons */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setViewMode('monthly')}
-            className={`px-4 py-2 rounded transition-colors ${viewMode === 'monthly'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-          >
-            Vista Mensile
-          </button>
-          <button
-            onClick={() => setViewMode('yearly')}
-            className={`px-4 py-2 rounded transition-colors ${viewMode === 'yearly'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-          >
-            Vista Annuale
-          </button>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-sm mb-2">Total Clicks</h3>
+          <p className="text-3xl font-bold">{totalClicks}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-sm mb-2">Sign up</h3>
+          <p className="text-3xl font-bold">{yearFilteredData.cplCount}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-sm mb-2">CPA</h3>
+          <p className="text-3xl font-bold">{yearFilteredData.cpaCount}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-sm mb-2">Profit</h3>
+          <p className="text-3xl font-bold">€ {totalPeriodCommissions}</p>
         </div>
       </div>
 
-      {/* Filtri Periodo (solo per vista mensile) */}
-      {viewMode === 'monthly' && (
-        <div className="flex flex-wrap gap-4 mb-6">
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-400">Visualizza:</span>
+      {/* View Toggle and Period Filters */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setViewMode('monthly')}
+            className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'monthly'
+                ? 'bg-blue-50 text-blue-600'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+          >
+            Monthly View
+          </button>
+          <button
+            onClick={() => setViewMode('yearly')}
+            className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'yearly'
+                ? 'bg-blue-50 text-blue-600'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+          >
+            Yearly View
+          </button>
+        </div>
+
+        {viewMode === 'monthly' && (
+          <div className="flex gap-3">
             {monthRangeOptions.map(option => (
               <button
                 key={option.value}
                 onClick={() => setMonthRange(option.value)}
-                className={`px-3 py-1 rounded transition-colors ${monthRange === option.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                className={`px-4 py-2 rounded-lg transition-colors ${monthRange === option.value
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 {option.label}
               </button>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">Totale Click</h3>
-          <p className="text-2xl font-bold text-green-400">{totalClicks}</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">CPL</h3>
-          <p className="text-2xl font-bold text-green-400">{yearFilteredData.cplCount}</p>
-          <p className="text-sm text-gray-400">({yearFilteredData.cplPercentage}%)</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">CPA</h3>
-          <p className="text-2xl font-bold text-green-400">{yearFilteredData.cpaCount}</p>
-          <p className="text-sm text-gray-400">({yearFilteredData.cpaPercentage}%)</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">Totale Conversioni</h3>
-          <p className="text-2xl font-bold text-green-400">{yearFilteredData.totalConversions}</p>
-        </div>
+        )}
       </div>
 
-      {/* Grafico Commissioni */}
-      <CommissionsChart
-        data={viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions}
-        viewMode={viewMode}
-      />
+      {/* Commissions Chart */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-6">Total Commission</h2>
+        <CommissionsChart
+          data={viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions}
+          viewMode={viewMode}
+        />
+      </div>
 
-      {/* Grafico Clicks e Conversioni */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-4">Andamento Click e Conversioni</h2>
+      {/* Clicks and Conversions Chart */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-6">Clicks & Conversions Trend</h2>
         {clicksLoading ? (
           <div className="h-96 flex items-center justify-center">
-            <p>Caricamento dati...</p>
+            <p className="text-gray-500">Loading data...</p>
           </div>
         ) : clicksError ? (
           <div className="h-96 flex items-center justify-center">
-            <p className="text-red-500">Errore: {clicksError}</p>
+            <p className="text-red-500">Error: {clicksError}</p>
           </div>
         ) : (
           <ClicksConversionChart
@@ -359,40 +355,54 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Lista Conversioni */}
-      <div className="bg-gray-800 p-4 rounded-lg">
-        <h2 className="text-lg font-semibold mb-4">Ultime Conversioni</h2>
-        {filteredData.length > 0 ? (
-          <div className="space-y-2">
-            {filteredData
-              .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .slice(0, 5)
-              .map((conv) => (
-                <div
-                  key={conv.conversion_id}
-                  className={`p-3 rounded ${conv.status === 'paid' ? 'bg-green-700' :
-                    conv.status === 'onhold' ? 'bg-yellow-700' :
-                      conv.status === 'validated' ? 'bg-green-400' : 'bg-gray-700'
-                    }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold">{conv.campaign_name}</p>
-                      <p className="text-sm text-gray-300">
-                        {new Date(conv.date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold">€ {parseFloat(conv.commission).toFixed(2)}</p>
-                      <p className="text-sm text-gray-300">{conv.type.toUpperCase()}</p>
+      {/* Latest Conversions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-xl font-semibold mb-6">Latest Commissions</h2>
+          {filteredData.length > 0 ? (
+            <div className="space-y-4">
+              {filteredData
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5)
+                .map((conv) => (
+                  <div
+                    key={conv.conversion_id}
+                    className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-gray-900">{conv.campaign_name}</p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(conv.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">€ {parseFloat(conv.commission).toFixed(2)}</p>
+                        <span className={`text-sm px-2 py-1 rounded-full ${conv.status === 'paid' ? 'bg-green-100 text-green-600' :
+                            conv.status === 'onhold' ? 'bg-yellow-100 text-yellow-600' :
+                              'bg-blue-100 text-blue-600'
+                          }`}>
+                          {conv.type.toUpperCase()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No conversions in selected period.</p>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-xl font-semibold mb-6">Signup to deposit</h2>
+          {/* Placeholder for signup to deposit chart - you'll need to implement this */}
+          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+            <p className="text-gray-500">Signup/Deposit ratio visualization</p>
+              <p className="text-sm text-gray-400">({yearFilteredData.cpaPercentage}%)</p>
+              <p className="text-sm text-gray-400">({yearFilteredData.cplPercentage}%)</p>
           </div>
-        ) : (
-          <p>Nessuna conversione nel periodo selezionato.</p>
-        )}
+        </div>
       </div>
     </div>
   );

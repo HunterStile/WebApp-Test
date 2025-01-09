@@ -189,7 +189,7 @@ function Auth() {
         }, 2000);
       } else {
         await login(formData.username, formData.password);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (error) {
       if (error.response?.data?.error) {

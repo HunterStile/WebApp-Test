@@ -36,13 +36,13 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
-app.use('/auth', authRoutes);
-app.use('/admin/auth', adminAuthRoutes);
-app.use('/gambling', gamblingRoutes);
-app.use('/cpc', redirectRoutes);
-app.use('/admin', adminCampaignRoutes);
-app.use('/threads', threadRoutes);
-app.use('/announcements', announcementsRouter);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/gambling', gamblingRoutes);
+app.use('/api/cpc', redirectRoutes);
+app.use('/api/admin', adminCampaignRoutes);
+app.use('/api/threads', threadRoutes);
+app.use('/api/announcements', announcementsRouter);
 
 // Catch-all route
 app.get('*', (req, res) => {

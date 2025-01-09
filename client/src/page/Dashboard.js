@@ -250,7 +250,7 @@ const Dashboard = () => {
         onClick={() => setActiveChart('commissions')}
         className={`px-4 py-2 rounded-lg transition-colors ${
           activeChart === 'commissions'
-            ? 'bg-blue-50 text-blue-600'
+            ? 'bg-light-green text-dark-green'
             : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
         }`}
       >
@@ -260,7 +260,7 @@ const Dashboard = () => {
         onClick={() => setActiveChart('clicks')}
         className={`px-4 py-2 rounded-lg transition-colors ${
           activeChart === 'clicks'
-            ? 'bg-blue-50 text-blue-600'
+            ? 'bg-light-green text-dark-green'
             : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
         }`}
       >
@@ -327,20 +327,20 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-sm mb-2">Total Clicks</h3>
-          <p className="text-3xl font-bold">{totalClicks}</p>
+          <h3 className="text-gray-600 text-xl text-center mb-2">Total Clicks</h3>
+          <p className="text-4xl text-center font-bold">{totalClicks}</p>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-sm mb-2">Sign up</h3>
-          <p className="text-3xl font-bold">{yearFilteredData.cplCount}</p>
+          <h3 className="text-gray-600 text-xl text-center mb-2">Sign up</h3>
+          <p className="text-4xl text-center font-bold">{yearFilteredData.cplCount}</p>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-sm mb-2">CPA</h3>
-          <p className="text-3xl font-bold">{yearFilteredData.cpaCount}</p>
+          <h3 className="text-gray-600 text-xl text-center mb-2">CPA</h3>
+          <p className="text-4xl text-center font-bold">{yearFilteredData.cpaCount}</p>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-sm mb-2">Profit</h3>
-          <p className="text-3xl font-bold">€ {totalPeriodCommissions}</p>
+          <h3 className="text-gray-600 text-xl text-center mb-2">Profit</h3>
+          <p className="text-4xl text-center font-bold">€ {totalPeriodCommissions}</p>
         </div>
       </div>
 
@@ -350,7 +350,7 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('monthly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'monthly'
-                ? 'bg-blue-50 text-blue-600'
+                ? 'bg-light-green text-dark-green'
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
           >
@@ -359,7 +359,7 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('yearly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'yearly'
-                ? 'bg-blue-50 text-blue-600'
+                ? 'bg-light-green text-dark-green'
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
           >
@@ -374,7 +374,7 @@ const Dashboard = () => {
                 key={option.value}
                 onClick={() => setMonthRange(option.value)}
                 className={`px-4 py-2 rounded-lg transition-colors ${monthRange === option.value
-                    ? 'bg-blue-50 text-blue-600'
+                    ? 'bg-light-green text-dark-green'
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
               >
@@ -417,9 +417,9 @@ const Dashboard = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-gray-900">€ {parseFloat(conv.commission).toFixed(2)}</p>
-                        <span className={`text-sm px-2 py-1 rounded-full ${conv.status === 'paid' ? 'bg-green-100 text-green-600' :
+                        <span className={`text-sm px-2 py-1 rounded-full ${conv.status === 'paid' ? 'bg-green-100 text-dark-green' :
                             conv.status === 'onhold' ? 'bg-yellow-100 text-yellow-600' :
-                              'bg-blue-100 text-blue-600'
+                              'bg-blue-100 text-dark-blue'
                           }`}>
                           {conv.type.toUpperCase()}
                         </span>

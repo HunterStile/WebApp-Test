@@ -12,7 +12,7 @@ const CommissionsChart = ({ data, viewMode }) => {
         </h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+            <div className="w-3 h-3 rounded-full bg-dark-blue"></div>
             <span className="text-sm text-gray-600">Convalidated</span>
           </div>
           <div className="flex items-center gap-2">
@@ -20,7 +20,7 @@ const CommissionsChart = ({ data, viewMode }) => {
             <span className="text-sm text-gray-600">On Hold</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <div className="w-3 h-3 rounded-full bg-paid-green"></div>
             <span className="text-sm text-gray-600">Paid</span>
           </div>
         </div>
@@ -74,7 +74,7 @@ const CommissionsChart = ({ data, viewMode }) => {
             <Bar 
               dataKey="validatedCommissions" 
               stackId="a" 
-              fill="#3B82F6" 
+              fill="#1A2B88" 
               radius={[4, 4, 0, 0]}
             />
             <Bar 
@@ -86,7 +86,7 @@ const CommissionsChart = ({ data, viewMode }) => {
             <Bar 
               dataKey="paidCommissions" 
               stackId="a" 
-              fill="#10B981"
+              fill="#49A078"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

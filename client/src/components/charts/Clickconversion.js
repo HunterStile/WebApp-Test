@@ -82,7 +82,7 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
               type="monotone"
               dataKey="clicks"
               name="Clicks"
-              stroke="#2196F3"
+              stroke="#1A2B88"
               dot={false}
               strokeWidth={2}
             />
@@ -90,7 +90,7 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
               type="monotone"
               dataKey="conversions"
               name="Conversioni"
-              stroke="#4CAF50"
+              stroke="#49A078"
               dot={false}
               strokeWidth={2}
             />

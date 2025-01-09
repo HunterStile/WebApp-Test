@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [clicksHistory, setClicksHistory] = useState([]);
   const [clicksLoading, setClicksLoading] = useState(false);
   const [clicksError, setClicksError] = useState(null);
+  const [activeChart, setActiveChart] = useState('commissions'); // 'commissions', 'clicks', etc.
 
   useEffect(() => {
     const fetchTotalClicks = async () => {
@@ -242,6 +243,64 @@ const Dashboard = () => {
     }));
   }, [filteredData, monthRange]);
 
+  // Componente per i tab dei grafici
+  const ChartTabs = () => (
+    <div className="flex gap-4 mb-6">
+      <button
+        onClick={() => setActiveChart('commissions')}
+        className={`px-4 py-2 rounded-lg transition-colors ${
+          activeChart === 'commissions'
+            ? 'bg-blue-50 text-blue-600'
+            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        Commissions
+      </button>
+      <button
+        onClick={() => setActiveChart('clicks')}
+        className={`px-4 py-2 rounded-lg transition-colors ${
+          activeChart === 'clicks'
+            ? 'bg-blue-50 text-blue-600'
+            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        Clicks & Conversions
+      </button>
+    </div>
+  );
+
+  // Componente per il contenuto del grafico attivo
+  const ActiveChartContent = () => {
+    switch (activeChart) {
+      case 'commissions':
+        return (
+          <CommissionsChart
+            data={viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions}
+            viewMode={viewMode}
+          />
+        );
+      case 'clicks':
+        return clicksLoading ? (
+          <div className="h-96 flex items-center justify-center">
+            <p className="text-gray-500">Loading data...</p>
+          </div>
+        ) : clicksError ? (
+          <div className="h-96 flex items-center justify-center">
+            <p className="text-red-500">Error: {clicksError}</p>
+          </div>
+        ) : (
+          <ClicksConversionChart
+            conversions={filteredData}
+            clicksHistory={clicksHistory}
+            days={30}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+
   if (loading) return <div className="p-4">Caricamento...</div>;
   if (error) return <div className="p-4 text-red-500">Errore: {error}</div>;
 
@@ -326,33 +385,13 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Commissions Chart */}
+      {/* Charts Section with Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-6">Total Commission</h2>
-        <CommissionsChart
-          data={viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions}
-          viewMode={viewMode}
-        />
-      </div>
-
-      {/* Clicks and Conversions Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-6">Clicks & Conversions Trend</h2>
-        {clicksLoading ? (
-          <div className="h-96 flex items-center justify-center">
-            <p className="text-gray-500">Loading data...</p>
-          </div>
-        ) : clicksError ? (
-          <div className="h-96 flex items-center justify-center">
-            <p className="text-red-500">Error: {clicksError}</p>
-          </div>
-        ) : (
-          <ClicksConversionChart
-            conversions={filteredData}
-            clicksHistory={clicksHistory}
-            days={30}
-          />
-        )}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">Analytics</h2>
+          <ChartTabs />
+        </div>
+        <ActiveChartContent />
       </div>
 
       {/* Latest Conversions */}

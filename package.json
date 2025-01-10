@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.4",
     "axios": "^1.7.5",
     "bcrypt": "^5.1.1",
     "bip32": "^4.0.0",
@@ -28,6 +29,7 @@
     "mongoose": "^8.6.1",
     "node-cache": "^5.1.2",
     "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16",
     "react-scripts": "^5.0.1",
     "recharts": "^2.15.0"
   },

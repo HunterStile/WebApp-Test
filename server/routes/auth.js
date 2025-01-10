@@ -105,6 +105,13 @@ router.post('/register', async (req, res) => {
       newsletterSubscription,
     });
 
+    // Invia email di benvenuto
+    try {
+      await emailService.sendWelcomeEmail(user);
+    } catch (emailError) {
+      console.error('Errore invio email di benvenuto:', emailError);
+      // Non blocchiamo la registrazione se l'invio dell'email fallisce
+    }
     await user.save();
 
     res.status(201).json({

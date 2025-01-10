@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const axios = require('axios');
+const emailService = require('../services/emailService');
 
 // Validazione email
 const isValidEmail = (email) => {

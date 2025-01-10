@@ -10,7 +10,10 @@ class EmailService {
   async sendEmail(to, subject, html) {
     const msg = {
       to,
-      from: process.env.SENDGRID_FROM_EMAIL, // email verificato in SendGrid
+      from: {
+        email: process.env.SENDGRID_FROM_EMAIL,
+        name: 'FastAffilation Team'  // Personalizza con il nome del tuo team/azienda
+      },
       subject,
       html,
     };

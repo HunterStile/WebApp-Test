@@ -12,6 +12,8 @@ const isValidEmail = (email) => {
 
 // Verifica reCAPTCHA
 async function verifyCaptcha(token) {
+  console.log('Token ricevuto dal client:', token);
+
   try {
     const response = await axios.post(
       'https://www.google.com/recaptcha/api/siteverify',
@@ -23,13 +25,15 @@ async function verifyCaptcha(token) {
         }
       }
     );
+
+    console.log('Risposta da Google:', response.data);
+
     return response.data.success;
   } catch (error) {
-    console.error('Errore verifica captcha:', error);
+    console.error('Errore durante la verifica di reCAPTCHA:', error.message);
     return false;
   }
 }
-
 // Registrazione
 router.post('/register', async (req, res) => {
   const {

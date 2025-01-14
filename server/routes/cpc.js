@@ -158,11 +158,10 @@ router.get('/clicks-history', async (req, res) => {
 router.get('/total-clicks', async (req, res) => {
   try {
     const { username, startDate, endDate, viewMode } = req.query;
-
     let query = { username: username };
 
-    // Se siamo in modalità mensile e abbiamo date di inizio e fine
-    if (viewMode === 'monthly' && startDate && endDate) {
+    // Aggiungiamo la logica per filtrare in base al viewMode
+    if (startDate && endDate) {
       query['clicksHistory.timestamp'] = {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
@@ -170,11 +169,11 @@ router.get('/total-clicks', async (req, res) => {
     }
 
     const campaigns = await CampaignRequest.find(query);
-    
     let totalClicks = 0;
 
-    if (viewMode === 'monthly' && startDate && endDate) {
-      // Conta solo i click nel range di date specificato
+    // Logica di conteggio in base al viewMode
+    if (viewMode === 'daily' || viewMode === 'monthly') {
+      // Per vista giornaliera e mensile, contiamo solo i click nel range di date
       campaigns.forEach(campaign => {
         const filteredClicks = campaign.clicksHistory.filter(click => 
           click.timestamp >= new Date(startDate) && 
@@ -183,7 +182,7 @@ router.get('/total-clicks', async (req, res) => {
         totalClicks += filteredClicks.length;
       });
     } else {
-      // In modalità annuale, conta tutti i click
+      // Per vista annuale, contiamo tutti i click
       totalClicks = campaigns.reduce((sum, campaign) => sum + campaign.clicksHistory.length, 0);
     }
 

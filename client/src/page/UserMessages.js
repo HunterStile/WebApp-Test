@@ -96,73 +96,86 @@ const ThreadList = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
-      <div className="w-1/3 bg-gray-800 border-r border-gray-700">
-        <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-blue-200">I miei Thread</h1>
+    <div className="flex h-screen bg-white">
+      {/* Left sidebar */}
+      <div className="w-80 border-r border-gray-200">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h1 className="text-xl font-semibold text-gray-800">Threads</h1>
           <button
             onClick={() => setIsNewThreadModalOpen(true)}
-            className="p-2 rounded-full hover:bg-gray-700 text-blue-300"
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
           >
-            <Plus size={24} />
+            <Plus size={20} />
           </button>
         </div>
-        
-        <div className="overflow-y-auto h-full">
+
+        {/* Search bar */}
+        <div className="p-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full py-2 px-4 bg-gray-100 rounded-full text-sm focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Thread list */}
+        <div className="overflow-y-auto">
           {threads.map(thread => (
             <div
               key={thread._id}
               onClick={() => setActiveThread(thread)}
-              className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-750 ${
-                activeThread?._id === thread._id ? 'bg-gray-700' : ''
+              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 ${
+                activeThread?._id === thread._id ? 'bg-gray-100' : ''
               }`}
             >
               <div className="flex justify-between items-start">
-                <div className="font-semibold text-blue-200">{thread.subject}</div>
-                {!thread.isOpen && <Lock size={16} className="text-red-400" />}
+                <div className="font-medium text-gray-800">{thread.subject}</div>
+                <div className="text-xs text-gray-500">
+                  {new Date(thread.lastActivity).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit'
+                  })}
+                </div>
               </div>
               {thread.lastMessage && (
-                <div className="text-sm text-gray-400 mt-2">
-                  {thread.lastMessage.content.substring(0, 50)}...
+                <div className="text-sm text-gray-500 mt-1 line-clamp-1">
+                  {thread.lastMessage.content}
                 </div>
               )}
-              <div className="text-xs text-gray-500 mt-1">
-                {new Date(thread.lastActivity).toLocaleDateString()}
-              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col bg-gray-900">
+      {/* Main chat area */}
+      <div className="flex-1 flex flex-col">
         {activeThread ? (
           <>
-            <div className="p-4 border-b border-gray-700 bg-gray-800 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-blue-200">{activeThread.subject}</h2>
-              {!activeThread.isOpen && (
-                <span className="text-red-400 flex items-center gap-2">
-                  <Lock size={16} />
-                  Thread chiuso
-                </span>
-              )}
+            <div className="p-4 border-b flex justify-between items-center bg-white">
+              <h2 className="font-medium text-gray-800">{activeThread.subject}</h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((message) => (
                 <div
                   key={message._id}
                   className={`flex ${message.sender === user ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[70%] p-3 rounded-lg ${
+                    className={`max-w-[60%] rounded-2xl px-4 py-2 ${
                       message.sender === user
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-100'
+                        ? 'bg-dark-green text-white'
+                        : 'bg-gray-100 text-gray-800'
                     }`}
                   >
-                    <div className="text-sm mb-1">{message.content}</div>
-                    <div className="text-xs opacity-75">
-                      {new Date(message.timestamp).toLocaleString()}
+                    <div className="text-sm">{message.content}</div>
+                    <div className="text-xs mt-1 opacity-75">
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
                     </div>
                   </div>
                 </div>
@@ -171,71 +184,72 @@ const ThreadList = () => {
             </div>
 
             {activeThread.isOpen && (
-              <form onSubmit={handleSendMessage} className="p-4 bg-gray-800 border-t border-gray-700">
-                <div className="flex space-x-4">
+              <div className="p-4 border-t">
+                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Scrivi un messaggio..."
-                    className="flex-1 p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Type your message here.."
+                    className="flex-1 py-2 px-4 bg-gray-100 rounded-full text-sm focus:outline-none"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-dark-green p-2 hover:bg-gray-100 rounded-full"
                   >
                     <Send size={20} />
                   </button>
-                </div>
-              </form>
+                </form>
+              </div>
             )}
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">
-            Seleziona un thread per visualizzare i messaggi
+            Select a thread to view messages
           </div>
         )}
       </div>
 
+      {/* New Thread Modal */}
       {isNewThreadModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-blue-200">Nuovo Thread</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">New Thread</h2>
             <form onSubmit={handleCreateThread} className="space-y-4">
               <input
                 type="text"
-                placeholder="Oggetto"
+                placeholder="Subject"
                 value={newThreadData.subject}
                 onChange={(e) => setNewThreadData({
                   ...newThreadData,
                   subject: e.target.value
                 })}
-                className="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
               <textarea
-                placeholder="Messaggio"
+                placeholder="Message"
                 value={newThreadData.content}
                 onChange={(e) => setNewThreadData({
                   ...newThreadData,
                   content: e.target.value
                 })}
-                className="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                className="w-full p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[100px]"
                 required
               />
-              <div className="flex space-x-4">
+              <div className="flex gap-4">
                 <button
                   type="button"
                   onClick={() => setIsNewThreadModalOpen(false)}
-                  className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50"
                 >
-                  Annulla
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 bg-dark-green text-white rounded-lg hover:bg-green-600"
                 >
-                  Crea Thread
+                  Create Thread
                 </button>
               </div>
             </form>

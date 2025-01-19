@@ -1,11 +1,40 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Globe, Monitor, Building2, BarChart3 } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
 import flogowhite from "../assets/images/flogowhite.png"
 import mapbase from "../assets/images/mapbase.png"
 import dashboard3d from "../assets/images/dashboard3d.png"
+import CampaignLogo from '../components/utils/CampaignLogo';
+
+const partners = [
+  'BETANO - Exclusive',
+  'RABONA - Bonus Deal',
+  'TIKTAKBET - Best Offer',
+  'CAZEURS - Special Promo',
+  'BETANO - Exclusive',
+  'BETANO - Exclusive',
+  'BETANO - Exclusive',
+  'BETANO - Exclusive',
+  'YBETS - Special Promo',
+  'CASINOTOGHETER - Special Promo',
+];
+
+
 
 const LandingPage = () => {
+
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth / 2; // Scroll di metà larghezza
+      scrollRef.current.scrollTo({
+        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -30,7 +59,7 @@ const LandingPage = () => {
           Fast Affiliation is a network for gambling, online poker, and sports betting, offering tools and support to maximize your engagement and earnings.
         </p>
         <div className="max-w-4xl mx-auto">
-          <img 
+          <img
             src={dashboard3d}
             alt="Dashboard Preview"
             className="w-full"
@@ -40,13 +69,35 @@ const LandingPage = () => {
 
       {/* Partners Section */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-2xl font-semibold text-center mb-12">our partners</h2>
-        <div className="flex justify-center space-x-12">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="w-32 h-12 bg-gray-100 rounded"></div>
+      <h2 className="text-2xl font-semibold text-center mb-12">Our Partners</h2>
+      <div className="relative group"> {/* Aggiunto `group` per gestione hover */}
+        {/* Freccia Sinistra */}
+        <button
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-800 text-white rounded-full shadow-md hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={() => scroll('left')}
+        >
+          &#9664; {/* Icona freccia sinistra */}
+        </button>
+        {/* Contenitore Scrollabile */}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-hidden gap-12 scroll-smooth"
+        >
+          {partners.map((campaignName, index) => (
+            <div key={index} className="w-48 h-20 flex-shrink-0">
+              <CampaignLogo campaignName={campaignName} />
+            </div>
           ))}
         </div>
-      </section>
+        {/* Freccia Destra */}
+        <button
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-800 text-white rounded-full shadow-md hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={() => scroll('right')}
+        >
+          &#9654; {/* Icona freccia destra */}
+        </button>
+      </div>
+    </section>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-16">
@@ -103,8 +154,8 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-16 text-center">
         <p className="text-xl mb-8">provides global affiliate support with swift solutions for all gaming sectors.</p>
         <div className="max-w-4xl mx-auto">
-          <img 
-            src= {mapbase}
+          <img
+            src={mapbase}
             alt="Global Map"
             className="w-full"
           />
@@ -126,8 +177,8 @@ const LandingPage = () => {
         <div className="mx-auto px-4">
           <div className="text-center">
             <div className="flex justify-center">
-             <img src={flogowhite} alt="Fast Affiliation" className="h-8" />
-             <span className="font-bold text-center text-white mb-6 mt-4">Fast Affiliation</span>
+              <img src={flogowhite} alt="Fast Affiliation" className="h-8" />
+              <span className="font-bold text-center text-white mb-6 mt-4">Fast Affiliation</span>
             </div>
             <nav className="flex justify-center space-x-6 mb-8">
               <a href="#" className="text-white">Home</a>

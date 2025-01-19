@@ -28,7 +28,7 @@ const Dashboard = () => {
   const { conversions, loading, error } = useContext(ConversionContext);
   const [monthRange, setMonthRange] = useState(12);
   const [totalClicks, setTotalClicks] = useState(0);
-  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
+  const [viewMode, setViewMode] = useState('daily'); // 'monthly', 'yearly', or 'daily'
   const [clicksHistory, setClicksHistory] = useState([]);
   const [clicksLoading, setClicksLoading] = useState(false);
   const [clicksError, setClicksError] = useState(null);
@@ -41,26 +41,40 @@ const Dashboard = () => {
           username: user,
           viewMode: viewMode
         };
-
-        // Aggiungi date solo se siamo in modalità mensile
+  
         if (viewMode === 'monthly') {
           const endDate = new Date();
           const startDate = new Date();
           startDate.setMonth(endDate.getMonth() - monthRange + 1);
-
+          
           params.startDate = startDate.toISOString();
           params.endDate = endDate.toISOString();
+        } else if (viewMode === 'daily') {
+          const currentDate = new Date();
+          const startOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            1
+          );
+          const endOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1,
+            0
+          );
+          
+          params.startDate = startOfMonth.toISOString();
+          params.endDate = endOfMonth.toISOString();
         }
-
+  
         const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, { params });
         setTotalClicks(response.data.totalClicks);
       } catch (error) {
         console.error('Errore nel recupero dei click totali:', error);
       }
     };
-
+  
     fetchTotalClicks();
-  }, [user, viewMode, monthRange]); // Aggiungi viewMode e monthRange alle dipendenze
+  }, [user, viewMode, monthRange]);
 
   useEffect(() => {
     const fetchClicksHistory = async () => {
@@ -88,26 +102,35 @@ const Dashboard = () => {
 
   // First, update the yearFilteredData calculation to consider viewMode
   const yearFilteredData = useMemo(() => {
-    // Per la vista annuale, prendiamo tutti i dati
+    const currentDate = new Date();
     let filteredConversions;
+  
     if (viewMode === 'yearly') {
-      filteredConversions = [...conversions]; // Tutti i dati
+      filteredConversions = [...conversions];
+    } else if (viewMode === 'daily') {
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      
+      filteredConversions = conversions.filter(conv => {
+        const convDate = new Date(conv.date);
+        return convDate.getMonth() === currentMonth && 
+               convDate.getFullYear() === currentYear;
+      });
     } else {
-      // Per la vista mensile, manteniamo il filtro esistente
-      const endDate = new Date();
+      const endDate = currentDate;
       const startDate = new Date();
       startDate.setMonth(endDate.getMonth() - monthRange + 1);
-
+  
       filteredConversions = conversions.filter(conv => {
         const convDate = new Date(conv.date);
         return convDate >= startDate && convDate <= endDate;
       });
     }
-
+  
     const cplCount = filteredConversions.filter(conv => conv.type === 'cpl').length;
     const cpaCount = filteredConversions.filter(conv => conv.type === 'cpa').length;
     const totalConversions = cplCount + cpaCount;
-
+  
     return {
       cplCount,
       cpaCount,
@@ -115,16 +138,28 @@ const Dashboard = () => {
       cplPercentage: totalConversions > 0 ? ((cplCount / totalConversions) * 100).toFixed(2) : 0,
       cpaPercentage: totalConversions > 0 ? ((cpaCount / totalConversions) * 100).toFixed(2) : 0,
     };
-  }, [conversions, monthRange, viewMode]); // Aggiunto viewMode alle dipendenze
+  }, [conversions, monthRange, viewMode]);
 
   // Update filteredData calculation
   const filteredData = useMemo(() => {
+    const currentDate = new Date();
+
     if (viewMode === 'yearly') {
       // Per la vista annuale, restituiamo tutti i dati
       return [...conversions];
+    } else if (viewMode === 'daily') {
+      // Per la vista giornaliera, filtriamo per il mese corrente
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+
+      return conversions.filter(conv => {
+        const convDate = new Date(conv.date);
+        return convDate.getMonth() === currentMonth &&
+          convDate.getFullYear() === currentYear;
+      });
     } else {
       // Per la vista mensile, manteniamo il filtro esistente
-      const endDate = new Date();
+      const endDate = currentDate;
       const startDate = new Date();
       startDate.setMonth(endDate.getMonth() - monthRange + 1);
 
@@ -133,7 +168,7 @@ const Dashboard = () => {
         return convDate >= startDate && convDate <= endDate;
       });
     }
-  }, [conversions, monthRange, viewMode]); // Aggiunto viewMode alle dipendenze
+  }, [conversions, monthRange, viewMode]);
 
   // Update totalPeriodCommissions calculation
   const totalPeriodCommissions = useMemo(() => {
@@ -243,26 +278,72 @@ const Dashboard = () => {
     }));
   }, [filteredData, monthRange]);
 
+  const dailyCommissions = useMemo(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    // Create array for all days in current month
+    const days = new Array(daysInMonth).fill(0).map((_, index) => {
+      const day = index + 1;
+      return {
+        date: new Date(currentYear, currentMonth, day),
+        dayLabel: `${day}/${currentMonth + 1}`,
+        paidCommissions: 0,
+        onholdCommissions: 0,
+        validatedCommissions: 0
+      };
+    });
+
+    // Filter conversions for current month
+    const currentMonthConversions = conversions.filter(conversion => {
+      const convDate = new Date(conversion.date);
+      return convDate.getMonth() === currentMonth &&
+        convDate.getFullYear() === currentYear;
+    });
+
+    // Populate daily data
+    currentMonthConversions.forEach(conversion => {
+      const convDate = new Date(conversion.date);
+      const dayIndex = convDate.getDate() - 1;
+      const commission = parseFloat(conversion.commission) || 0;
+
+      if (conversion.status === 'paid') {
+        days[dayIndex].paidCommissions += commission;
+      } else if (conversion.status === 'onhold') {
+        days[dayIndex].onholdCommissions += commission;
+      } else if (conversion.status === 'validated') {
+        days[dayIndex].validatedCommissions += commission;
+      }
+    });
+
+    return days.map(day => ({
+      ...day,
+      paidCommissions: Number(day.paidCommissions.toFixed(2)),
+      onholdCommissions: Number(day.onholdCommissions.toFixed(2)),
+      validatedCommissions: Number(day.validatedCommissions.toFixed(2))
+    }));
+  }, [conversions]);
+
   // Componente per i tab dei grafici
   const ChartTabs = () => (
     <div className="flex gap-4 mb-6">
       <button
         onClick={() => setActiveChart('commissions')}
-        className={`px-4 py-2 rounded-lg transition-colors ${
-          activeChart === 'commissions'
-            ? 'bg-light-green text-dark-green'
-            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-        }`}
+        className={`px-4 py-2 rounded-lg transition-colors ${activeChart === 'commissions'
+          ? 'bg-light-green text-dark-green'
+          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+          }`}
       >
         Commissions
       </button>
       <button
         onClick={() => setActiveChart('clicks')}
-        className={`px-4 py-2 rounded-lg transition-colors ${
-          activeChart === 'clicks'
-            ? 'bg-light-green text-dark-green'
-            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-        }`}
+        className={`px-4 py-2 rounded-lg transition-colors ${activeChart === 'clicks'
+          ? 'bg-light-green text-dark-green'
+          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+          }`}
       >
         Clicks & Conversions
       </button>
@@ -275,7 +356,13 @@ const Dashboard = () => {
       case 'commissions':
         return (
           <CommissionsChart
-            data={viewMode === 'yearly' ? yearlyCommissions : monthlyCommissions}
+            data={
+              viewMode === 'yearly'
+                ? yearlyCommissions
+                : viewMode === 'daily'
+                  ? dailyCommissions
+                  : monthlyCommissions
+            }
             viewMode={viewMode}
           />
         );
@@ -299,7 +386,6 @@ const Dashboard = () => {
         return null;
     }
   };
-
 
   if (loading) return <div className="p-4">Caricamento...</div>;
   if (error) return <div className="p-4 text-red-500">Errore: {error}</div>;
@@ -348,10 +434,19 @@ const Dashboard = () => {
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4">
           <button
+            onClick={() => setViewMode('daily')}
+            className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'daily'
+              ? 'bg-light-green text-dark-green'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+          >
+            Daily View
+          </button>
+          <button
             onClick={() => setViewMode('monthly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'monthly'
-                ? 'bg-light-green text-dark-green'
-                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              ? 'bg-light-green text-dark-green'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
           >
             Monthly View
@@ -359,8 +454,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('yearly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'yearly'
-                ? 'bg-light-green text-dark-green'
-                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              ? 'bg-light-green text-dark-green'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
           >
             Yearly View
@@ -374,8 +469,8 @@ const Dashboard = () => {
                 key={option.value}
                 onClick={() => setMonthRange(option.value)}
                 className={`px-4 py-2 rounded-lg transition-colors ${monthRange === option.value
-                    ? 'bg-light-green text-dark-green'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-light-green text-dark-green'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 {option.label}
@@ -418,8 +513,8 @@ const Dashboard = () => {
                       <div className="text-right">
                         <p className="font-bold text-gray-900">€ {parseFloat(conv.commission).toFixed(2)}</p>
                         <span className={`text-sm px-2 py-1 rounded-full ${conv.status === 'paid' ? 'bg-green-100 text-dark-green' :
-                            conv.status === 'onhold' ? 'bg-yellow-100 text-yellow-600' :
-                              'bg-blue-100 text-dark-blue'
+                          conv.status === 'onhold' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-blue-100 text-dark-blue'
                           }`}>
                           {conv.type.toUpperCase()}
                         </span>
@@ -438,8 +533,8 @@ const Dashboard = () => {
           {/* Placeholder for signup to deposit chart - you'll need to implement this */}
           <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
             <p className="text-gray-500">Signup/Deposit ratio visualization</p>
-              <p className="text-sm text-gray-400">({yearFilteredData.cpaPercentage}%)</p>
-              <p className="text-sm text-gray-400">({yearFilteredData.cplPercentage}%)</p>
+            <p className="text-sm text-gray-400">({yearFilteredData.cpaPercentage}%)</p>
+            <p className="text-sm text-gray-400">({yearFilteredData.cplPercentage}%)</p>
           </div>
         </div>
       </div>

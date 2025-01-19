@@ -15,7 +15,8 @@ const ThreadList = () => {
     subject: '',
     content: ''
   });
-  
+  const [unreadMessages, setUnreadMessages] = useState(new Set());
+
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -35,6 +36,17 @@ const ThreadList = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/threads/${threadId}/messages`);
       setMessages(response.data);
+      // Mark messages as read when opening thread
+      await axios.post(`${API_BASE_URL}/threads/${threadId}/messages/read`, {
+        username: user
+      });
+
+      // Update unread state
+      setUnreadMessages(new Set(
+        response.data
+          .filter(msg => msg.sender !== user && !msg.readBy.includes(user))
+          .map(msg => msg._id)
+      ));
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -65,7 +77,7 @@ const ThreadList = () => {
         sender: user,
         content: newMessage
       });
-      
+
       setNewMessage('');
       fetchMessages(activeThread._id);
       fetchThreads(); // Aggiorna la lista dei thread per l'ultimo messaggio
@@ -85,13 +97,46 @@ const ThreadList = () => {
         creator: user,
         ...newThreadData
       });
-      
+
       setNewThreadData({ subject: '', content: '' });
       setIsNewThreadModalOpen(false);
       fetchThreads();
       setActiveThread(response.data);
     } catch (error) {
       console.error('Error creating thread:', error);
+    }
+  };
+
+  const handleThreadClick = async (thread) => {
+    setActiveThread(thread);
+    
+    try {
+      // Mark messages as read
+      await axios.post(`${API_BASE_URL}/threads/${thread._id}/messages/read`, {
+        username: user
+      });
+
+      // Update threads list to reflect read status
+      const updatedThreads = threads.map(t => {
+        if (t._id === thread._id && t.lastMessage) {
+          return {
+            ...t,
+            lastMessage: {
+              ...t.lastMessage,
+              readBy: [...(t.lastMessage.readBy || []), user]
+            }
+          };
+        }
+        return t;
+      });
+      setThreads(updatedThreads);
+
+      // Update navbar unread count immediately
+      if (window.updateNavbarUnreadCount) {
+        window.updateNavbarUnreadCount();
+      }
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
     }
   };
 
@@ -125,16 +170,22 @@ const ThreadList = () => {
           {threads.map(thread => (
             <div
               key={thread._id}
-              onClick={() => setActiveThread(thread)}
-              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 ${
-                activeThread?._id === thread._id ? 'bg-gray-100' : ''
-              }`}
+              onClick={() => handleThreadClick(thread)}
+              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 ${activeThread?._id === thread._id ? 'bg-gray-100' : ''
+                }`}
             >
               <div className="flex justify-between items-start">
-                <div className="font-medium text-gray-800">{thread.subject}</div>
+                <div className="font-medium text-gray-800 flex items-center gap-2">
+                  {thread.subject}
+                  {thread.lastMessage &&
+                    !thread.lastMessage.readBy.includes(user) &&
+                    thread.lastMessage.sender !== user && (
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    )}
+                </div>
                 <div className="text-xs text-gray-500">
-                  {new Date(thread.lastActivity).toLocaleTimeString([], { 
-                    hour: '2-digit', 
+                  {new Date(thread.lastActivity).toLocaleTimeString([], {
+                    hour: '2-digit',
                     minute: '2-digit'
                   })}
                 </div>
@@ -164,11 +215,10 @@ const ThreadList = () => {
                   className={`flex ${message.sender === user ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[60%] rounded-2xl px-4 py-2 ${
-                      message.sender === user
-                        ? 'bg-dark-green text-white'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
+                    className={`max-w-[60%] rounded-2xl px-4 py-2 ${message.sender === user
+                      ? 'bg-dark-green text-white'
+                      : 'bg-gray-100 text-gray-800'
+                      }`}
                   >
                     <div className="text-sm">{message.content}</div>
                     <div className="text-xs mt-1 opacity-75">

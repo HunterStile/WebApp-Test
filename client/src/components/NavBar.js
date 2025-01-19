@@ -1,14 +1,17 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { AdminAuthContext } from '../context/AdminAuthContext';
 import { Link } from 'react-router-dom';
 import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, Briefcase, Calendar, Store, User, Settings } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
+import API_BASE_URL from '../config';
+import axios from 'axios';
 
 function Navbar() {
   const { user, logout: logoutUser } = useContext(AuthContext);
   const { admin, logout: logoutAdmin } = useContext(AdminAuthContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -22,6 +25,36 @@ function Navbar() {
     }
   };
 
+   // Add function to update unread count
+   const updateUnreadCount = async () => {
+    if (user) {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/threads/unread-count/${user}`);
+        setUnreadCount(response.data.unreadCount);
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+      }
+    }
+  };
+
+   // Export the update function to window object to make it accessible
+   useEffect(() => {
+    if (window) {
+      window.updateNavbarUnreadCount = updateUnreadCount;
+    }
+    return () => {
+      if (window) {
+        delete window.updateNavbarUnreadCount;
+      }
+    };
+  }, [user]);
+
+  useEffect(() => {
+    updateUnreadCount();
+    const interval = setInterval(updateUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+  
   return (
     <>
       {/* Mobile Header */}
@@ -41,7 +74,7 @@ function Navbar() {
       {/* Sidebar Navigation */}
       <div className={`fixed top-0 left-0 w-64 bg-white border-r border-gray-200 flex flex-col h-screen transition-transform duration-300 ease-in-out z-40
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        
+
         {/* Logo */}
         <div className="p-6 hidden lg:block">
           <Link to="/" className="flex items-center gap-2">
@@ -81,7 +114,14 @@ function Navbar() {
                 <span>Campaigns</span>
               </Link>
               <Link to="/messages" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <MessageCircle size={20} />
+                <div className="relative">
+                  <MessageCircle size={20} />
+                  {unreadCount > 0 && (
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </div>
+                  )}
+                </div>
                 <span>Messages</span>
               </Link>
               <Link to="/announcements" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">

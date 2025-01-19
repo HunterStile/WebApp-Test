@@ -1,90 +1,221 @@
-import React, { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { AdminAuthContext } from '../context/AdminAuthContext';
-import { Link } from 'react-router-dom';
+import React, { useRef } from 'react';
+import { Globe, Monitor, Building2, BarChart3 } from 'lucide-react';
+import flogo from "../assets/images/flogo.png"
+import flogowhite from "../assets/images/flogowhite.png"
+import mapbase from "../assets/images/mapbase.png"
+import dashboard3d from "../assets/images/dashboard3d.png"
+import CampaignLogo from '../components/utils/CampaignLogo';
 
-function Home() {
-  const { user } = useContext(AuthContext);
-  const { admin } = useContext(AdminAuthContext);
+const partners = [
+  'BETANO - Exclusive',
+  'RABONA - Bonus Deal',
+  'TIKTAKBET - Best Offer',
+  'CAZEURS - Special Promo',
+  'BETANO - Exclusive',
+  'BETANO - Exclusive',
+  'BETANO - Exclusive',
+  'BETANO - Exclusive',
+  'YBETS - Special Promo',
+  'CASINOTOGHETER - Special Promo',
+];
 
+
+
+const LandingPage = () => {
+
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth / 2; // Scroll di metà larghezza
+      scrollRef.current.scrollTo({
+        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-blue-800 text-white p-8 shadow-md">
-        <h1 className="text-4xl font-bold text-center">Welcome to MyApp!</h1>
-        <p className="text-center text-lg mt-2">
-          Your one-stop solution for managing campaigns, conversions, and more.
-        </p>
+      <header className="mx-auto px-4 py-4 flex justify-between items-center">
+        <nav className="flex space-x-6">
+          <a href="#" className="text-gray-600">Home</a>
+          <a href="#" className="text-gray-600">About Us</a>
+          <a href="#" className="text-gray-600">Contact</a>
+        </nav>
+        <img src={flogo} className='h-8' />
+        <div className="flex space-x-4">
+          <button className="px-4 py-2 text-gray-600 rounded-full border">Log In</button>
+          <button className="px-4 py-2 bg-black text-white rounded-full">Sign up</button>
+        </div>
       </header>
+      <div class="border-t border-gray-300"></div>
 
-      {/* Main content */}
-      <main className="py-12">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Card 1: General Overview */}
-            <div className="bg-blue-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <h3 className="text-2xl font-semibold mb-4">Overview</h3>
-              <p className="text-blue-200 mb-4">
-                Get a quick overview of your account, including your active campaigns, conversions, and performance metrics.
-              </p>
-              <Link
-                to="/dashboard"
-                className="text-orange-400 hover:text-orange-500 font-medium"
-              >
-                Go to Dashboard
-              </Link>
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-5xl font-bold mb-6">Leading Affiliate Network<br />in the iGaming industry</h1>
+        <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
+          Fast Affiliation is a network for gambling, online poker, and sports betting, offering tools and support to maximize your engagement and earnings.
+        </p>
+        <div className="max-w-4xl mx-auto">
+          <img
+            src={dashboard3d}
+            alt="Dashboard Preview"
+            className="w-full"
+          />
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="container mx-auto px-4 py-16">
+      <h2 className="text-2xl font-semibold text-center mb-12">Our Partners</h2>
+      <div className="relative group"> {/* Aggiunto `group` per gestione hover */}
+        {/* Freccia Sinistra */}
+        <button
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-800 text-white rounded-full shadow-md hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={() => scroll('left')}
+        >
+          &#9664; {/* Icona freccia sinistra */}
+        </button>
+        {/* Contenitore Scrollabile */}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-hidden gap-12 scroll-smooth"
+        >
+          {partners.map((campaignName, index) => (
+            <div key={index} className="w-48 h-20 flex-shrink-0">
+              <CampaignLogo campaignName={campaignName} />
             </div>
+          ))}
+        </div>
+        {/* Freccia Destra */}
+        <button
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-800 text-white rounded-full shadow-md hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={() => scroll('right')}
+        >
+          &#9654; {/* Icona freccia destra */}
+        </button>
+      </div>
+    </section>
 
-            {/* Card 2: Campaign List - Only visible for normal users */}
-            {user && !admin && (
-              <div className="bg-blue-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <h3 className="text-2xl font-semibold mb-4">Campaigns</h3>
-                <p className="text-blue-200 mb-4">
-                  Explore and manage your ongoing campaigns, track performance, and optimize your results.
-                </p>
-                <Link
-                  to="/campaignlist"
-                  className="text-orange-400 hover:text-orange-500 font-medium"
-                >
-                  View Campaigns
-                </Link>
-              </div>
-            )}
+      {/* Features Section */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-2xl font-semibold text-center mb-12">why choose us</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <FeatureCard
+            icon={<Monitor className="w-8 h-8 items-center text-teal-600" />}
+            title="Tailored Services"
+            features={[
+              "Personalized Affiliate Manager",
+              "Arrangement of exclusive deals",
+              "Built-in Messenger for direct communication with our Support Team"
+            ]}
+          />
+          <FeatureCard
+            icon={<Building2 className="w-8 h-8 items-center text-teal-600" />}
+            title="Commission Payments"
+            features={[
+              "Monthly payment sessions each month",
+              "Choose from 5 payment methods, including Bitcoin",
+              "Adjustable payout according to your preferences"
+            ]}
+          />
+          <FeatureCard
+            icon={<Globe className="w-8 h-8 text-teal-600" />}
+            title="Campaign Portfolio"
+            features={[
+              "Collaborations with leading operators",
+              "Diverse verticals: Sportsbook, Casino, Poker",
+              "Flexible deal options: CPA, Revenue Share, Hybrid"
+            ]}
+          />
+          <FeatureCard
+            icon={<BarChart3 className="w-8 h-8 text-teal-600" />}
+            title="Affiliate Rewards"
+            features={[
+              "Loyalty Program: Unlock extra rewards through our VIP system",
+              "Referral Program: Receive 5% commission on referrals"
+            ]}
+          />
+        </div>
+      </section>
 
-            {/* Card 3: Admin Area - Only visible for admins */}
-            {admin && (
-              <div className="bg-blue-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <h3 className="text-2xl font-semibold mb-4">Admin Dashboard</h3>
-                <p className="text-blue-200 mb-4">
-                  Manage users, campaigns, and perform administrative tasks.
-                </p>
-                <Link
-                  to="/admin"
-                  className="text-orange-400 hover:text-orange-500 font-medium"
-                >
-                  Go to Admin Dashboard
-                </Link>
-              </div>
-            )}
+      {/* Stats Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="flex justify-center space-x-16">
+          <StatCard number="50+" label="Campaigns" />
+          <StatCard number="120+" label="Affiliates" />
+          <StatCard number="20+" label="Brands" />
+        </div>
+      </section>
 
-            {/* Card 4: More Features */}
-            <div className="bg-blue-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <h3 className="text-2xl font-semibold mb-4">More Features</h3>
-              <p className="text-blue-200 mb-4">
-                Discover more about affiliations, events, and your store with us.
-              </p>
-              <Link
-                to="/more"
-                className="text-orange-400 hover:text-orange-500 font-medium"
-              >
-                Explore More
-              </Link>
+      {/* Global Map Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <p className="text-xl mb-8">provides global affiliate support with swift solutions for all gaming sectors.</p>
+        <div className="max-w-4xl mx-auto">
+          <img
+            src={mapbase}
+            alt="Global Map"
+            className="w-full"
+          />
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl font-semibold mb-4">Ready to begin?</h2>
+        <p className="mb-8">Sign up today or reach out for more details!</p>
+        <div className="flex justify-center space-x-4">
+          <button className="px-6 py-3 bg-black text-white rounded-full">Sign up</button>
+          <button className="px-6 py-3 border border-gray-300 rounded-full">Contact us</button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-teal-800 text-white py-12">
+        <div className="mx-auto px-4">
+          <div className="text-center">
+            <div className="flex justify-center">
+              <img src={flogowhite} alt="Fast Affiliation" className="h-8" />
+              <span className="font-bold text-center text-white mb-6 mt-4">Fast Affiliation</span>
             </div>
+            <nav className="flex justify-center space-x-6 mb-8">
+              <a href="#" className="text-white">Home</a>
+              <a href="#" className="text-white">About</a>
+              <a href="#" className="text-white">Service</a>
+              <a href="#" className="text-white">Contact Us</a>
+            </nav>
+            <div className="flex justify-center space-x-4 mb-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-8 h-8 bg-teal-700 rounded-full"></div>
+              ))}
+            </div>
+            <div className="text-sm">Copyright Fast Affiliation</div>
           </div>
         </div>
-      </main>
+      </footer>
     </div>
   );
-}
+};
 
-export default Home;
+const FeatureCard = ({ icon, title, features }) => (
+  <div className="p-6 bg-gray-50 rounded-lg">
+    <div className="mb-4">{icon}</div>
+    <h3 className="text-lg font-semibold mb-4">{title}</h3>
+    <ul className="space-y-2">
+      {features.map((feature, index) => (
+        <li key={index} className="text-sm text-gray-600">{feature}</li>
+      ))}
+    </ul>
+  </div>
+);
+
+const StatCard = ({ number, label }) => (
+  <div className="text-center">
+    <div className="text-4xl font-bold mb-2">{number}</div>
+    <div className="text-gray-600">{label}</div>
+  </div>
+);
+
+export default LandingPage;

@@ -24,13 +24,11 @@ const importLogo = (campaignName) => {
 
 const CampaignLogo = ({ campaignName, className = '' }) => {
   return (
-    <div className="relative w-17 h-8">
       <img
         src={importLogo(campaignName)}
         alt={`${campaignName} logo`}
         className={`w-full h-full object-contain ${className}`}
       />
-    </div>
   );
 };
 

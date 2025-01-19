@@ -2,13 +2,37 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const CommissionsChart = ({ data, viewMode }) => {
-  const xDataKey = viewMode === 'yearly' ? 'year' : 'monthLabel';
+  const getXDataKey = () => {
+    switch(viewMode) {
+      case 'yearly':
+        return 'year';
+      case 'monthly':
+        return 'monthLabel';
+      case 'daily':
+        return 'dayLabel';
+      default:
+        return 'monthLabel';
+    }
+  };
+
+  const getChartTitle = () => {
+    switch(viewMode) {
+      case 'yearly':
+        return 'Annual Commission Trend';
+      case 'monthly':
+        return 'Monthly Commission Trend';
+      case 'daily':
+        return 'Daily Commission Trend';
+      default:
+        return 'Commission Trend';
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-900">
-          {viewMode === 'yearly' ? 'Annual Commission Trend' : 'Monthly Commission Trend'}
+          {getChartTitle()}
         </h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -30,7 +54,7 @@ const CommissionsChart = ({ data, viewMode }) => {
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis
-              dataKey={xDataKey}
+              dataKey={getXDataKey()}
               tick={{ fill: '#4B5563' }}
               angle={viewMode === 'yearly' ? 0 : -45}
               textAnchor={viewMode === 'yearly' ? 'middle' : 'end'}

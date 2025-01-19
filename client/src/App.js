@@ -27,17 +27,21 @@ import './App.css';
 
 function Layout({ children }) {
   const location = useLocation();
-  
-  // Mostra la navbar solo se il percorso non è "/"
+
+  // Mostra la navbar solo se il percorso non è "/" o "/login2"
   const showNavbar = !['/', '/login2'].includes(location.pathname);
+
+  // Nasconde il footer se il percorso è "/messages o /admin/messages"
+  const hiddenPaths = ['/messages', '/admin/messages']; // Aggiungi qui altri percorsi
+  const showFooter = !hiddenPaths.includes(location.pathname);
 
   return (
     <div className="App min-h-screen bg-white">
       {showNavbar && <Navbar />}
       <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen`}>
-        <div className="container mx-auto p-4">{children}</div>
+        <div className="mx-auto p-4">{children}</div>
       </div>
-      <Footer />
+      {showFooter && <Footer />}
     </div>
   );
 }

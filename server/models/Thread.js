@@ -5,7 +5,9 @@ const ThreadSchema = new mongoose.Schema({
   subject: { type: String, required: true }, // Titolo del thread
   isOpen: { type: Boolean, default: true }, // Stato del thread
   lastActivity: { type: Date, default: Date.now }, // Ultima attività
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  targetUser: { type: String },
+  isAdminCreated: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Thread', ThreadSchema);

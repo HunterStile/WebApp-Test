@@ -6,14 +6,21 @@ const Message = require('../models/Message');
 
 // Crea nuovo thread
 router.post('/', async (req, res) => {
-  const { creator, subject, content } = req.body;
+  const { creator, subject, content, isAdminCreated, targetUser } = req.body;
   
   try {
-    const thread = await Thread.create({ creator, subject });
+    const thread = await Thread.create({ 
+      creator, 
+      subject,
+      isAdminCreated: isAdminCreated || false,
+      targetUser: targetUser || creator // Salviamo l'utente destinatario
+    });
+    
     await Message.create({
       threadId: thread._id,
-      sender: creator,
-      content
+      sender: isAdminCreated ? 'admin' : creator,
+      content,
+      isAdminMessage: isAdminCreated || false
     });
     
     res.status(201).json(thread);
@@ -113,6 +120,49 @@ router.post('/:threadId/messages', async (req, res) => {
     res.status(201).json(message);
   } catch (error) {
     res.status(500).json({ message: 'Errore nell\'invio del messaggio' });
+  }
+});
+
+router.get('/unread-count/:username', async (req, res) => {
+  try {
+    // Prima troviamo i thread dove l'utente è il destinatario
+    const userThreads = await Thread.find({
+      $or: [
+        { creator: req.params.username },
+        // Aggiungiamo questa condizione per i thread creati dall'admin per questo utente specifico
+        { isAdminCreated: true, targetUser: req.params.username }
+      ]
+    }).select('_id');
+
+    const threadIds = userThreads.map(thread => thread._id);
+
+    // Contiamo i messaggi non letti solo nei thread destinati all'utente
+    const unreadCount = await Message.countDocuments({
+      threadId: { $in: threadIds }, // Solo nei thread dell'utente
+      readBy: { $ne: req.params.username },
+      sender: { $ne: req.params.username }
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Error fetching unread count:', error);
+    res.status(500).json({ message: 'Error fetching unread count' });
+  }
+});
+
+router.post('/:threadId/messages/read', async (req, res) => {
+  const { username } = req.body;
+  try {
+    await Message.updateMany(
+      { 
+        threadId: req.params.threadId,
+        readBy: { $ne: username }
+      },
+      { $addToSet: { readBy: username } }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Error marking messages as read' });
   }
 });
 

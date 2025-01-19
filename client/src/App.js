@@ -31,8 +31,9 @@ function Layout({ children }) {
   // Mostra la navbar solo se il percorso non è "/" o "/login2"
   const showNavbar = !['/', '/login2'].includes(location.pathname);
 
-  // Nasconde il footer se il percorso è "/messages"
-  const showFooter = location.pathname !== '/messages';
+  // Nasconde il footer se il percorso è "/messages o /admin/messages"
+  const hiddenPaths = ['/messages', '/admin/messages']; // Aggiungi qui altri percorsi
+  const showFooter = !hiddenPaths.includes(location.pathname);
 
   return (
     <div className="App min-h-screen bg-white">

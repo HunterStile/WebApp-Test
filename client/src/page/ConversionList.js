@@ -52,19 +52,28 @@ const ConversionList = () => {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="text-[#81a1c1]">Caricamento conversioni...</div>
+      <div className="text-gray-600">Loading conversions...</div>
     </div>
   );
 
   if (error) return (
     <div className="flex items-center justify-center h-64">
-      <div className="text-red-400">Errore: {error}</div>
+      <div className="text-red-600">Error: {error}</div>
     </div>
   );
 
   const uniqueTypes = [...new Set(conversions?.map(c => c.type) || [])];
   const uniqueStatuses = [...new Set(conversions?.map(c => c.status) || [])];
   const uniqueCampaignStatuses = [...new Set(conversions?.map(c => c.campaign_status) || [])];
+
+  // Calcola statistiche per le card
+  const getTotalCommission = () => {
+    return filteredConversions.reduce((sum, conv) => sum + parseFloat(conv.commission), 0).toFixed(2);
+  };
+
+  const getStatusCount = (status) => {
+    return filteredConversions.filter(conv => conv.status === status).length;
+  };
 
   const resetFilters = () => {
     setFilters({
@@ -84,14 +93,35 @@ const ConversionList = () => {
   );
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-[#81a1c1] border-b-2 border-[#5e81ac] pb-2">
-        Conversion Management
-      </h1>
+    <div className="p-8 bg-white rounded-xl">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-xl font-semibold text-gray-900">Conversion Management</h1>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Total Conversions</h3>
+          <p className="text-4xl text-center font-bold">{filteredConversions.length}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Total Commission</h3>
+          <p className="text-4xl text-center font-bold">€ {getTotalCommission()}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Validated</h3>
+          <p className="text-4xl text-center font-bold">{getStatusCount('validated')}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Pending</h3>
+          <p className="text-4xl text-center font-bold">{getStatusCount('pending')}</p>
+        </div>
+      </div>
 
       {/* Filters Section */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-wrap gap-4 items-center justify-between bg-[#3b4252] p-4 rounded-lg">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+        <div className="flex flex-wrap gap-4 items-center justify-between">
           {/* Search Bar */}
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -100,7 +130,7 @@ const ConversionList = () => {
               placeholder="Search by campaign name or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -109,7 +139,7 @@ const ConversionList = () => {
             <select
               value={filters.type}
               onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Types</option>
               {uniqueTypes.map(type => (
@@ -120,7 +150,7 @@ const ConversionList = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Statuses</option>
               {uniqueStatuses.map(status => (
@@ -131,7 +161,7 @@ const ConversionList = () => {
             <select
               value={filters.campaign_status}
               onChange={(e) => setFilters(prev => ({ ...prev, campaign_status: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Campaign Statuses</option>
               {uniqueCampaignStatuses.map(status => (
@@ -142,7 +172,7 @@ const ConversionList = () => {
             <select
               value={filters.dateRange}
               onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Time</option>
               <option value="7days">Last 7 Days</option>
@@ -151,8 +181,16 @@ const ConversionList = () => {
             </select>
 
             <button
-              onClick={resetFilters}
-              className="flex items-center gap-2 px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] hover:bg-[#434c5e]"
+              onClick={() => {
+                setFilters({
+                  status: '',
+                  type: '',
+                  campaign_status: '',
+                  dateRange: ''
+                });
+                setSearchTerm('');
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-gray-600 hover:bg-gray-100"
             >
               <X className="w-4 h-4" />
               Reset
@@ -162,93 +200,110 @@ const ConversionList = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse bg-[#3b4252] text-[#e1e1e1]">
-          <thead>
-            <tr className="bg-[#434c5e]">
-              <th className="p-3 text-left border border-[#4c566a]">ID Conversione</th>
-              <th className="p-3 text-left border border-[#4c566a]">Nome Campagna</th>
-              <th className="p-3 text-left border border-[#4c566a]">Data</th>
-              <th className="p-3 text-left border border-[#4c566a]">Tipo</th>
-              <th className="p-3 text-left border border-[#4c566a]">Stato</th>
-              <th className="p-3 text-left border border-[#4c566a]">Commissione</th>
-              <th className="p-3 text-left border border-[#4c566a]">Stato Campagna</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentConversions.map((conv) => (
-              <tr key={conv.conversion_id || conv._id} className="border-b border-[#4c566a] hover:bg-[#4c566a]/30">
-                <td className="p-3 border border-[#4c566a]">{conv.conversion_id}</td>
-                <td className="p-3 border border-[#4c566a]">{conv.campaign_name}</td>
-                <td className="p-3 border border-[#4c566a]">
-                  {new Date(conv.date).toLocaleDateString('it-IT', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                  })}
-                </td>
-                <td className="p-3 border border-[#4c566a]">{conv.type}</td>
-                <td className="p-3 border border-[#4c566a]">
-                  <span className={`px-2 py-1 rounded-full text-xs
-                    ${conv.status === 'paid' ? 'bg-green-900/30 text-green-300' :
-                      conv.status === 'validated' ? 'bg-blue-900/30 text-blue-300' :
-                        conv.status === 'refused' ? 'bg-red-900/30 text-red-300' :
-                          'bg-yellow-900/30 text-yellow-300'}`}
-                  >
-                    {conv.status}
-                  </span>
-                </td>
-                <td className="p-3 border border-[#4c566a]">{conv.commission}</td>
-                <td className="p-3 border border-[#4c566a]">{conv.campaign_status}</td>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="p-4 text-left text-gray-600 font-semibold">Conversion ID</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Campaign Name</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Date</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Type</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Status</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Commission</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Campaign Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between bg-[#3b4252] p-4 rounded-lg mt-4">
-        <div className="text-[#e1e1e1]">
-          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredConversions.length)} of {filteredConversions.length} entries
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredConversions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((conv) => (
+                <tr key={conv.conversion_id} className="hover:bg-gray-50">
+                  <td className="p-4 text-gray-900">{conv.conversion_id}</td>
+                  <td className="p-4 text-gray-900">{conv.campaign_name}</td>
+                  <td className="p-4 text-gray-600">
+                    {new Date(conv.date).toLocaleDateString('it-IT', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })}
+                  </td>
+                  <td className="p-4 text-gray-600">{conv.type}</td>
+                  <td className="p-4">
+                    <StatusBadge status={conv.status} />
+                  </td>
+                  <td className="p-4 text-gray-900">€ {parseFloat(conv.commission).toFixed(2)}</td>
+                  <td className="p-4 text-gray-600">{conv.campaign_status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronsLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 border-t border-gray-100">
+          <div className="text-gray-600">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredConversions.length)} of {filteredConversions.length} entries
+          </div>
 
-          <span className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1]">
-            {currentPage} of {totalPages}
-          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
 
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronsRight className="w-4 h-4" />
-          </button>
+            <span className="px-4 py-2 bg-gray-50 rounded-lg text-gray-600">
+              {currentPage} of {Math.ceil(filteredConversions.length / itemsPerPage)}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredConversions.length / itemsPerPage), prev + 1))}
+              disabled={currentPage === Math.ceil(filteredConversions.length / itemsPerPage)}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(Math.ceil(filteredConversions.length / itemsPerPage))}
+              disabled={currentPage === Math.ceil(filteredConversions.length / itemsPerPage)}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  );
+};
+
+// Status Badge Component
+const StatusBadge = ({ status }) => {
+  const getStatusStyle = () => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-50 text-green-600';
+      case 'validated':
+        return 'bg-blue-50 text-blue-600';
+      case 'refused':
+        return 'bg-red-50 text-red-600';
+      default:
+        return 'bg-yellow-50 text-yellow-600';
+    }
+  };
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-sm ${getStatusStyle()}`}>
+      {status}
+    </span>
   );
 };
 

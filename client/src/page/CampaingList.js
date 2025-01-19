@@ -183,17 +183,47 @@ const CampaignTable = () => {
   );
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-[#81a1c1] border-b-2 border-[#5e81ac] pb-2">Campaign Management</h1>
+    <div className="p-8 bg-white rounded-xl">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-xl font-semibold text-gray-900">Campaign Management</h1>
+      </div>
 
       {message && (
-        <div className={`p-2 mb-4 rounded ${message.includes('Failed') ? 'bg-red-900/20 text-red-300' : 'bg-green-900/20 text-green-300'}`}>
+        <div className={`p-4 mb-6 rounded-xl ${
+          message.includes('Failed') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+        }`}>
           {message}
         </div>
       )}
+
+      {/* Stats Cards - Matching Dashboard Style */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Total Campaigns</h3>
+          <p className="text-4xl text-center font-bold">{campaigns.length}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Active Campaigns</h3>
+          <p className="text-4xl text-center font-bold">
+            {campaigns.filter(c => c.status === 'attivo').length}
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Approved</h3>
+          <p className="text-4xl text-center font-bold">
+            {userRequests.approved.length}
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-gray-600 text-xl text-center mb-2">Pending</h3>
+          <p className="text-4xl text-center font-bold">{userRequests.pending.length}</p>
+        </div>
+      </div>
+
       {/* Filters Section */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-wrap gap-4 items-center justify-between bg-[#3b4252] p-4 rounded-lg">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+        <div className="flex flex-wrap gap-4 items-center justify-between">
           {/* Search Bar */}
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -202,17 +232,16 @@ const CampaignTable = () => {
               placeholder="Search campaigns..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Filter Dropdowns */}
           <div className="flex flex-wrap gap-4">
-            {/* Type Filter */}
             <select
               value={filters.type}
               onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Types</option>
               {uniqueTypes.map(type => (
@@ -220,11 +249,10 @@ const CampaignTable = () => {
               ))}
             </select>
 
-            {/* Country Filter */}
             <select
               value={filters.country}
               onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Countries</option>
               {uniqueCountries.map(country => (
@@ -232,11 +260,10 @@ const CampaignTable = () => {
               ))}
             </select>
 
-            {/* Request Status Filter */}
             <select
               value={filters.requestStatus}
               onChange={(e) => setFilters(prev => ({ ...prev, requestStatus: e.target.value }))}
-              className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-[#81a1c1]"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Request Status</option>
               {requestStatuses.map(status => (
@@ -244,10 +271,9 @@ const CampaignTable = () => {
               ))}
             </select>
 
-            {/* Reset Filters Button */}
             <button
               onClick={resetFilters}
-              className="flex items-center gap-2 px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1] hover:bg-[#434c5e]"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-gray-600 hover:bg-gray-100"
             >
               <X className="w-4 h-4" />
               Reset
@@ -257,190 +283,211 @@ const CampaignTable = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed border-collapse bg-[#3b4252] text-[#e1e1e1]">
-          <colgroup>
-            <col className="w-1/4" />
-            <col className="w-1/6" />
-            <col className="w-1/6" />
-            <col className="w-1/7" />
-            <col className="w-1/6" />
-            <col className="w-1/6" />
-            <col className="w-1/6" />
-          </colgroup>
-          <thead>
-            <tr className="bg-[#434c5e]">
-              <th className="p-3 text-left border border-[#4c566a]">Brand Logo</th>
-              <th className="p-3 text-left border border-[#4c566a]">Campaign Name</th>
-              <th className="p-3 text-left border border-[#4c566a]">Type</th>
-              <th className="p-3 text-left border border-[#4c566a]">Country</th>
-              <th className="p-3 text-left border border-[#4c566a]">Commission Plan</th>
-              <th className="p-3 text-left border border-[#4c566a]">Stato richiesta</th>
-              <th className="p-3 text-left border border-[#4c566a]">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentCampaigns.map((campaign) => {
-              const status = getRequestStatus(campaign.name);
-              const requestDetails = getRequestDetails(campaign.name);
-              const isExpanded = expandedRows[campaign.name];
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="p-4 text-left text-gray-600 font-semibold">Brand Logo</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Campaign Name</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Type</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Country</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Commission Plan</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Status</th>
+                <th className="p-4 text-left text-gray-600 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {currentCampaigns.map((campaign) => {
+                const status = getRequestStatus(campaign.name);
+                const requestDetails = getRequestDetails(campaign.name);
+                const isExpanded = expandedRows[campaign.name];
 
-              return (
-                <React.Fragment key={campaign.name}>
-                  <tr className="border-b border-[#4c566a] hover:bg-[#4c566a]/30">
-                    <td className="p-3 border border-[#4c566a]">
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-2 h-2 rounded-full ${status != 'deactivated' && campaign.status === 'attivo' ? 'bg-green-500' : 'bg-red-500'}`} />
-                        <div className="relative w-17 h-8">
-                          <CampaignLogo campaignName={campaign.name} />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3 border border-[#4c566a]">
-                      <div className="flex items-center space-x-2">
-                        <span className="truncate">{campaign.mappedName || campaign.name} </span>
-                      </div>
-                    </td>
-                    <td className="p-3 border border-[#4c566a]">
-                      <span className="capitalize truncate">{campaign.type}</span>
-                    </td>
-                    <td className="p-3 border border-[#4c566a]">
-                      <div className="flex items-center space-x-2">
-                        <CountryFlag country={campaign.country} />
-                      </div>
-                    </td>
-                    <td className="p-3 border border-[#4c566a] cursor-pointer hover:bg-[#4c566a]" onClick={() => toggleRowExpansion(campaign.name)}>
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">{campaign.commissionPlan}</span>
-                        {isExpanded ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />}
-                      </div>
-                    </td>
-                    <td className="p-3 border border-[#4c566a]">
-                      <div className="truncate">
-                        {status === 'deactivated' && (
-                          <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Disattivata</span>
-                        )}
-                        {campaign.status === 'disattivo' && (
-                          <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Campagna Disattivata</span>
-                        )}
-                        {status === 'approved' && campaign.status === 'attivo' && (
-                          <span className="px-2 py-1 bg-green-900/30 text-green-300 rounded-full">Approved</span>
-                        )}
-                        {status === 'pending' && campaign.status === 'attivo' && (
-                          <span className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full">Pending</span>
-                        )}
-                        {status === 'rejected' && (
-                          <span className="px-2 py-1 bg-red-900/30 text-red-300 rounded-full">Rejected</span>
-                        )}
-                        {status === 'not_requested' && campaign.status === 'attivo' && (
-                          <span className="px-2 py-1 bg-gray-900/30 text-gray-300 rounded-full">Not Requested</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-3 border border-[#4c566a]">
-                      <div className="truncate">
-                        {status === 'approved' && campaign.status === 'attivo' && requestDetails.uniqueLink && (
-                          <div className="flex items-center space-x-2">
-                            <a
-                              href={API_BASE_URL + requestDetails.uniqueLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:text-blue-300 hover:underline"
-                            >
-                              View Link
-                            </a>
-                            <button
-                              onClick={() => copyToClipboard(API_BASE_URL + requestDetails.uniqueLink)}
-                              className="text-gray-400 hover:text-gray-200"
-                            >
-                              {copiedLink === API_BASE_URL + requestDetails.uniqueLink ? (
-                                <Check className="w-5 h-5 text-green-300" />
-                              ) : (
-                                <Copy className="w-5 h-5" />
-                              )}
-                            </button>
-                          </div>
-                        )}
-                        {status === 'not_requested' && campaign.status === 'attivo' && (
-                          <button
-                            onClick={() => handleRequestCampaign(campaign.name)}
-                            className="px-3 py-1 bg-blue-900/40 text-blue-300 rounded hover:bg-blue-900/60 flex items-center"
-                          >
-                            Request <ArrowRight className="ml-2 w-4 h-4" />
-                          </button>
-                        )}
-                        {(status === 'pending' || status === 'rejected' || campaign.status === 'disattivo' || status === 'deactivated') && (
-                          <span className="text-gray-400">No Action</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  {isExpanded && (
-                    <tr className="bg-[#2e3440]">
-                      <td colSpan="7" className="p-4 border border-[#4c566a]">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <h3 className="font-semibold text-[#88c0d0] mb-2">Description</h3>
-                            <p>{campaign.description}</p>
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-[#88c0d0] mb-2">Conditions</h3>
-                            <p>{campaign.conditions}</p>
+                return (
+                  <React.Fragment key={campaign.name}>
+                    <tr className="hover:bg-gray-50">
+                      <td className="p-4">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            status !== 'deactivated' && campaign.status === 'attivo' 
+                              ? 'bg-green-500' 
+                              : 'bg-red-500'
+                          }`} />
+                          <div className="relative w-16 h-8">
+                            <CampaignLogo campaignName={campaign.name} />
                           </div>
                         </div>
                       </td>
+                      <td className="p-4 text-gray-900">{campaign.mappedName || campaign.name}</td>
+                      <td className="p-4 text-gray-600 capitalize">{campaign.type}</td>
+                      <td className="p-4">
+                        <CountryFlag country={campaign.country} />
+                      </td>
+                      <td className="p-4">
+                        <button 
+                          onClick={() => toggleRowExpansion(campaign.name)}
+                          className="flex items-center justify-between w-full text-gray-600 hover:text-gray-900"
+                        >
+                          <span>{campaign.commissionPlan}</span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="p-4">
+                        <StatusBadge status={status} campaignStatus={campaign.status} />
+                      </td>
+                      <td className="p-4">
+                        <ActionButton 
+                          status={status} 
+                          campaign={campaign} 
+                          requestDetails={requestDetails}
+                          onRequest={handleRequestCampaign}
+                          onCopy={copyToClipboard}
+                          copiedLink={copiedLink}
+                        />
+                      </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between bg-[#3b4252] p-4 rounded-lg">
-        <div className="text-[#e1e1e1]">
-          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredCampaigns.length)} of {filteredCampaigns.length} entries
+                    {isExpanded && (
+                      <tr className="bg-gray-50">
+                        <td colSpan="7" className="p-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                              <p className="text-gray-600">{campaign.description}</p>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 mb-2">Conditions</h3>
+                              <p className="text-gray-600">{campaign.conditions}</p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronsLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 border-t border-gray-100">
+          <div className="text-gray-600">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredCampaigns.length)} of {filteredCampaigns.length} entries
+          </div>
 
-          <span className="px-4 py-2 bg-[#4c566a] rounded-md text-[#e1e1e1]">
-            {currentPage} of {totalPages}
-          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
 
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-            className="p-2 bg-[#4c566a] rounded-md text-[#e1e1e1] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#434c5e]"
-          >
-            <ChevronsRight className="w-4 h-4" />
-          </button>
+            <span className="px-4 py-2 bg-gray-50 rounded-lg text-gray-600">
+              {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
+};
+
+// Helper Components
+const StatusBadge = ({ status, campaignStatus }) => {
+  const getStatusStyles = () => {
+    switch (status) {
+      case 'deactivated':
+        return 'bg-red-50 text-red-600';
+      case 'approved':
+        return campaignStatus === 'attivo' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600';
+      case 'pending':
+        return campaignStatus === 'attivo' ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-600';
+      case 'rejected':
+        return 'bg-red-50 text-red-600';
+      default:
+        return 'bg-gray-50 text-gray-600';
+    }
+  };
+
+  const getStatusText = () => {
+    if (status === 'deactivated') return 'Deactivated';
+    if (campaignStatus === 'disattivo') return 'Campaign Deactivated';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-sm ${getStatusStyles()}`}>
+      {getStatusText()}
+    </span>
+  );
+};
+
+const ActionButton = ({ status, campaign, requestDetails, onRequest, onCopy, copiedLink }) => {
+  if (status === 'approved' && campaign.status === 'attivo' && requestDetails?.uniqueLink) {
+    return (
+      <div className="flex items-center space-x-2">
+        <a
+          href={API_BASE_URL + requestDetails.uniqueLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-700 hover:underline"
+        >
+          View Link
+        </a>
+        <button
+          onClick={() => onCopy(API_BASE_URL + requestDetails.uniqueLink)}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          {copiedLink === API_BASE_URL + requestDetails.uniqueLink ? (
+            <Check className="w-5 h-5 text-green-600" />
+          ) : (
+            <Copy className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  if (status === 'not_requested' && campaign.status === 'attivo') {
+    return (
+      <button
+        onClick={() => onRequest(campaign.name)}
+        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 flex items-center gap-2"
+      >
+        Request <ArrowRight className="w-4 h-4" />
+      </button>
+    );
+  }
+
+  return <span className="text-gray-400">No Action</span>;
 };
 
 export default CampaignTable;

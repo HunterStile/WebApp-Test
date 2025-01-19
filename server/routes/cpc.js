@@ -205,9 +205,21 @@ router.get('/:uniqueLink', async (req, res) => {
     }
 
     if (campaignRequest.status !== 'APPROVED') {
-      return res.status(403).send('Il link non è ancora approvato.');
+      return res.status(403).send('Il link non è disponibile.');
     }
 
+     // Trova la campagna corrispondente e verifica il suo stato
+     const campaign = await Campaign.findOne({ name: campaignRequest.campaign });
+    
+     if (!campaign) {
+       return res.status(404).send('Campagna non trovata.');
+     }
+ 
+     // Verifica se la campagna è attiva
+     if (campaign.status !== 'attivo') {
+       return res.status(403).send('La campagna non è attualmente attiva.');
+     }
+     
     // Incrementa il contatore generale
     campaignRequest.clicks += 1;
 

@@ -1,5 +1,5 @@
 TODO List:
-1.[] Aggiornare le conversioni di gambling.js e togliere il -20 ma decidere con un parametro in modello campaign la detrazione.
+1.[X] Aggiornare le conversioni di gambling.js e togliere il -20 ma decidere con un parametro in modello campaign la detrazione.
 2.[] Aggiungere le varie email automatiche (campagne accettata, disattivata, nuovo thread in messaggi fatto dall'admin, ecc).
 3.[] Implementare sistema referral.
 4.[] Impostare profilo, settaggi dell'utente.

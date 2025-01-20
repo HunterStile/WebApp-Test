@@ -115,7 +115,7 @@ const ConversionList = () => {
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-gray-600 text-xl text-center mb-2">Pending</h3>
-          <p className="text-4xl text-center font-bold">{getStatusCount('pending')}</p>
+          <p className="text-4xl text-center font-bold">{getStatusCount('onhold')}</p>
         </div>
       </div>
 

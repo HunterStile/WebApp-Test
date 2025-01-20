@@ -1,0 +1,25 @@
+TODO List:
+1.[] Aggiornare le conversioni di gambling.js e togliere il -20 ma decidere con un parametro in modello campaign la detrazione.
+2.[] Aggiungere le varie email automatiche (campagne accettata, disattivata, nuovo thread in messaggi fatto dall'admin, ecc).
+3.[] Implementare sistema referral.
+4.[] Impostare profilo, settaggi dell'utente.
+5.[] Impostare metodo registrazione pagamenti, come vedere i pagamenti pronti da essere fatturati, ecc.
+6.[] Idea di aggiungere un comparatore personalizzato per l'utente.
+7.[] Banner disponibile all'utente per le specifiche campagne.
+
+[Idee marketing per sponsorizzare un sito di affiliazione dove l'utente che ha un canale Telegram o sito web può sponsorizzare:]
+- Creare contenuti di qualità che spiegano i vantaggi del programma di affiliazione.
+- Offrire incentivi o bonus per i nuovi affiliati che si iscrivono tramite il canale Telegram o sito web.
+- Utilizzare testimonianze e casi di studio di affiliati di successo per attirare nuovi utenti.
+- Promuovere il programma di affiliazione attraverso campagne pubblicitarie mirate sui social media.
+- Collaborare con influencer del settore per aumentare la visibilità del programma di affiliazione.
+- Organizzare webinar o live streaming per spiegare il funzionamento del programma e rispondere alle domande degli utenti.
+- Creare una serie di tutorial video che mostrano come utilizzare il programma di affiliazione e massimizzare i guadagni.
+- Offrire supporto dedicato agli affiliati per aiutarli a risolvere eventuali problemi e ottimizzare le loro campagne.
+- Sviluppare una newsletter periodica con aggiornamenti, suggerimenti e storie di successo per mantenere gli affiliati coinvolti e motivati.
+- Utilizzare SEO e content marketing per aumentare la visibilità del programma di affiliazione sui motori di ricerca.
+- Creare un programma di formazione per gli affiliati, con corsi e materiali didattici per aiutarli a migliorare le loro competenze di marketing.
+- Offrire premi e riconoscimenti per gli affiliati più performanti per incentivare la competizione e l'impegno.
+- Sviluppare partnership con altre aziende per offrire vantaggi esclusivi agli affiliati.
+- Utilizzare email marketing per mantenere gli affiliati informati su nuove opportunità e aggiornamenti del programma.
+- Creare un forum o una community online dove gli affiliati possono condividere esperienze, consigli e strategie.

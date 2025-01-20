@@ -6,9 +6,9 @@ const Campaign = require('../models/Campaign');
 const router = express.Router();
 
 router.get('/fetch-conversions', async (req, res) => {
-    try {
-      const apiKey = '9XQPzYXpBwSCZ1xakP1r8-Uy';
-      const apiUrl = `https://api.gambling-affiliation.com/aff/v1/${apiKey}/report/conversion`;
+  try {
+    const apiKey = '9XQPzYXpBwSCZ1xakP1r8-Uy';
+    const apiUrl = `https://api.gambling-affiliation.com/aff/v1/${apiKey}/report/conversion`;
 
     // Calcola date per gli ultimi 5 mesi
     const endDate = new Date();
@@ -21,9 +21,9 @@ router.get('/fetch-conversions', async (req, res) => {
     console.log(`Fetching conversions from ${formattedStartDate} to ${formattedEndDate}`);
 
     // Recupera tutte le campagne che richiedono rimappatura
-    const mappingCampaigns = await Campaign.find({ 
-      requiresMapping: true 
-    }, 'name mappedName');
+    const mappingCampaigns = await Campaign.find({
+      requiresMapping: true
+    }, 'name mappedName commissionAdjustment'); // Aggiungi commissionAdjustment qui
 
     // Crea l'oggetto di mappatura
     const campaignNameMapping = mappingCampaigns.reduce((acc, campaign) => {
@@ -62,10 +62,19 @@ router.get('/fetch-conversions', async (req, res) => {
 
     console.log('Risposta API completa:', JSON.stringify(response.data, null, 2));
 
-     // Usa la mappatura nelle conversioni
-     const conversions = response.data.conversions.map(conv => {
-      let adjustedCommission = parseFloat(conv.commission) - 20;
-      adjustedCommission = Math.max(0, adjustedCommission);
+    // Usa la mappatura nelle conversioni
+    const conversions = response.data.conversions.map(conv => {
+      // Trova la campagna corrispondente
+      const campaign = mappingCampaigns.find(c =>
+        c.name === conv.campaign_name || c.mappedName === conv.campaign_name
+      );
+
+      // Calcola la commissione aggiustata
+      let adjustedCommission = parseFloat(conv.commission);
+      if (campaign && campaign.commissionAdjustment) {
+        adjustedCommission -= campaign.commissionAdjustment;
+        adjustedCommission = Math.max(0, adjustedCommission);
+      }
 
       // Usa la mappatura dal database
       const mappedCampaignName = campaignNameMapping[conv.campaign_name] || conv.campaign_name;
@@ -80,8 +89,9 @@ router.get('/fetch-conversions', async (req, res) => {
         tracking: conv.tracking,
         aff_var: conv.aff_var,
         netrevenue: conv.netrevenue ? parseFloat(conv.netrevenue) : null,
-        commission: adjustedCommission.toFixed(2), // Arrotonda a 2 decimali
-        original_commission: conv.commission, // Mantieni anche la commissione originale se necessario
+        commission: adjustedCommission.toFixed(2),
+        original_commission: conv.commission,
+        adjustment_applied: campaign ? campaign.commissionAdjustment : 0, // Aggiungi questo per debug
         payment: conv.payment,
         status: conv.status,
         campaign_status: conv.campaign_status

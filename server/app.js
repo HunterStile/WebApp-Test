@@ -4,11 +4,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/admin-auth');
-const gamblingRoutes = require('./routes/gambling');
-const redirectRoutes = require('./routes/cpc');
-const adminCampaignRoutes = require('./routes/admin-cpc');
-const threadRoutes = require('./routes/threads');
-const announcementsRouter = require('./routes/announcements');
 
 require('dotenv').config();
 const app = express();
@@ -26,7 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Connessione a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/WebApp-Test', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/DEGI', {
 })
 .then(() => console.log('MongoDB connected...'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -36,13 +31,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
-app.use('/auth', authRoutes);
-app.use('/admin/auth', adminAuthRoutes);
-app.use('/gambling', gamblingRoutes);
-app.use('/cpc', redirectRoutes);
-app.use('/admin', adminCampaignRoutes);
-app.use('/threads', threadRoutes);
-app.use('/announcements', announcementsRouter);
+app.use('/qpi/auth', authRoutes);
+app.use('/qpi/admin/auth', adminAuthRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

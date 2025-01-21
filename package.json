@@ -4,11 +4,15 @@
   "description": "A web application with a React frontend and Express backend.",
   "main": "index.js",
   "scripts": {
+    "server": "npm run start:server",
+    "client": "npm run start:client",
     "start:server": "node server/app.js",
     "start:client": "cd client && npm start",
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "build:client": "cd client && npm run build && cp -r client/build/* ../public/",
     "build": "npm run build:client",
+    "build:client": "cd client && npm run build && cd .. && npm run copy:build ",
+    "start:total": "cd client && npm run build && cd .. && npm run copy:build && cd server && node app.js",
+    "start": "npm run start:total",
+    "copy:build": "node copy-build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

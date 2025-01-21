@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
-const axios = require('axios');
-const emailService = require('../services/emailService');
 
 // Validazione email
 const isValidEmail = (email) => {
@@ -11,30 +9,6 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// Verifica reCAPTCHA
-async function verifyCaptcha(token) {
-  console.log('Token ricevuto dal client:', token);
-
-  try {
-    const response = await axios.post(
-      'https://www.google.com/recaptcha/api/siteverify',
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY,
-          response: token
-        }
-      }
-    );
-
-    console.log('Risposta da Google:', response.data);
-
-    return response.data.success;
-  } catch (error) {
-    console.error('Errore durante la verifica di reCAPTCHA:', error.message);
-    return false;
-  }
-}
 // Registrazione
 router.post('/register', async (req, res) => {
   const {
@@ -47,7 +21,6 @@ router.post('/register', async (req, res) => {
     language,
     acceptedTerms,
     newsletterSubscription,
-    captchaToken
   } = req.body;
   
   try {
@@ -70,12 +43,6 @@ router.post('/register', async (req, res) => {
     // Validazione termini
     if (!acceptedTerms) {
       return res.status(400).json({ error: 'Devi accettare i termini e le condizioni' });
-    }
-
-    // Verifica captcha
-    const isCaptchaValid = await verifyCaptcha(captchaToken);
-    if (!isCaptchaValid) {
-      return res.status(400).json({ error: 'Verifica captcha fallita' });
     }
 
     // Verifica se username esiste già
@@ -106,13 +73,6 @@ router.post('/register', async (req, res) => {
       newsletterSubscription,
     });
 
-    // Invia email di benvenuto
-    try {
-      await emailService.sendWelcomeEmail(user);
-    } catch (emailError) {
-      console.error('Errore invio email di benvenuto:', emailError);
-      // Non blocchiamo la registrazione se l'invio dell'email fallisce
-    }
     await user.save();
 
     res.status(201).json({
@@ -145,8 +105,6 @@ router.post('/login', async (req, res) => {
     if (!validPassword) {
       return res.status(400).json({ error: 'Credenziali non valide' });
     }
-
-    // Qui potresti aggiungere la generazione del JWT token
 
     res.json({
       message: 'Login effettuato con successo',

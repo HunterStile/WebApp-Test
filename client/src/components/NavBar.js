@@ -105,29 +105,6 @@ function Navbar() {
                 <PieChart size={20} />
                 <span>Dashboard</span>
               </Link>
-              <Link to="/conversionlist" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <BarChart size={20} />
-                <span>Conversions</span>
-              </Link>
-              <Link to="/campaignlist" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <FileText size={20} />
-                <span>Campaigns</span>
-              </Link>
-              <Link to="/messages" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <div className="relative">
-                  <MessageCircle size={20} />
-                  {unreadCount > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </div>
-                  )}
-                </div>
-                <span>Messages</span>
-              </Link>
-              <Link to="/announcements" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <Bell size={20} />
-                <span>Announcements</span>
-              </Link>
             </>
           )}
 
@@ -142,37 +119,8 @@ function Navbar() {
                 <FileText size={20} />
                 <span>Manage</span>
               </Link>
-              <Link to="/admin/allconversion" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <BarChart size={20} />
-                <span>All Conversions</span>
-              </Link>
-              <Link to="/admin/messages" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <MessageCircle size={20} />
-                <span>Messages</span>
-              </Link>
-              <Link to="/admin/announcements" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-                <Bell size={20} />
-                <span>Announcements</span>
-              </Link>
             </>
           )}
-
-          {/* More section */}
-          <div className="mt-6">
-            <h3 className="px-3 text-xs font-semibold text-gray-400 uppercase mb-2">More</h3>
-            <Link to="/affiliations" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-              <Briefcase size={20} />
-              <span>Affiliations</span>
-            </Link>
-            <Link to="/events" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-              <Calendar size={20} />
-              <span>Events</span>
-            </Link>
-            <Link to="/store" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-              <Store size={20} />
-              <span>Store</span>
-            </Link>
-          </div>
         </nav>
 
         {/* Bottom links */}

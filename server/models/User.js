@@ -15,7 +15,14 @@ const userSchema = new mongoose.Schema({
   },
   acceptedTerms: { type: Boolean, required: true },
   newsletterSubscription: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  paypalAddress: { type: String, default: '' }, // Nuovo campo per PayPal
+  bitcoinAddress: { type: String, default: '' }, // Nuovo campo per Bitcoin
+  paymentMethod: { 
+    type: String, 
+    enum: ['paypal', 'bitcoin'], // Limitiamo i metodi di pagamento a PayPal o Bitcoin
+    default: 'paypal' // Impostiamo PayPal come metodo predefinito
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);

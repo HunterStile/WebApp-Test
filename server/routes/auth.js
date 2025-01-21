@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const Payment = require('../models/Payment');
 const axios = require('axios');
+
 
 // Validazione email
 const isValidEmail = (email) => {
@@ -149,6 +151,67 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Errore login:', error);
     res.status(500).json({ error: 'Errore durante il login' });
+  }
+});
+
+// Recupero profilo basato su username
+router.get('/profile', async (req, res) => {
+  const { username } = req.query;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username non fornito' });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Errore nel recupero del profilo:', error);
+    res.status(500).json({ error: 'Errore durante il recupero del profilo' });
+  }
+});
+
+// Aggiornamento profilo basato su username
+router.put('/profile', async (req, res) => {
+  const { username, paypalAddress, bitcoinAddress, paymentMethod } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ error: 'Username non fornito' });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    // Aggiorna i campi del profilo
+    user.paypalAddress = paypalAddress;
+    user.bitcoinAddress = bitcoinAddress;
+    user.paymentMethod = paymentMethod; // Salva il metodo di pagamento
+
+    await user.save();
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento del profilo:', error);
+    res.status(500).json({ error: 'Errore durante l\'aggiornamento del profilo' });
+  }
+});
+
+router.get('/payments/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    const payments = await Payment.find({ username }).exec();
+    res.json(payments);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero dei pagamenti' });
   }
 });
 

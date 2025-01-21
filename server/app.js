@@ -31,8 +31,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
-app.use('/qpi/auth', authRoutes);
-app.use('/qpi/admin/auth', adminAuthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

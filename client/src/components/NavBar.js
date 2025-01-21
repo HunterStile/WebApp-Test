@@ -61,7 +61,7 @@ function Navbar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm p-4 flex items-center justify-between z-50">
         <Link to="/" className="flex items-center gap-2">
           <img src={flogo} alt="Fast Affiliation" className="h-8" />
-          <span className="font-bold text-[#1F2421]">Fast Affiliation</span>
+          <span className="font-bold text-[#1F2421]">D.E.G.I APP</span>
         </Link>
         <button
           onClick={toggleMobileMenu}
@@ -79,7 +79,7 @@ function Navbar() {
         <div className="p-6 hidden lg:block">
           <Link to="/" className="flex items-center gap-2">
             <img src={flogo} alt="Fast Affiliation" className="h-8" />
-            <span className="font-bold text-[#1F2421]">Fast Affiliation</span>
+            <span className="font-bold text-[#1F2421]">DEGI MARMI</span>
           </Link>
         </div>
 
@@ -91,7 +91,7 @@ function Navbar() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gray-200"></div>
             <div>
-              <p className="text-sm text-gray-500">Affiliate</p>
+              <p className="text-sm text-gray-500">Utente</p>
               <p className="font-medium">{user || admin || 'Guest'}</p>
             </div>
           </div>

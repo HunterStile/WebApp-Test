@@ -6,6 +6,8 @@ import API_BASE_URL from '../config';
 import ClicksConversionChart from '../components/charts/Clickconversion';
 import CommissionsChart from '../components/charts/CommissionsChart';
 import StatsCard from '../components/ui/StatsCards';
+import { useTheme } from '../context/ThemeContext';
+import { Moon, Sun } from 'lucide-react';
 
 const monthNames = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -34,6 +36,7 @@ const Dashboard = () => {
   const [clicksLoading, setClicksLoading] = useState(false);
   const [clicksError, setClicksError] = useState(null);
   const [activeChart, setActiveChart] = useState('commissions'); // 'commissions', 'clicks', etc.
+  const { theme, toggleTheme } = useTheme(); 
 
   useEffect(() => {
     const fetchTotalClicks = async () => {
@@ -393,18 +396,27 @@ const Dashboard = () => {
 
   // Main Page Content
   return (
-    <div className="p-8 bg-white rounded-xl">
-      {/* Header with Welcome and Logout */}
+    <div className="p-8 bg-white dark:bg-dark-bg text-black dark:text-dark-text rounded-xl transition-colors duration-300">
+      {/* Header with Welcome, Logout, and Theme Toggle */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-200 rounded-full" /> {/* User avatar placeholder */}
-          <div>
-            {user && <h1 className="text-xl font-semibold">BENTORNATO, {user}</h1>}
-          </div>
+          <div className="w-12 h-12 bg-gray-200 dark:bg-dark-accent rounded-full" />
+          {user && <h1 className="text-xl font-semibold">BENTORNATO, {user}</h1>}
         </div>
         <div className="flex items-center gap-4">
+          {/* Theme Toggle Button */}
+          <button 
+            onClick={toggleTheme} 
+            className="p-2 rounded-full bg-gray-100 dark:bg-dark-accent hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+          
           {user && (
-            <button onClick={logout} className="text-gray-600 hover:text-gray-800">
+            <button 
+              onClick={logout} 
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+            >
               •••
             </button>
           )}

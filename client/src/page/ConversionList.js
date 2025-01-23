@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ConversionContext } from '../context/ConversionContext';
 import { Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import StatsCard from '../components/ui/StatsCards';
 
 const ConversionList = () => {
   const { conversions, loading, error } = useContext(ConversionContext);
@@ -100,24 +101,33 @@ const ConversionList = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Total Conversions</h3>
-          <p className="text-4xl text-center font-bold">{filteredConversions.length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Total Commission</h3>
-          <p className="text-4xl text-center font-bold">€ {getTotalCommission()}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Validated</h3>
-          <p className="text-4xl text-center font-bold">{getStatusCount('validated')}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Pending</h3>
-          <p className="text-4xl text-center font-bold">{getStatusCount('onhold')}</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+        <StatsCard
+          title="Total Conversions"
+          value={filteredConversions.length}
+        />
+        <StatsCard
+          title="Total Commission"
+          value={getTotalCommission()}
+        />
+        <StatsCard
+          title="Validated"
+          value={getStatusCount('validated')}
+        />
+        <StatsCard
+          title="Pending"
+          value={getStatusCount('onhold')}
+        />
+        <StatsCard
+          title="Paid"
+          value={getStatusCount('paid')}
+        />
+        <StatsCard
+          title="Refused"
+          value={getStatusCount('refused')}
+        />
       </div>
+
 
       {/* Filters Section */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">

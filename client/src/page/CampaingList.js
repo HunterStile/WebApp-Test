@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import StatsCard from '../components/ui/StatsCards';
 import API_BASE_URL from '../config';
 import axios from 'axios';
 import {
@@ -199,26 +200,22 @@ const CampaignTable = () => {
 
       {/* Stats Cards - Matching Dashboard Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Total Campaigns</h3>
-          <p className="text-4xl text-center font-bold">{campaigns.length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Active Campaigns</h3>
-          <p className="text-4xl text-center font-bold">
-            {campaigns.filter(c => c.status === 'attivo').length}
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Approved</h3>
-          <p className="text-4xl text-center font-bold">
-            {userRequests.approved.length}
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Pending</h3>
-          <p className="text-4xl text-center font-bold">{userRequests.pending.length}</p>
-        </div>
+      <StatsCard 
+        title="Total Campaigns" 
+        value={campaigns.length} 
+      />
+      <StatsCard 
+        title="Active Campaigns" 
+        value={campaigns.filter(c => c.status === 'attivo').length} 
+      />
+      <StatsCard 
+        title="Approved" 
+        value={userRequests.approved.length} 
+      />
+      <StatsCard 
+        title="Pending" 
+        value={userRequests.pending.length} 
+      />
       </div>
 
       {/* Filters Section */}

@@ -5,6 +5,7 @@ import axios from 'axios';
 import API_BASE_URL from '../config';
 import ClicksConversionChart from '../components/charts/Clickconversion';
 import CommissionsChart from '../components/charts/CommissionsChart';
+import StatsCard from '../components/ui/StatsCards';
 
 const monthNames = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -412,23 +413,23 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Total Clicks</h3>
-          <p className="text-4xl text-center font-bold">{totalClicks}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Sign up</h3>
-          <p className="text-4xl text-center font-bold">{yearFilteredData.cplCount}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">CPA</h3>
-          <p className="text-4xl text-center font-bold">{yearFilteredData.cpaCount}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Profit</h3>
-          <p className="text-4xl text-center font-bold">€ {totalPeriodCommissions}</p>
-        </div>
-      </div>
+      <StatsCard 
+        title="Total Clicks" 
+        value={totalClicks} 
+      />
+      <StatsCard 
+        title="Sign up" 
+        value={yearFilteredData.cplCount} 
+      />
+      <StatsCard 
+        title="CPA" 
+        value={yearFilteredData.cpaCount} 
+      />
+      <StatsCard 
+        title="Profit" 
+        value={`€ ${totalPeriodCommissions}`} 
+      />
+    </div>
 
       {/* View Toggle and Period Filters */}
       <div className="flex justify-between items-center mb-6">

@@ -9,15 +9,12 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  X
 } from 'lucide-react';
 import CampaignLogo from '../components/utils/CampaignLogo';
 import CountryFlag from '../components/utils/CountryFlag';
+import PageHeader from '../components/ui/PageHeader';
+import FilterSection from '../components/ui/FilterSection';
+import PaginationControl from '../components/ui/PaginationControl';
 
 const CampaignTable = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -185,99 +182,51 @@ const CampaignTable = () => {
 
   return (
     <div className="p-8 bg-white rounded-xl">
+
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Campaign Management</h1>
-      </div>
+      <PageHeader title="Campaign Management" />
 
       {message && (
-        <div className={`p-4 mb-6 rounded-xl ${
-          message.includes('Failed') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
-        }`}>
+        <div className={`p-4 mb-6 rounded-xl ${message.includes('Failed') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+          }`}>
           {message}
         </div>
       )}
 
-      {/* Stats Cards - Matching Dashboard Style */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatsCard 
-        title="Total Campaigns" 
-        value={campaigns.length} 
-      />
-      <StatsCard 
-        title="Active Campaigns" 
-        value={campaigns.filter(c => c.status === 'attivo').length} 
-      />
-      <StatsCard 
-        title="Approved" 
-        value={userRequests.approved.length} 
-      />
-      <StatsCard 
-        title="Pending" 
-        value={userRequests.pending.length} 
-      />
+        <StatsCard
+          title="Total Campaigns"
+          value={campaigns.length}
+        />
+        <StatsCard
+          title="Active Campaigns"
+          value={campaigns.filter(c => c.status === 'attivo').length}
+        />
+        <StatsCard
+          title="Approved"
+          value={userRequests.approved.length}
+        />
+        <StatsCard
+          title="Pending"
+          value={userRequests.pending.length}
+        />
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          {/* Search Bar */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search campaigns..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Filter Dropdowns */}
-          <div className="flex flex-wrap gap-4">
-            <select
-              value={filters.type}
-              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Types</option>
-              {uniqueTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-
-            <select
-              value={filters.country}
-              onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Countries</option>
-              {uniqueCountries.map(country => (
-                <option key={country} value={country}>{country}</option>
-              ))}
-            </select>
-
-            <select
-              value={filters.requestStatus}
-              onChange={(e) => setFilters(prev => ({ ...prev, requestStatus: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Request Status</option>
-              {requestStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-
-            <button
-              onClick={resetFilters}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-gray-600 hover:bg-gray-100"
-            >
-              <X className="w-4 h-4" />
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
+      <FilterSection
+        searchTerm={searchTerm}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
+        filters={filters}
+        onFilterChange={(key, value) => setFilters(prev => ({ ...prev, [key]: value }))}
+        resetFilters={resetFilters}
+        searchPlaceholder="Search campaigns..."
+        filterOptions={{
+          type: uniqueTypes,
+          country: uniqueCountries,
+          requestStatus: requestStatuses
+        }}
+      />
 
       {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -305,11 +254,10 @@ const CampaignTable = () => {
                     <tr className="hover:bg-gray-50">
                       <td className="p-4">
                         <div className="flex items-center space-x-2">
-                          <div className={`w-2 h-2 rounded-full ${
-                            status !== 'deactivated' && campaign.status === 'attivo' 
-                              ? 'bg-green-500' 
+                          <div className={`w-2 h-2 rounded-full ${status !== 'deactivated' && campaign.status === 'attivo'
+                              ? 'bg-green-500'
                               : 'bg-red-500'
-                          }`} />
+                            }`} />
                           <div className="relative w-16 h-8">
                             <CampaignLogo campaignName={campaign.name} />
                           </div>
@@ -321,7 +269,7 @@ const CampaignTable = () => {
                         <CountryFlag country={campaign.country} />
                       </td>
                       <td className="p-4">
-                        <button 
+                        <button
                           onClick={() => toggleRowExpansion(campaign.name)}
                           className="flex items-center justify-between w-full text-gray-600 hover:text-gray-900"
                         >
@@ -337,9 +285,9 @@ const CampaignTable = () => {
                         <StatusBadge status={status} campaignStatus={campaign.status} />
                       </td>
                       <td className="p-4">
-                        <ActionButton 
-                          status={status} 
-                          campaign={campaign} 
+                        <ActionButton
+                          status={status}
+                          campaign={campaign}
                           requestDetails={requestDetails}
                           onRequest={handleRequestCampaign}
                           onCopy={copyToClipboard}
@@ -371,47 +319,13 @@ const CampaignTable = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-100">
-          <div className="text-gray-600">
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredCampaigns.length)} of {filteredCampaigns.length} entries
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronsLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            <span className="px-4 py-2 bg-gray-50 rounded-lg text-gray-600">
-              {currentPage} of {totalPages}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setCurrentPage(totalPages)}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronsRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <PaginationControl
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredCampaigns.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

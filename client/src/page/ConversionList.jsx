@@ -1,7 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ConversionContext } from '../context/ConversionContext';
-import { Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import StatsCard from '../components/ui/StatsCards';
+import PageHeader from '../components/ui/PageHeader';
+import FilterSection from '../components/ui/FilterSection';
+import PaginationControl from '../components/ui/PaginationControl';
 
 const ConversionList = () => {
   const { conversions, loading, error } = useContext(ConversionContext);
@@ -96,9 +98,7 @@ const ConversionList = () => {
   return (
     <div className="p-8 bg-white rounded-xl">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Conversion Management</h1>
-      </div>
+      <PageHeader title="Conversion Management" />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
@@ -130,84 +130,20 @@ const ConversionList = () => {
 
 
       {/* Filters Section */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          {/* Search Bar */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search by campaign name or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Filter Dropdowns */}
-          <div className="flex flex-wrap gap-4">
-            <select
-              value={filters.type}
-              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Types</option>
-              {uniqueTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Statuses</option>
-              {uniqueStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-
-            <select
-              value={filters.campaign_status}
-              onChange={(e) => setFilters(prev => ({ ...prev, campaign_status: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Campaign Statuses</option>
-              {uniqueCampaignStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-
-            <select
-              value={filters.dateRange}
-              onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Time</option>
-              <option value="7days">Last 7 Days</option>
-              <option value="30days">Last 30 Days</option>
-              <option value="90days">Last 90 Days</option>
-            </select>
-
-            <button
-              onClick={() => {
-                setFilters({
-                  status: '',
-                  type: '',
-                  campaign_status: '',
-                  dateRange: ''
-                });
-                setSearchTerm('');
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-gray-600 hover:bg-gray-100"
-            >
-              <X className="w-4 h-4" />
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
+      <FilterSection
+        searchTerm={searchTerm}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
+        filters={filters}
+        onFilterChange={(key, value) => setFilters(prev => ({ ...prev, [key]: value }))}
+        resetFilters={resetFilters}
+        searchPlaceholder="Search by campaign name or ID..."
+        filterOptions={{
+          type: uniqueTypes,
+          status: uniqueStatuses,
+          campaign_status: uniqueCampaignStatuses,
+          dateRange: ['7days', '30days', '90days']
+        }}
+      />
 
       {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -249,47 +185,13 @@ const ConversionList = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-100">
-          <div className="text-gray-600">
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredConversions.length)} of {filteredConversions.length} entries
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronsLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            <span className="px-4 py-2 bg-gray-50 rounded-lg text-gray-600">
-              {currentPage} of {Math.ceil(filteredConversions.length / itemsPerPage)}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredConversions.length / itemsPerPage), prev + 1))}
-              disabled={currentPage === Math.ceil(filteredConversions.length / itemsPerPage)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setCurrentPage(Math.ceil(filteredConversions.length / itemsPerPage))}
-              disabled={currentPage === Math.ceil(filteredConversions.length / itemsPerPage)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronsRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <PaginationControl
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredConversions.length / itemsPerPage)}
+          totalItems={filteredConversions.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

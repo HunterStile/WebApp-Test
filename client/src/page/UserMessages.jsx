@@ -205,7 +205,7 @@ const ThreadList = () => {
         {activeThread ? (
           <>
             <div className="p-4 border-b flex justify-between items-center bg-white">
-              <h2 className="font-medium text-gray-800">{activeThread.subject}</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">{activeThread.subject}</h2>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">

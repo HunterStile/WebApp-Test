@@ -43,7 +43,7 @@ function Layout({ children }) {
     <div className="App min-h-screen bg-white dark:bg-dark-bg text-black dark:text-dark-text transition-colors duration-300">
       {showNavbar && <Navbar />}
       <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen`}>
-        <div className="mx-auto p-4">{children}</div>
+        <div className="mx-auto p-0">{children}</div>
       </div>
       {showFooter && <Footer />}
     </div>

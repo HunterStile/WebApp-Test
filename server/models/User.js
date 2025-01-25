@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     enum: ['paypal', 'bitcoin'], // Limitiamo i metodi di pagamento a PayPal o Bitcoin
     default: 'paypal' // Impostiamo PayPal come metodo predefinito
   },
+  profileImage: { 
+    type: String, 
+    default: 'default-profile.png' 
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);

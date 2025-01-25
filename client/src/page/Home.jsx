@@ -34,6 +34,25 @@ const LandingPage = () => {
     }
   };
 
+  const StatCard = ({ number, label }) => (
+    <div className="text-center">
+      <div className="text-4xl font-bold mb-2">{number}</div>
+      <div className="text-gray-600">{label}</div>
+    </div>
+  );
+
+  const FeatureCard = ({ icon, title, features }) => (
+    <div className="p-6 bg-gray-50 rounded-lg">
+      <div className="mb-4">{icon}</div>
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <ul className="space-y-2">
+        {features.map((feature, index) => (
+          <li key={index} className="text-sm text-gray-600">{feature}</li>
+        ))}
+      </ul>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center text-center">
       {/* Header */}
@@ -45,8 +64,8 @@ const LandingPage = () => {
         </nav>
         <img src={flogo} className="h-8" alt="Logo" />
         <div className="flex space-x-4">
-          <button className="px-4 py-2 text-gray-600 rounded-full border">Log In</button>
-          <button className="px-4 py-2 bg-black text-white rounded-full">Sign up</button>
+        <Link to="/login" className="px-4 py-2 text-gray-600 rounded-full border">Log In</Link>
+        <Link to="/signup" className="px-4 py-2 bg-black text-white rounded-full">Sign up</Link>
         </div>
       </header>
 
@@ -133,6 +152,37 @@ const LandingPage = () => {
           />
         </div>
       </section>
+      
+      {/* Stats Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="flex justify-center space-x-16">
+          <StatCard number="50+" label="Campaigns" />
+          <StatCard number="120+" label="Affiliates" />
+          <StatCard number="20+" label="Brands" />
+        </div>
+      </section>
+
+      {/* Global Map Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <p className="text-xl mb-8">provides global affiliate support with swift solutions for all gaming sectors.</p>
+        <div className="max-w-4xl mx-auto">
+          <img
+            src={mapbase}
+            alt="Global Map"
+            className="w-full"
+          />
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl font-semibold mb-4">Ready to begin?</h2>
+        <p className="mb-8">Sign up today or reach out for more details!</p>
+        <div className="flex justify-center space-x-4">
+          <button className="px-6 py-3 bg-black text-white rounded-full">Sign up</button>
+          <button className="px-6 py-3 border border-gray-300 rounded-full">Contact us</button>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-teal-800 text-white py-12 w-full">
@@ -153,16 +203,6 @@ const LandingPage = () => {
   );
 };
 
-const FeatureCard = ({ icon, title, features }) => (
-  <div className="p-6 bg-gray-50 rounded-lg">
-    <div className="mb-4">{icon}</div>
-    <h3 className="text-lg font-semibold mb-4">{title}</h3>
-    <ul className="space-y-2">
-      {features.map((feature, index) => (
-        <li key={index} className="text-sm text-gray-600">{feature}</li>
-      ))}
-    </ul>
-  </div>
-);
+
 
 export default LandingPage;

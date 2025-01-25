@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import Navbar from './components/NavBar';
 import Home from './page/Home';
 import Dashboard from './page/Dashboard';
-import Login from './page/Login';
+import Auth from './page/Login';
 import PrivateRoute from './components/redirect/PrivateRoute';
 import AdminPrivateRoute from './components/redirect/AdminPrivateRoute';
 import AdminLogin from './page/private/AdminLogin';
@@ -33,7 +33,7 @@ function Layout({ children }) {
   const location = useLocation();
 
   // Mostra la navbar solo se il percorso non è "/" o "/login2"
-  const showNavbar = !['/', '/login2'].includes(location.pathname);
+  const showNavbar = !['/', '/login','/signup'].includes(location.pathname);
 
   // Nasconde il footer se il percorso è "/messages o /admin/messages"
   const hiddenPaths = ['/', '/messages', '/admin/messages']; // Aggiungi qui altri percorsi
@@ -60,8 +60,9 @@ function App() {
               <Layout>
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/login2" element={<Login />} />
+                  <Route path="/login" element={<Auth />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/signup" element={<Auth />} />
 
                   {/* Protected routes per utenti normali */}
                   <Route element={<PrivateRoute />}>

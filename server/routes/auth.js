@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Payment = require('../models/Payment');
 const axios = require('axios');
+const multer = require('multer');
+const path = require('path');
 
 
 // Validazione email
@@ -178,30 +180,91 @@ router.get('/profile', async (req, res) => {
 
 // Aggiornamento profilo basato su username
 router.put('/profile', async (req, res) => {
-  const { username, paypalAddress, bitcoinAddress, paymentMethod } = req.body;
+  const { 
+    username, 
+    firstName, 
+    lastName, 
+    paypalAddress, 
+    bitcoinAddress, 
+    paymentMethod 
+  } = req.body;
 
   if (!username) {
-    return res.status(400).json({ error: 'Username non fornito' });
+    return res.status(400).json({ error: 'Username not provided' });
   }
 
   try {
     const user = await User.findOne({ username });
 
     if (!user) {
-      return res.status(404).json({ error: 'Utente non trovato' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Aggiorna i campi del profilo
+    // Update profile fields
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
     user.paypalAddress = paypalAddress;
     user.bitcoinAddress = bitcoinAddress;
-    user.paymentMethod = paymentMethod; // Salva il metodo di pagamento
+    user.paymentMethod = paymentMethod;
 
     await user.save();
 
     res.json({ user });
   } catch (error) {
-    console.error('Errore nell\'aggiornamento del profilo:', error);
-    res.status(500).json({ error: 'Errore durante l\'aggiornamento del profilo' });
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Error during profile update' });
+  }
+});
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/profile-images/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${req.body.username}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'));
+    }
+  }
+});
+
+// Add to your existing routes
+router.post('/upload-profile-image', upload.single('profileImage'), async (req, res) => {
+  try {
+    const { username } = req.body;
+    
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Save relative path
+    const imagePath = `uploads/profile-images/${req.file.filename}`;
+    user.profileImage = imagePath;
+    await user.save();
+
+    res.json({ 
+      message: 'Profile image uploaded successfully',
+      imageUrl: imagePath
+    });
+  } catch (error) {
+    console.error('Profile image upload error:', error);
+    res.status(500).json({ error: 'Error uploading profile image' });
   }
 });
 

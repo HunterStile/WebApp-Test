@@ -6,58 +6,82 @@ import API_BASE_URL from '../config';
 const ProfilePage = () => {
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState({});
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [paypalAddress, setPaypalAddress] = useState('');
   const [bitcoinAddress, setBitcoinAddress] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState('paypal');
+  const [selectedMethod, setSelectedMethod] = useState('');
   const [message, setMessage] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (user) {
       axios.get(`${API_BASE_URL}/auth/profile?username=${user}`)
         .then((response) => {
-          setProfile(response.data.user);
-          setPaypalAddress(response.data.user.paypalAddress || '');
-          setBitcoinAddress(response.data.user.bitcoinAddress || '');
-          setSelectedMethod(response.data.user.paymentMethod || 'paypal');
+          const userData = response.data.user;
+          setProfile(userData);
+          setFirstName(userData.firstName || '');
+          setLastName(userData.lastName || '');
+          setPaypalAddress(userData.paypalAddress || '');
+          setBitcoinAddress(userData.bitcoinAddress || '');
+          setSelectedMethod(userData.paymentMethod || 'paypal');
+          setProfileImage(
+            userData.profileImage 
+            ? `${API_BASE_URL}/${userData.profileImage}` 
+            : null
+          );
         })
         .catch((error) => {
-          console.error('Errore nel recupero del profilo:', error);
+          console.error('Error fetching profile:', error);
         });
     }
   }, [user]);
 
   const handleUpdate = () => {
     if (!user) {
-      setMessage('Devi essere loggato per aggiornare il profilo');
+      setMessage('You must be logged in to update the profile');
       return;
     }
 
     axios.put(`${API_BASE_URL}/auth/profile`, {
       username: user,
+      firstName,
+      lastName,
       paypalAddress,
       bitcoinAddress,
       paymentMethod: selectedMethod,
     })
       .then((response) => {
-        setMessage('Profilo aggiornato con successo!');
+        setMessage('Profile updated successfully!');
         setProfile(response.data.user);
       })
       .catch((error) => {
-        console.error('Errore nell\'aggiornamento del profilo:', error);
-        setMessage('Errore durante l\'aggiornamento del profilo');
+        console.error('Error updating profile:', error);
+        setMessage('Error updating profile');
       });
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      formData.append('username', user);
+
+      try {
+        const response = await axios.post(`${API_BASE_URL}/auth/upload-profile-image`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        setProfileImage(`${API_BASE_URL}/${response.data.imageUrl}`);
+        setMessage('Profile image uploaded successfully');
+      } catch (error) {
+        console.error('Image upload error:', error);
+        setMessage('Failed to upload image');
+      }
     }
   };
 
@@ -66,31 +90,22 @@ const ProfilePage = () => {
   };
 
   if (!user) {
-    return <p>Devi essere loggato per visualizzare e aggiornare il tuo profilo.</p>;
+    return <p>You must be logged in to view and update your profile.</p>;
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full m-auto max-w-custom p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-        {/* Tabs */}
-        <div className="mb-12">
-          <div className="flex space-x-8 border-b">
-            <button className="text-green-600 pb-4 border-b-2 border-green-600 font-medium">
-              Account Setting
-            </button>
-          </div>
-        </div>
-
         {/* Profile Picture Section */}
         <div className="mb-12">
           <h3 className="text-gray-700 mb-4">Your Profile Picture</h3>
           <div
-            onClick={handleUploadClick}
+            onClick={() => fileInputRef.current?.click()}
             className="w-[104px] h-[104px] rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden relative bg-gray-50"
           >
-            {selectedImage ? (
+            {profileImage ? (
               <img
-                src={selectedImage}
+                src={profileImage}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -121,8 +136,9 @@ const ProfilePage = () => {
               <label className="block text-gray-700 mb-2">Username</label>
               <input
                 type="text"
-                defaultValue={profile.username}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500"
+                value={profile.username}
+                disabled
+                className="w-full p-3 bg-gray-100 border border-gray-200 rounded-md text-gray-500"
               />
             </div>
 
@@ -130,59 +146,79 @@ const ProfilePage = () => {
               <label className="block text-gray-700 mb-2">Email</label>
               <input
                 type="text"
-                defaultValue={profile.email}
-                className="w-full p-3 border border-gray-200 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-green-500"
+                value={profile.email}
+                disabled
+                className="w-full p-3 bg-gray-100 border border-gray-200 rounded-md text-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Name</label>
+              <label className="block text-gray-700 mb-2">First Name</label>
               <input
                 type="text"
-                placeholder="Please enter your fullname"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-green-500"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Language</label>
-              <select
-                className="w-full p-3 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500"
-              >
-                <option>Select your Language</option>
-                <option>English</option>
-                <option>Italian</option>
-              </select>
+              <label className="block text-gray-700 mb-2">Last Name</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full p-3 border border-gray-200 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
             </div>
-
           </div>
 
           <div className="grid grid-cols-2 gap-x-6">
             <div>
               <label className="block text-gray-700 mb-2">Method of Payment</label>
               <select
+                value={selectedMethod}
+                onChange={(e) => setSelectedMethod(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500"
               >
-                <option>Select your payment method</option>
-                <option>Bitcoin</option>
-                <option>PayPal</option>
+                <option value="paypal">PayPal</option>
+                <option value="bitcoin">Bitcoin</option>
               </select>
             </div>
 
-            <div>
-              <label className="block text-gray-700 mb-2">Address</label>
-              <input
-                type="text"
-                value={paypalAddress}
-                onChange={(e) => setPaypalAddress(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-            </div>
+            {selectedMethod === 'paypal' ? (
+              <div>
+                <label className="block text-gray-700 mb-2">PayPal Address</label>
+                <input
+                  type="text"
+                  value={paypalAddress}
+                  onChange={(e) => setPaypalAddress(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-gray-700 mb-2">Bitcoin Address</label>
+                <input
+                  type="text"
+                  value={bitcoinAddress}
+                  onChange={(e) => setBitcoinAddress(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Message Display */}
+        {message && (
+          <div className="mt-4 text-center text-green-600">
+            {message}
+          </div>
+        )}
+
         {/* Buttons */}
-        <div className="flex space-x-4 mt-72">
+        <div className="flex space-x-4 mt-8">
           <button
             onClick={handleUpdate}
             className="bg-[#4EB37E] hover:bg-[#45a070] text-white px-6 py-2 rounded-md font-normal"

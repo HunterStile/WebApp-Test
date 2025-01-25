@@ -63,7 +63,6 @@ class EmailService {
     return this.sendEmail(user.email, subject, html);
   }
 
-  // services/emailService.js
   async sendRequestStatusEmail(user, request) {
     const subject = `Aggiornamento stato richiesta campagna: ${request.campaign}`;
     const html = `
@@ -106,7 +105,37 @@ class EmailService {
     };
     return statusLabels[status] || status;
   }
-}
 
+  async sendAdminThreadCreationEmail(user, thread) {
+    const subject = `Nuovo messaggio dall'assistenza: ${thread.subject}`;
+    
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Nuovo Messaggio dell'Assistenza</h2>
+        
+        <p>Ciao ${user.firstName},</p>
+        
+        <p>Hai ricevuto un nuovo messaggio dall'assistenza di FastAffiliation.</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="color: #666;">Dettagli Messaggio:</h3>
+          <p><strong>Oggetto:</strong> ${thread.subject}</p>
+          <p>Accedi al tuo account per leggere il messaggio completo.</p>
+        </div>
+        
+        <p>Se hai domande, non esitare a rispondere tramite la piattaforma.</p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+          <p style="color: #888; font-size: 12px;">
+            Cordiali saluti,<br>
+            Il team FastAffiliation
+          </p>
+        </div>
+      </div>
+    `;
+  
+    return this.sendEmail(user.email, subject, html);
+  }
+}
 
 module.exports = new EmailService();

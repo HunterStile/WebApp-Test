@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Thread = require('../models/Thread');
 const Message = require('../models/Message');
+const User = require('../models/User');
 const emailService = require('../services/emailService');
 
 // Crea nuovo thread

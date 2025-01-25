@@ -78,7 +78,7 @@ class EmailService {
         <h3 style="color: #666;">Dettagli Aggiornamento:</h3>
         <p><strong>Stato:</strong> ${this.getStatusLabel(request.status)}</p>
         ${request.status === 'APPROVED' ? `
-          <p><strong>Link Univoco:</strong> <a href="${DOMAIN_URL}${request.uniqueLink}" style="color: #007bff; text-decoration: underline;">Clicca qui per visualizzare il brend</a></p>
+          <p><strong>Link Univoco:</strong> <a href="${DOMAIN_URL}${request.uniqueLink}" style="color: #007bff; text-decoration: underline;">${DOMAIN_URL}${request.uniqueLink}</a></p>
         ` : ''}
       </div>
       

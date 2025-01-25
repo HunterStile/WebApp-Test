@@ -100,16 +100,47 @@ router.get('/fetch-conversions', async (req, res) => {
       };
     });
 
-    // Usa upsert per evitare duplicati
-    const bulkOps = conversions.map(conv => ({
-      updateOne: {
-        filter: { conversion_id: conv.conversion_id },
-        update: conv,
-        upsert: true
-      }
-    }));
+    // Usa upsert per evitare duplicati con logica di status personalizzata
+    const bulkOps = conversions.map(async (conv) => {
+      // Cerca la conversione esistente
+      const existingConversion = await Conversion.findOne({ conversion_id: conv.conversion_id });
 
-    const result = await Conversion.bulkWrite(bulkOps);
+      // Determina lo status da salvare
+      let statusToSave = conv.status;
+      if (existingConversion) {
+        // Se esistente e lo status attuale è 'validated'
+        if (existingConversion.status === 'validated') {
+          // Mantieni 'validated' se l'API passa 'paid'
+          statusToSave = existingConversion.status;
+        }
+        // Se esistente e lo status attuale è 'paid'
+        if (existingConversion.status === 'paid') {
+          // Mantieni sempre 'paid'
+          statusToSave = existingConversion.status;
+        }
+      } else {
+        // Per nuove conversioni, se arriva 'paid', imposta a 'validated'
+        if (conv.status === 'paid') {
+          statusToSave = 'validated';
+        }
+      }
+
+      // Aggiorna con lo status determinato
+      return {
+        updateOne: {
+          filter: { conversion_id: conv.conversion_id },
+          update: {
+            ...conv,
+            status: statusToSave
+          },
+          upsert: true
+        }
+      };
+    });
+
+    // Esegui le operazioni di bulk write
+    const bulkWriteOps = await Promise.all(bulkOps);
+    const result = await Conversion.bulkWrite(bulkWriteOps);
 
     res.json({
       message: 'Conversioni salvate con successo',
@@ -176,7 +207,7 @@ router.get('/all-conversions', async (req, res) => {
     const { aff_var, status, campaign_name, type, startDate, endDate } = req.query;
     const { page = 1, limit = 10 } = req.query; // Default valori
     const skip = (page - 1) * limit;
-    
+
     // Costruisci filtro dinamico
     const filter = {};
     if (aff_var) filter.aff_var = aff_var; // Filtra per aff_var (username)
@@ -216,7 +247,7 @@ router.get('/all-conversions', async (req, res) => {
 router.get('/user-commissions/:username', async (req, res) => {
   try {
     const { username } = req.params;
-    
+
     // Find the user to get payment method
     const user = await User.findOne({ username });
     if (!user) {
@@ -225,11 +256,11 @@ router.get('/user-commissions/:username', async (req, res) => {
 
     // Find validated conversions for the specific user
     const validatedCommissions = await Conversion.aggregate([
-      { 
-        $match: { 
-          aff_var: username, 
-          status: 'validated' 
-        } 
+      {
+        $match: {
+          aff_var: username,
+          status: 'validated'
+        }
       },
       {
         $group: {
@@ -240,9 +271,9 @@ router.get('/user-commissions/:username', async (req, res) => {
       }
     ]);
 
-    const result = validatedCommissions[0] || { 
-      total_commission: 0, 
-      total_conversions: 0 
+    const result = validatedCommissions[0] || {
+      total_commission: 0,
+      total_conversions: 0
     };
 
     res.json({
@@ -264,7 +295,7 @@ router.get('/user-commissions/:username', async (req, res) => {
 router.post('/mark-conversions-paid', async (req, res) => {
   try {
     const { username, amount } = req.body;
-    
+
     // Find the user to get payment method
     const user = await User.findOne({ username });
     if (!user) {
@@ -273,12 +304,12 @@ router.post('/mark-conversions-paid', async (req, res) => {
 
     // Update validated conversions to paid status for this user
     const result = await Conversion.updateMany(
-      { 
-        aff_var: username, 
-        status: 'validated' 
+      {
+        aff_var: username,
+        status: 'validated'
       },
-      { 
-        $set: { status: 'paid' } 
+      {
+        $set: { status: 'paid' }
       }
     );
 

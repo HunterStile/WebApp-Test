@@ -3,6 +3,8 @@ const express = require('express');
 const axios = require('axios');
 const Conversion = require('../models/Conversion');
 const Campaign = require('../models/Campaign');
+const Payment = require('../models/Payment');
+const User = require('../models/User');
 const router = express.Router();
 
 router.get('/fetch-conversions', async (req, res) => {
@@ -169,28 +171,136 @@ router.get('/conversions', async (req, res) => {
   }
 });
 
-// Rotta per statistiche aggregate
-router.get('/stats', async (req, res) => {
+router.get('/all-conversions', async (req, res) => {
   try {
-    const stats = await Conversion.aggregate([
-      {
-        $group: {
-          _id: {
-            status: '$status',
-            type: '$type',
-            campaign: '$campaign_name'
-          },
-          total_conversions: { $sum: 1 },
-          total_commission: { $sum: { $toDouble: '$commission' } }
-        }
-      },
-      { $sort: { total_conversions: -1 } }
-    ]);
+    const { aff_var, status, campaign_name, type, startDate, endDate } = req.query;
+    const { page = 1, limit = 10 } = req.query; // Default valori
+    const skip = (page - 1) * limit;
+    
+    // Costruisci filtro dinamico
+    const filter = {};
+    if (aff_var) filter.aff_var = aff_var; // Filtra per aff_var (username)
+    if (status) filter.status = status;
+    if (campaign_name) filter.campaign_name = { $regex: campaign_name, $options: 'i' };
+    if (type) filter.type = type;
 
-    res.json(stats);
+    if (startDate && endDate) {
+      filter.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    const conversions = await Conversion.find(filter)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Conversion.countDocuments(filter);
+
+    res.json({
+      total,
+      conversions,
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (error) {
     res.status(500).json({
-      error: 'Errore nel calcolo statistiche',
+      error: 'Errore nel recupero conversioni',
+      details: error.message,
+    });
+  }
+});
+
+
+// In routes/gambling.js, add this route:
+router.get('/user-commissions/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    // Find the user to get payment method
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    // Find validated conversions for the specific user
+    const validatedCommissions = await Conversion.aggregate([
+      { 
+        $match: { 
+          aff_var: username, 
+          status: 'validated' 
+        } 
+      },
+      {
+        $group: {
+          _id: null,
+          total_commission: { $sum: { $toDouble: '$commission' } },
+          total_conversions: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const result = validatedCommissions[0] || { 
+      total_commission: 0, 
+      total_conversions: 0 
+    };
+
+    res.json({
+      username,
+      payment_method: user.paymentMethod,
+      payment_address: user.paymentMethod === 'paypal' ? user.paypalAddress : user.bitcoinAddress,
+      total_validated_commission: result.total_commission.toFixed(2),
+      validated_conversions_count: result.total_conversions
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Errore nel calcolo delle commissioni',
+      details: error.message
+    });
+  }
+});
+
+// Modify the mark-conversions-paid route
+router.post('/mark-conversions-paid', async (req, res) => {
+  try {
+    const { username, amount } = req.body;
+    
+    // Find the user to get payment method
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    // Update validated conversions to paid status for this user
+    const result = await Conversion.updateMany(
+      { 
+        aff_var: username, 
+        status: 'validated' 
+      },
+      { 
+        $set: { status: 'paid' } 
+      }
+    );
+
+    // Create a payment record
+    const payment = new Payment({
+      username,
+      amount,
+      currency: 'EUR', // You might want to make this more dynamic
+      method: user.paymentMethod === 'paypal' ? 'PayPal' : 'BTC',
+      timestamp: new Date()
+    });
+    await payment.save();
+
+    res.json({
+      message: 'Conversioni marcate come pagate',
+      updatedCount: result.modifiedCount,
+      payment_method: user.paymentMethod,
+      payment_address: user.paymentMethod === 'paypal' ? user.paypalAddress : user.bitcoinAddress
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Errore nel marcare le conversioni come pagate',
       details: error.message
     });
   }

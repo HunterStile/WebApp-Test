@@ -25,10 +25,6 @@ const paymentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  adminProcessed: {
-    type: Boolean,
-    default: false, // Indica se l'admin ha già elaborato il pagamento
-  },
 });
 
 // Crea il modello Payment

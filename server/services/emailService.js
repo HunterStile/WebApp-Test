@@ -60,6 +60,52 @@ class EmailService {
 
     return this.sendEmail(user.email, subject, html);
   }
+
+  // services/emailService.js
+  async sendRequestStatusEmail(user, request) {
+    const subject = `Aggiornamento stato richiesta campagna: ${request.campaign}`;
+    const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #333;">Aggiornamento Stato Richiesta</h2>
+      
+      <p>Ciao ${user.firstName},</p>
+      
+      <p>Lo stato della tua richiesta per la campagna <strong>${request.campaign}</strong> è stato aggiornato.</p>
+      
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3 style="color: #666;">Dettagli Aggiornamento:</h3>
+        <p><strong>Stato:</strong> ${this.getStatusLabel(request.status)}</p>
+        ${request.status === 'APPROVED' ? `
+          <p><strong>Link Univoco:</strong> ${request.uniqueLink || 'Non disponibile'}</p>
+          <p><strong>URL Redirect:</strong> ${request.realRedirectUrl || 'Non disponibile'}</p>
+        ` : ''}
+      </div>
+      
+      <p>Per ulteriori informazioni, accedi al tuo account sulla nostra piattaforma.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #888; font-size: 12px;">
+          Cordiali saluti,<br>
+          Il team FastAffiliation
+        </p>
+      </div>
+    </div>
+  `;
+
+    return this.sendEmail(user.email, subject, html);
+  }
+
+  // Metodo helper per tradurre lo stato
+  getStatusLabel(status) {
+    const statusLabels = {
+      'APPROVED': 'Approvata',
+      'REJECTED': 'Rifiutata',
+      'DEACTIVATED': 'Disattivata',
+      'PENDING': 'In Attesa'
+    };
+    return statusLabels[status] || status;
+  }
 }
+
 
 module.exports = new EmailService();

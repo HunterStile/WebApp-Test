@@ -2,19 +2,21 @@ const express = require('express');
 const router = express.Router();
 const CampaignRequest = require('../models/CampaignRequest');
 const Campaign = require('../models/Campaign');
+const User = require('../models/User');
+const emailService = require('../services/emailService');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { 
-    name, 
-    realUrl, 
-    description, 
-    conditions, 
-    commissionPlan, 
-    status = 'attivo', 
-    type = 'Sport', 
-    country, 
-    mappedName, 
+  const {
+    name,
+    realUrl,
+    description,
+    conditions,
+    commissionPlan,
+    status = 'attivo',
+    type = 'Sport',
+    country,
+    mappedName,
     requiresMapping,
     commissionAdjustment = 0  // Aggiungi il nuovo campo con default 0
   } = req.body;
@@ -33,11 +35,11 @@ router.post('/campaigns', async (req, res) => {
       return res.status(400).json({ message: 'Il nome mappato è richiesto quando requiresMapping è attivo' });
     }
 
-    const newCampaign = new Campaign({ 
-      name, 
-      realUrl, 
-      description, 
-      conditions, 
+    const newCampaign = new Campaign({
+      name,
+      realUrl,
+      description,
+      conditions,
       commissionPlan,
       status,
       type,
@@ -57,16 +59,16 @@ router.post('/campaigns', async (req, res) => {
 // Modifica una campagna esistente
 router.patch('/campaigns/:id', async (req, res) => {
   const { id } = req.params;
-  const { 
-    name, 
-    realUrl, 
-    description, 
-    conditions, 
-    commissionPlan, 
-    status, 
-    type, 
-    country, 
-    mappedName, 
+  const {
+    name,
+    realUrl,
+    description,
+    conditions,
+    commissionPlan,
+    status,
+    type,
+    country,
+    mappedName,
     requiresMapping,
     commissionAdjustment  // Aggiungi il nuovo campo
   } = req.body;
@@ -134,15 +136,15 @@ router.get('/user-campaign-requests/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
-    const requests = await CampaignRequest.find({ 
-      username: username 
+    const requests = await CampaignRequest.find({
+      username: username
     }).sort({ createdAt: -1 });
-    
+
     res.json(requests);
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Errore nel recupero delle richieste', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Errore nel recupero delle richieste',
+      error: error.message
     });
   }
 });
@@ -150,15 +152,15 @@ router.get('/user-campaign-requests/:username', async (req, res) => {
 // Recupera tutte le richieste pending
 router.get('/pending-requests', async (req, res) => {
   try {
-    const requests = await CampaignRequest.find({ 
-      status: 'PENDING' 
+    const requests = await CampaignRequest.find({
+      status: 'PENDING'
     }).sort({ createdAt: -1 });
-    
+
     res.json(requests);
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Errore nel recupero delle richieste', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Errore nel recupero delle richieste',
+      error: error.message
     });
   }
 });
@@ -176,9 +178,14 @@ router.patch('/update-request/:id', async (req, res) => {
     }
 
     const campaign = await Campaign.findOne({ name: request.campaign });
+    const user = await User.findOne({ username: request.username });
 
     if (!campaign) {
       return res.status(404).json({ message: 'Campagna non trovata' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utente non trovato' });
     }
 
     if (status === 'APPROVED') {
@@ -200,11 +207,19 @@ router.patch('/update-request/:id', async (req, res) => {
     }
 
     await request.save();
+
+    // Invia email di aggioranmento stato richiesta
+    try {
+      await emailService.sendRequestStatusEmail(user, request);;
+    } catch (emailError) {
+      console.error('Errore invio email di aggiornamento:', emailError);
+    }
+
     res.json(request);
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Errore nell\'aggiornamento della richiesta', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Errore nell\'aggiornamento della richiesta',
+      error: error.message
     });
   }
 });

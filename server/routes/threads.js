@@ -29,8 +29,13 @@ router.post('/', async (req, res) => {
     if (isAdminCreated) {
       const user = await User.findOne({ username: targetUser });
       if (user) {
+        console.log('User:', user);
+        console.log('Thread:', thread);
         try {
-          await emailService.sendAdminThreadCreationEmail(user, thread);
+          await emailService.sendAdminThreadCreationEmail(user, {
+            subject: thread.subject,
+            // Aggiungi altri campi necessari se mancanti
+          });
         } catch (emailError) {
           console.error('Errore invio email di aggiornamento:', emailError);
         }

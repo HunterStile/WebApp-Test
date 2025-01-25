@@ -18,9 +18,16 @@ const campaignSchema = new mongoose.Schema({
     default: 'attivo' 
   },
   mappedName: { type: String },
-  requiresMapping: { type: Boolean, default: false }
+  requiresMapping: { type: Boolean, default: false },
+  commissionAdjustment: { 
+    type: Number, 
+    required: true, 
+    default: 0,
+    min: 0 
+  },
 }, {
   timestamps: true,
+  
 });
 
 module.exports = mongoose.model('Campaign', campaignSchema);

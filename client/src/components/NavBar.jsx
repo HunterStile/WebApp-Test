@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { AdminAuthContext } from '../context/AdminAuthContext';
 import { Link } from 'react-router-dom';
-import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, Briefcase, Calendar, Store, User, Settings } from 'lucide-react';
+import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, ReceiptEuro, User, Settings } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
 import API_BASE_URL from '../config';
 import axios from 'axios';
@@ -128,6 +128,10 @@ function Navbar() {
                 <Bell size={20} />
                 <span>Announcements</span>
               </Link>
+              <Link to="/payments" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
+                <ReceiptEuro  size={20} />
+                <span>Payments</span>
+              </Link>
             </>
           )}
 
@@ -154,25 +158,11 @@ function Navbar() {
                 <Bell size={20} />
                 <span>Announcements</span>
               </Link>
+              
             </>
           )}
 
-          {/* More section */}
-          <div className="mt-6">
-            <h3 className="px-3 text-xs font-semibold text-gray-400 uppercase mb-2">More</h3>
-            <Link to="/affiliations" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-              <Briefcase size={20} />
-              <span>Affiliations</span>
-            </Link>
-            <Link to="/events" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-              <Calendar size={20} />
-              <span>Events</span>
-            </Link>
-            <Link to="/store" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
-              <Store size={20} />
-              <span>Store</span>
-            </Link>
-          </div>
+          
         </nav>
 
         {/* Bottom links */}
@@ -194,7 +184,7 @@ function Navbar() {
             </button>
           ) : (
             <Link
-              to="/login2"
+              to="/login"
               className="w-full mt-4 bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium text-center"
             >
               Login

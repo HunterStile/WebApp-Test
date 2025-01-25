@@ -44,6 +44,8 @@ app.use('/admin', adminCampaignRoutes);
 app.use('/threads', threadRoutes);
 app.use('/announcements', announcementsRouter);
 
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Catch-all route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));

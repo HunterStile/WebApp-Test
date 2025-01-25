@@ -1,11 +1,14 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import homeimage from "../assets/images/home1.png"
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Auth() {
-  const [isRegister, setIsRegister] = useState(false);
+  const location = useLocation();
+  const [isRegister, setIsRegister] = useState(
+    location.pathname === '/signup'
+  );
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);

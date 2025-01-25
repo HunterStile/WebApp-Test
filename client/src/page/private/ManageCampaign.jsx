@@ -18,7 +18,8 @@ const ManageCampaigns = () => {
     type: 'Sport',
     country: '',
     mappedName: '',
-    requiresMapping: false
+    requiresMapping: false,
+    commissionAdjustment: 0
   });
   const [editCampaignId, setEditCampaignId] = useState(null);
   const [message, setMessage] = useState('');
@@ -128,7 +129,8 @@ const ManageCampaigns = () => {
       type: 'Sport',
       country: '',
       mappedName: '',  // Aggiungi questo
-      requiresMapping: false  // Aggiungi questo
+      requiresMapping: false,  // Aggiungi questo
+      commissionAdjustment: ''
     });
     setEditCampaignId(null);
   };
@@ -145,7 +147,8 @@ const ManageCampaigns = () => {
       type: campaign.type,
       country: campaign.country,
       mappedName: campaign.mappedName || '',
-      requiresMapping: Boolean(campaign.requiresMapping)
+      requiresMapping: Boolean(campaign.requiresMapping),
+      commissionAdjustment: campaign.commissionAdjustment
     });
     setEditCampaignId(campaign._id);
   };
@@ -349,6 +352,21 @@ const ManageCampaigns = () => {
               <option value="disattivo">Disattivo</option>
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Detrazione Commissione (€)
+            </label>
+            <input
+              type="number"
+              name="commissionAdjustment"
+              value={formData.commissionAdjustment}
+              onChange={handleInputChange}
+              min="0"
+              step="0.01"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
           <div className="md:col-span-2 flex space-x-2">
             <button
               type="submit"
@@ -413,6 +431,7 @@ const ManageCampaigns = () => {
                   <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">URL</th>
                   <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
                   <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">Azioni</th>
+                  <th className="p-3 text-left text-xs font-medium text-white uppercase tracking-wider">Detrazione</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -470,6 +489,9 @@ const ManageCampaigns = () => {
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </td>
+                    <td className="p-3">
+                  {campaign.commissionAdjustment}€
+                </td>
                   </tr>
                 ))}
               </tbody>

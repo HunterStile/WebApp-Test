@@ -5,7 +5,19 @@ const Campaign = require('../models/Campaign');
 
 // Aggiungi o modifica una campagna
 router.post('/campaigns', async (req, res) => {
-  const { name, realUrl, description, conditions, commissionPlan, status = 'attivo', type = 'Sport', country , mappedName, requiresMapping } = req.body;
+  const { 
+    name, 
+    realUrl, 
+    description, 
+    conditions, 
+    commissionPlan, 
+    status = 'attivo', 
+    type = 'Sport', 
+    country, 
+    mappedName, 
+    requiresMapping,
+    commissionAdjustment = 0  // Aggiungi il nuovo campo con default 0
+  } = req.body;
 
   if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
@@ -17,8 +29,7 @@ router.post('/campaigns', async (req, res) => {
       return res.status(400).json({ message: 'La campagna esiste già' });
     }
 
-    // Se requiresMapping è true, verifica che mappedName sia presente
-     if (requiresMapping && !mappedName) {
+    if (requiresMapping && !mappedName) {
       return res.status(400).json({ message: 'Il nome mappato è richiesto quando requiresMapping è attivo' });
     }
 
@@ -31,8 +42,9 @@ router.post('/campaigns', async (req, res) => {
       status,
       type,
       country,
-      mappedName:  requiresMapping ? mappedName : '',
-      requiresMapping: Boolean(requiresMapping)
+      mappedName: requiresMapping ? mappedName : '',
+      requiresMapping: Boolean(requiresMapping),
+      commissionAdjustment: Number(commissionAdjustment)  // Aggiungi il nuovo campo
     });
     await newCampaign.save();
 
@@ -45,7 +57,19 @@ router.post('/campaigns', async (req, res) => {
 // Modifica una campagna esistente
 router.patch('/campaigns/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, realUrl, description, conditions, commissionPlan, status, type, country, mappedName, requiresMapping } = req.body;
+  const { 
+    name, 
+    realUrl, 
+    description, 
+    conditions, 
+    commissionPlan, 
+    status, 
+    type, 
+    country, 
+    mappedName, 
+    requiresMapping,
+    commissionAdjustment  // Aggiungi il nuovo campo
+  } = req.body;
 
   if (!name || !realUrl || !description || !conditions || !commissionPlan || !status || !type || !country) {
     return res.status(400).json({ message: 'Tutti i campi sono richiesti' });
@@ -57,7 +81,6 @@ router.patch('/campaigns/:id', async (req, res) => {
       return res.status(404).json({ message: 'Campagna non trovata' });
     }
 
-    // Se requiresMapping è true, verifica che mappedName sia presente
     if (requiresMapping && !mappedName) {
       return res.status(400).json({ message: 'Il nome mappato è richiesto quando requiresMapping è attivo' });
     }
@@ -70,8 +93,9 @@ router.patch('/campaigns/:id', async (req, res) => {
     campaign.status = status;
     campaign.type = type;
     campaign.country = country;
-    campaign.mappedName = requiresMapping ? mappedName : ''; // Se non richiede mapping, imposta stringa vuota
-    campaign.requiresMapping = Boolean(requiresMapping); // Converti esplicitamente a booleano
+    campaign.mappedName = requiresMapping ? mappedName : '';
+    campaign.requiresMapping = Boolean(requiresMapping);
+    campaign.commissionAdjustment = Number(commissionAdjustment);  // Aggiungi il nuovo campo
 
     await campaign.save();
 

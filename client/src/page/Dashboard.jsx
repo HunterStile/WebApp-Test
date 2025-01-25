@@ -5,6 +5,10 @@ import axios from 'axios';
 import API_BASE_URL from '../config';
 import ClicksConversionChart from '../components/charts/Clickconversion';
 import CommissionsChart from '../components/charts/CommissionsChart';
+import StatsCard from '../components/ui/StatsCards';
+import SignupDepositChart from '../components/charts/SignupDeposit';
+import { useTheme } from '../context/ThemeContext';
+import { Moon, Sun } from 'lucide-react';
 
 const monthNames = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -33,6 +37,7 @@ const Dashboard = () => {
   const [clicksLoading, setClicksLoading] = useState(false);
   const [clicksError, setClicksError] = useState(null);
   const [activeChart, setActiveChart] = useState('commissions'); // 'commissions', 'clicks', etc.
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const fetchTotalClicks = async () => {
@@ -41,12 +46,12 @@ const Dashboard = () => {
           username: user,
           viewMode: viewMode
         };
-  
+
         if (viewMode === 'monthly') {
           const endDate = new Date();
           const startDate = new Date();
           startDate.setMonth(endDate.getMonth() - monthRange + 1);
-          
+
           params.startDate = startDate.toISOString();
           params.endDate = endDate.toISOString();
         } else if (viewMode === 'daily') {
@@ -61,18 +66,18 @@ const Dashboard = () => {
             currentDate.getMonth() + 1,
             0
           );
-          
+
           params.startDate = startOfMonth.toISOString();
           params.endDate = endOfMonth.toISOString();
         }
-  
+
         const response = await axios.get(`${API_BASE_URL}/cpc/total-clicks`, { params });
         setTotalClicks(response.data.totalClicks);
       } catch (error) {
         console.error('Errore nel recupero dei click totali:', error);
       }
     };
-  
+
     fetchTotalClicks();
   }, [user, viewMode, monthRange]);
 
@@ -104,33 +109,33 @@ const Dashboard = () => {
   const yearFilteredData = useMemo(() => {
     const currentDate = new Date();
     let filteredConversions;
-  
+
     if (viewMode === 'yearly') {
       filteredConversions = [...conversions];
     } else if (viewMode === 'daily') {
       const currentMonth = currentDate.getMonth();
       const currentYear = currentDate.getFullYear();
-      
+
       filteredConversions = conversions.filter(conv => {
         const convDate = new Date(conv.date);
-        return convDate.getMonth() === currentMonth && 
-               convDate.getFullYear() === currentYear;
+        return convDate.getMonth() === currentMonth &&
+          convDate.getFullYear() === currentYear;
       });
     } else {
       const endDate = currentDate;
       const startDate = new Date();
       startDate.setMonth(endDate.getMonth() - monthRange + 1);
-  
+
       filteredConversions = conversions.filter(conv => {
         const convDate = new Date(conv.date);
         return convDate >= startDate && convDate <= endDate;
       });
     }
-  
+
     const cplCount = filteredConversions.filter(conv => conv.type === 'cpl').length;
     const cpaCount = filteredConversions.filter(conv => conv.type === 'cpa').length;
     const totalConversions = cplCount + cpaCount;
-  
+
     return {
       cplCount,
       cpaCount,
@@ -392,18 +397,27 @@ const Dashboard = () => {
 
   // Main Page Content
   return (
-    <div className="p-8 bg-white rounded-xl">
-      {/* Header with Welcome and Logout */}
+    <div className="p-6 bg-white dark:bg-dark-bg text-black dark:text-dark-text rounded-xl transition-colors duration-300">
+      {/* Header with Welcome, Logout, and Theme Toggle */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-200 rounded-full" /> {/* User avatar placeholder */}
-          <div>
-            {user && <h1 className="text-xl font-semibold">BENTORNATO, {user}</h1>}
-          </div>
+          <div className="w-12 h-12 bg-gray-200 dark:bg-dark-accent rounded-full" />
+          {user && <h1 className="text-xl font-semibold">BENTORNATO, {user}</h1>}
         </div>
         <div className="flex items-center gap-4">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-gray-100 dark:bg-dark-accent hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+
           {user && (
-            <button onClick={logout} className="text-gray-600 hover:text-gray-800">
+            <button
+              onClick={logout}
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+            >
               •••
             </button>
           )}
@@ -412,22 +426,22 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Total Clicks</h3>
-          <p className="text-4xl text-center font-bold">{totalClicks}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Sign up</h3>
-          <p className="text-4xl text-center font-bold">{yearFilteredData.cplCount}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">CPA</h3>
-          <p className="text-4xl text-center font-bold">{yearFilteredData.cpaCount}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-gray-600 text-xl text-center mb-2">Profit</h3>
-          <p className="text-4xl text-center font-bold">€ {totalPeriodCommissions}</p>
-        </div>
+        <StatsCard
+          title="Total Clicks"
+          value={totalClicks}
+        />
+        <StatsCard
+          title="Sign up"
+          value={yearFilteredData.cplCount}
+        />
+        <StatsCard
+          title="CPA"
+          value={yearFilteredData.cpaCount}
+        />
+        <StatsCard
+          title="Profit"
+          value={`€ ${totalPeriodCommissions}`}
+        />
       </div>
 
       {/* View Toggle and Period Filters */}
@@ -530,13 +544,12 @@ const Dashboard = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h2 className="text-xl font-semibold mb-6">Signup to deposit</h2>
-          {/* Placeholder for signup to deposit chart - you'll need to implement this */}
-          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-            <p className="text-gray-500">Signup/Deposit ratio visualization</p>
-            <p className="text-sm text-gray-400">({yearFilteredData.cpaPercentage}%)</p>
-            <p className="text-sm text-gray-400">({yearFilteredData.cplPercentage}%)</p>
-          </div>
+          <SignupDepositChart
+            cplPercentage={yearFilteredData.cplPercentage}
+            cpaPercentage={yearFilteredData.cpaPercentage}
+          />
         </div>
+
       </div>
     </div>
   );

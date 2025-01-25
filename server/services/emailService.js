@@ -3,7 +3,7 @@ const sgMail = require('@sendgrid/mail');
 const path = require('path');
 require('dotenv').config();
 
-const DOMAIN_URL = process.env.DOMAIN_URL || 'https://www.talkchain.xyz'; // Personalizza con il tuo dominio
+const DOMAIN_URL = process.env.DOMAIN_URL || 'https://www.talkchain.xyz/api'; // Personalizza con il tuo dominio
 
 // Configura SendGrid con la tua API key
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -78,7 +78,7 @@ class EmailService {
         <h3 style="color: #666;">Dettagli Aggiornamento:</h3>
         <p><strong>Stato:</strong> ${this.getStatusLabel(request.status)}</p>
         ${request.status === 'APPROVED' ? `
-          <p><strong>Link Univoco:</strong> ${DOMAIN_URL}/${request.uniqueLink || 'Non disponibile'}</p>
+          <p><strong>Link Univoco:</strong> <a href="${DOMAIN_URL}${request.uniqueLink}" style="color: #007bff; text-decoration: underline;">Clicca qui per visualizzare il brend</a></p>
         ` : ''}
       </div>
       

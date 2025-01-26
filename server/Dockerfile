@@ -5,6 +5,9 @@ RUN groupadd -r nodegroup && useradd -r -g nodegroup -m nodeuser
 
 WORKDIR /app
 
+# Create upload directories
+RUN mkdir -p /app/server/uploads/profile-images
+
 # Copia i file del progetto e installa le dipendenze come utente non-root
 COPY package*.json ./
 RUN npm install

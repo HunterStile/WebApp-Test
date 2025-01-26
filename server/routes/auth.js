@@ -231,10 +231,10 @@ router.put('/profile', async (req, res) => {
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/profile-images/');
+    cb(null, path.join(__dirname, 'uploads/profile-images/'));
   },
   filename: (req, file, cb) => {
-    cb(null, `${req.body.username}-${Date.now()}${path.extname(file.originalname)}`);
+    cb(null, `${req.body.username || 'unknown'}-${Date.now()}${path.extname(file.originalname)}`);
   }
 });
 

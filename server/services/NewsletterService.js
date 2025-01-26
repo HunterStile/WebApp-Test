@@ -1,8 +1,13 @@
 // services/newsletterService.js
 const Newsletter = require('../models/Newsletter');
 const User = require('../models/User');
+const EmailService = require('./emailService'); // Import EmailService
 
 class NewsletterService {
+  constructor() {
+    this.emailService = EmailService; // Assign EmailService to instance property
+  }
+
   async createNewsletter(newsletterData) {
     return await Newsletter.create(newsletterData);
   }

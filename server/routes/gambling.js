@@ -337,4 +337,152 @@ router.post('/mark-conversions-paid', async (req, res) => {
   }
 });
 
+// Add this route to routes/gambling.js
+router.get('/user-payment-list', async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      sortBy = 'username', 
+      sortOrder = 'asc',
+      minValidatedCommissions,
+      minTotalPayments,
+      validatedCommissionsSortOrder,
+      totalPaymentsSortOrder
+    } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Base aggregation pipeline
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'conversions',
+          let: { username: '$username' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$aff_var', '$$username'] },
+                    { $eq: ['$status', 'validated'] }
+                  ]
+                }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                totalValidatedCommissions: { $sum: { $toDouble: '$commission' } },
+                validatedConversionsCount: { $sum: 1 }
+              }
+            }
+          ],
+          as: 'validatedCommissions'
+        }
+      },
+      {
+        $lookup: {
+          from: 'payments',
+          let: { username: '$username' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$username', '$$username'] }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                totalPayments: { $sum: '$amount' }
+              }
+            }
+          ],
+          as: 'payments'
+        }
+      },
+      {
+        $project: {
+          username: 1,
+          paymentMethod: 1,
+          email: 1,
+          totalValidatedCommissions: { 
+            $ifNull: [{ $arrayElemAt: ['$validatedCommissions.totalValidatedCommissions', 0] }, 0] 
+          },
+          totalPayments: { 
+            $ifNull: [{ $arrayElemAt: ['$payments.totalPayments', 0] }, 0] 
+          }
+        }
+      }
+    ];
+
+    // Add filtering conditions if specified
+    if (minValidatedCommissions || minTotalPayments) {
+      const matchStage = { $match: {} };
+      
+      if (minValidatedCommissions) {
+        matchStage.$match.totalValidatedCommissions = { 
+          $gte: parseFloat(minValidatedCommissions) 
+        };
+      }
+      
+      if (minTotalPayments) {
+        matchStage.$match.totalPayments = { 
+          $gte: parseFloat(minTotalPayments) 
+        };
+      }
+      
+      pipeline.push(matchStage);
+    }
+
+    // Add sorting stages
+    const sortStages = [];
+
+    // Main sort
+    const mainSortStage = { $sort: {} };
+    mainSortStage.$sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    sortStages.push(mainSortStage);
+
+    // Additional sorting for validated commissions
+    if (validatedCommissionsSortOrder) {
+      const validatedCommissionsSortStage = { 
+        $sort: { 
+          totalValidatedCommissions: validatedCommissionsSortOrder === 'asc' ? 1 : -1 
+        } 
+      };
+      sortStages.push(validatedCommissionsSortStage);
+    }
+
+    // Additional sorting for total payments
+    if (totalPaymentsSortOrder) {
+      const totalPaymentsSortStage = { 
+        $sort: { 
+          totalPayments: totalPaymentsSortOrder === 'asc' ? 1 : -1 
+        } 
+      };
+      sortStages.push(totalPaymentsSortStage);
+    }
+
+    // Add sort stages to pipeline
+    pipeline.push(...sortStages);
+
+    // Execute aggregation
+    const userList = await User.aggregate(pipeline);
+
+    // Pagination
+    const totalUsers = userList.length;
+    const paginatedUsers = userList.slice(skip, skip + Number(limit));
+
+    res.json({
+      total: totalUsers,
+      users: paginatedUsers,
+      totalPages: Math.ceil(totalUsers / limit)
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Errore nel recupero della lista utenti',
+      details: error.message
+    });
+  }
+});
+
 module.exports = router;

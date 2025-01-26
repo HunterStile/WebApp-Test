@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, Calendar } from 'lucide-react';
 
 const FilterSection = ({
   searchTerm,
@@ -8,7 +8,8 @@ const FilterSection = ({
   onFilterChange,
   resetFilters,
   searchPlaceholder = "Search...",
-  filterOptions = {}
+  filterOptions = {},
+  children
 }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
@@ -50,6 +51,9 @@ const FilterSection = ({
           </button>
         </div>
       </div>
+
+      {/* Optional additional content (for date ranges, etc.) */}
+      {children}
     </div>
   );
 };

@@ -1,10 +1,11 @@
 TODO List CORE:
 1.[X] Aggiornare le conversioni di gambling.js e togliere il -20 ma decidere con un parametro in modello campaign la detrazione.
-2.[] Aggiungere le varie email automatiche (campagne accettata, disattivata, nuovo thread in messaggi fatto dall'admin, ecc).
+2.[x] Aggiungere le varie email automatiche (campagne accettata, disattivata, nuovo thread in messaggi fatto dall'admin, ecc).
 3.[] Implementare sistema referral.
 4.[X] Impostare profilo, settaggi dell'utente.
 5.[X] Impostare metodo registrazione pagamenti, come vedere i pagamenti pronti da essere fatturati, ecc.
 6.[] Banner disponibile all'utente per le specifiche campagne.
+7.[X] Imlementate newsletter
 
 ALTER FEATURES
 1.[] Idea di aggiungere un comparatore personalizzato per l'utente.

@@ -30,7 +30,7 @@ const ConversionsPage = () => {
     sortOrder: 'asc',
     minValidatedCommissions: '',
     minTotalPayments: '',
-    validatedCommissionsSortOrder: '',
+    validatedCommissionsSortOrder: 'desc',
     totalPaymentsSortOrder: ''
   });
 

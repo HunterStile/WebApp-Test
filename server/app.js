@@ -9,6 +9,7 @@ const redirectRoutes = require('./routes/cpc');
 const adminCampaignRoutes = require('./routes/admin-cpc');
 const threadRoutes = require('./routes/threads');
 const announcementsRouter = require('./routes/announcements');
+const newsletterRouter = require('./routes/newsLetter');
 
 require('dotenv').config();
 const app = express();
@@ -43,6 +44,8 @@ app.use('/cpc', redirectRoutes);
 app.use('/admin', adminCampaignRoutes);
 app.use('/threads', threadRoutes);
 app.use('/announcements', announcementsRouter);
+app.use('/newsletter', newsletterRouter);
+
 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

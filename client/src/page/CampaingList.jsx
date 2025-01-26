@@ -181,7 +181,7 @@ const CampaignTable = () => {
   );
 
   return (
-    <div className="p-8 bg-white rounded-xl">
+    <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
 
       {/* Header Section */}
       <PageHeader title="Campaign Management" />
@@ -229,21 +229,21 @@ const CampaignTable = () => {
       />
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="p-4 text-left text-gray-600 font-semibold">Brand Logo</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Campaign Name</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Type</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Country</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Commission Plan</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Status</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Actions</th>
+              <tr className="bg-gray-50 dark:bg-dark-accent">
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Brand Logo</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Campaign Name</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Type</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Country</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Commission Plan</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Status</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-dark-accent">
               {currentCampaigns.map((campaign) => {
                 const status = getRequestStatus(campaign.name);
                 const requestDetails = getRequestDetails(campaign.name);
@@ -251,27 +251,28 @@ const CampaignTable = () => {
 
                 return (
                   <React.Fragment key={campaign.name}>
-                    <tr className="hover:bg-gray-50">
+                    <tr className="hover:bg-gray-50 dark:hover:bg-dark-accent">
                       <td className="p-4">
                         <div className="flex items-center space-x-2">
-                          <div className={`w-2 h-2 rounded-full ${status !== 'deactivated' && campaign.status === 'attivo'
+                          <div className={`w-2 h-2 rounded-full ${
+                            status !== 'deactivated' && campaign.status === 'attivo'
                               ? 'bg-green-500'
                               : 'bg-red-500'
-                            }`} />
+                          }`} />
                           <div className="relative w-16 h-8">
                             <CampaignLogo campaignName={campaign.name} />
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 text-gray-900">{campaign.mappedName || campaign.name}</td>
-                      <td className="p-4 text-gray-600 capitalize">{campaign.type}</td>
+                      <td className="p-4 text-gray-900 dark:text-dark-text">{campaign.mappedName || campaign.name}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400 capitalize">{campaign.type}</td>
                       <td className="p-4">
                         <CountryFlag country={campaign.country} />
                       </td>
                       <td className="p-4">
                         <button
                           onClick={() => toggleRowExpansion(campaign.name)}
-                          className="flex items-center justify-between w-full text-gray-600 hover:text-gray-900"
+                          className="flex items-center justify-between w-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-dark-text"
                         >
                           <span>{campaign.commissionPlan}</span>
                           {isExpanded ? (
@@ -296,16 +297,16 @@ const CampaignTable = () => {
                       </td>
                     </tr>
                     {isExpanded && (
-                      <tr className="bg-gray-50">
+                      <tr className="bg-gray-50 dark:bg-dark-accent">
                         <td colSpan="7" className="p-4">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                              <p className="text-gray-600">{campaign.description}</p>
+                              <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Description</h3>
+                              <p className="text-gray-600 dark:text-gray-400">{campaign.description}</p>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900 mb-2">Conditions</h3>
-                              <p className="text-gray-600">{campaign.conditions}</p>
+                              <h3 className="font-semibold text-gray-900 dark:text-dark-text mb-2">Conditions</h3>
+                              <p className="text-gray-600 dark:text-gray-400">{campaign.conditions}</p>
                             </div>
                           </div>
                         </td>
@@ -336,15 +337,19 @@ const StatusBadge = ({ status, campaignStatus }) => {
   const getStatusStyles = () => {
     switch (status) {
       case 'deactivated':
-        return 'bg-red-50 text-red-600';
+        return 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400';
       case 'approved':
-        return campaignStatus === 'attivo' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600';
+        return campaignStatus === 'attivo' 
+          ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' 
+          : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400';
       case 'pending':
-        return campaignStatus === 'attivo' ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-600';
+        return campaignStatus === 'attivo' 
+          ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400' 
+          : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400';
       case 'rejected':
-        return 'bg-red-50 text-red-600';
+        return 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400';
       default:
-        return 'bg-gray-50 text-gray-600';
+        return 'bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-400';
     }
   };
 
@@ -369,16 +374,16 @@ const ActionButton = ({ status, campaign, requestDetails, onRequest, onCopy, cop
           href={API_BASE_URL + requestDetails.uniqueLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-700 hover:underline"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500 hover:underline"
         >
           View Link
         </a>
         <button
           onClick={() => onCopy(API_BASE_URL + requestDetails.uniqueLink)}
-          className="text-gray-400 hover:text-gray-600"
+          className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
         >
           {copiedLink === API_BASE_URL + requestDetails.uniqueLink ? (
-            <Check className="w-5 h-5 text-green-600" />
+            <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
           ) : (
             <Copy className="w-5 h-5" />
           )}
@@ -391,14 +396,14 @@ const ActionButton = ({ status, campaign, requestDetails, onRequest, onCopy, cop
     return (
       <button
         onClick={() => onRequest(campaign.name)}
-        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 flex items-center gap-2"
+        className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 flex items-center gap-2"
       >
         Request <ArrowRight className="w-4 h-4" />
       </button>
     );
   }
 
-  return <span className="text-gray-400">No Action</span>;
+  return <span className="text-gray-400 dark:text-gray-500">No Action</span>;
 };
 
 export default CampaignTable;

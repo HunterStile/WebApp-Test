@@ -7,6 +7,7 @@ const axios = require('axios');
 const emailService = require('../services/emailService');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 
 // Validazione email
@@ -231,13 +232,16 @@ router.put('/profile', async (req, res) => {
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'uploads/profile-images/'));
+    // Change from relative to absolute path
+    const uploadPath = path.join(__dirname, '..', 'uploads', 'profile-images');
+    // Create directory if it doesn't exist
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     cb(null, `${req.body.username || 'unknown'}-${Date.now()}${path.extname(file.originalname)}`);
   }
 });
-
 const upload = multer({ 
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit

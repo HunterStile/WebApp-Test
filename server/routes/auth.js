@@ -259,38 +259,38 @@ const upload = multer({
 router.post('/upload-profile-image', upload.single('profileImage'), async (req, res) => {
   try {
     const { username } = req.body;
-    
+
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
     const user = await User.findOne({ username });
     if (!user) {
+      // Elimina il file appena caricato se l'utente non esiste
+      fs.unlinkSync(req.file.path);
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Save relative path
+    // Elimina l'immagine precedente, se esiste
+    if (user.profileImage) {
+      const previousImagePath = path.join(__dirname, '..', user.profileImage);
+      if (fs.existsSync(previousImagePath)) {
+        fs.unlinkSync(previousImagePath);
+      }
+    }
+
+    // Salva il nuovo percorso relativo
     const imagePath = `uploads/profile-images/${req.file.filename}`;
     user.profileImage = imagePath;
     await user.save();
 
-    res.json({ 
+    res.json({
       message: 'Profile image uploaded successfully',
-      imageUrl: imagePath
+      imageUrl: imagePath,
     });
   } catch (error) {
     console.error('Profile image upload error:', error);
     res.status(500).json({ error: 'Error uploading profile image' });
-  }
-});
-
-router.get('/payments/:username', async (req, res) => {
-  try {
-    const username = req.params.username;
-    const payments = await Payment.find({ username }).exec();
-    res.json(payments);
-  } catch (err) {
-    res.status(500).json({ error: 'Errore nel recupero dei pagamenti' });
   }
 });
 

@@ -3,6 +3,7 @@ import axios from 'axios';
 import API_BASE_URL from '../config';
 import { AuthContext } from '../context/AuthContext';
 import FilterSection from '../components/ui/FilterSection';
+import PageHeader from '../components/ui/PageHeader';
 
 const UserPayments = () => {
   const [payments, setPayments] = useState([]);
@@ -110,11 +111,9 @@ const UserPayments = () => {
   );
 
   return (
-    <div className="flex h-screen bg-white dark:bg-dark-bg">
+    <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
       <div className="w-full">
-        <div className="p-4 border-b border-gray-200 dark:border-dark-accent flex justify-between items-center dark:bg-dark-card">
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-dark-text">Payment History</h1>
-        </div>
+      <PageHeader title="Payment History" />
 
         <FilterSection
           searchTerm={searchTerm}

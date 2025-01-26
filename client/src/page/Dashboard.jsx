@@ -402,7 +402,7 @@ const Dashboard = () => {
 
   // Main Page Content
   return (
-    <div className="p-6 bg-white dark:bg-dark-bg text-black dark:text-dark-text rounded-xl transition-colors duration-300">
+    <div className="p-8 bg-white dark:bg-dark-bg text-black dark:text-dark-text rounded-xl transition-colors duration-300">
       {/* Header with Welcome, Logout, and Theme Toggle */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">

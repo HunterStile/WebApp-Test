@@ -25,9 +25,16 @@ const NewsletterManagement = () => {
   const fetchNewsletters = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/newsletters`);
-      setNewsletters(response.data);
+      
+      // Log the response to see its structure
+      console.log('Newsletter response:', response.data);
+
+      // Ensure we always have an array
+      setNewsletters(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
+      console.error('Fetch error:', error);
       handleError('Errore nel recupero delle newsletter');
+      setNewsletters([]); // Ensure newsletters is an array even on error
     }
   };
 

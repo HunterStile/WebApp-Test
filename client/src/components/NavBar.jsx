@@ -75,7 +75,7 @@ function Navbar() {
 
         {/* Logo */}
         <div className="p-6 hidden lg:block">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <img src={flogo} alt="Fast Affiliation" className="h-8" />
             <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
           </Link>

@@ -109,7 +109,7 @@ const ThreadList = () => {
 
   const handleThreadClick = async (thread) => {
     setActiveThread(thread);
-    
+
     try {
       // Mark messages as read
       await axios.post(`${API_BASE_URL}/threads/${thread._id}/messages/read`, {
@@ -138,6 +138,37 @@ const ThreadList = () => {
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
+  };
+
+  // Helper function to format date
+  const formatMessageDate = (timestamp) => {
+    const messageDate = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (messageDate.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (messageDate.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return messageDate.toLocaleDateString();
+    }
+  };
+
+  // Helper function to group messages by date
+  const groupMessagesByDate = (messages) => {
+    const groupedMessages = {};
+
+    messages.forEach(message => {
+      const messageDate = formatMessageDate(message.timestamp);
+      if (!groupedMessages[messageDate]) {
+        groupedMessages[messageDate] = [];
+      }
+      groupedMessages[messageDate].push(message);
+    });
+
+    return groupedMessages;
   };
 
   return (
@@ -171,11 +202,10 @@ const ThreadList = () => {
             <div
               key={thread._id}
               onClick={() => handleThreadClick(thread)}
-              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-accent ${
-                activeThread?._id === thread._id 
-                  ? 'bg-gray-100 dark:bg-dark-accent' 
+              className={`px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-accent ${activeThread?._id === thread._id
+                  ? 'bg-gray-100 dark:bg-dark-accent'
                   : ''
-              }`}
+                }`}
             >
               <div className="flex justify-between items-start">
                 <div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-2">
@@ -214,26 +244,35 @@ const ThreadList = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map((message) => (
-                <div
-                  key={message._id}
-                  className={`flex ${message.sender === user ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[60%] rounded-2xl px-4 py-2 ${
-                      message.sender === user
-                        ? 'bg-dark-green text-white'
-                        : 'bg-gray-100 dark:bg-dark-accent text-gray-800 dark:text-dark-text'
-                    }`}
-                  >
-                    <div className="text-sm">{message.content}</div>
-                    <div className="text-xs mt-1 opacity-75">
-                      {new Date(message.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </div>
+              {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
+                <div key={date}>
+                  <div className="text-center text-xs text-gray-500 dark:text-gray-400 my-4">
+                    <span className="bg-white dark:bg-dark-bg px-3">
+                      {date}
+                    </span>
+                    <hr className="absolute left-0 right-0 top-1/2 border-t dark:border-dark-accent" />
                   </div>
+                  {dateMessages.map((message) => (
+                    <div
+                      key={message._id}
+                      className={`flex mb-2 ${message.sender === user ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[60%] rounded-2xl px-4 py-2 ${message.sender === user
+                            ? 'bg-dark-green text-white'
+                            : 'bg-gray-100 dark:bg-dark-accent text-gray-800 dark:text-dark-text'
+                          }`}
+                      >
+                        <div className="text-sm">{message.content}</div>
+                        <div className="text-xs mt-1 opacity-75">
+                          {new Date(message.timestamp).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
               <div ref={messagesEndRef} />

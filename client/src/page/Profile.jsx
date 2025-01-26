@@ -28,7 +28,7 @@ const ProfilePage = () => {
           setSelectedMethod(userData.paymentMethod || 'paypal');
           setProfileImage(
             userData.profileImage 
-            ? `${API_BASE_URL}/${userData.profileImage}` 
+            ? `${API_BASE_URL.replace('/api', '')}/${userData.profileImage}` 
             : null
           );
         })

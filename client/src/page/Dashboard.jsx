@@ -337,8 +337,8 @@ const Dashboard = () => {
       <button
         onClick={() => setActiveChart('commissions')}
         className={`px-4 py-2 rounded-lg transition-colors ${activeChart === 'commissions'
-          ? 'bg-light-green text-dark-green'
-          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+          ? 'bg-light-green text-dark-green dark:bg-dark-green/20 dark:text-dark-text'
+          : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-card'
           }`}
       >
         Commissions
@@ -346,8 +346,8 @@ const Dashboard = () => {
       <button
         onClick={() => setActiveChart('clicks')}
         className={`px-4 py-2 rounded-lg transition-colors ${activeChart === 'clicks'
-          ? 'bg-light-green text-dark-green'
-          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+          ? 'bg-light-green text-dark-green dark:bg-dark-green/20 dark:text-dark-text'
+          : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-card'
           }`}
       >
         Clicks & Conversions
@@ -360,8 +360,10 @@ const Dashboard = () => {
     switch (activeChart) {
       case 'commissions':
         return (
+          <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-sm dark:border dark:border-dark-accent">
           <CommissionsChart
             data={
+              
               viewMode === 'yearly'
                 ? yearlyCommissions
                 : viewMode === 'daily'
@@ -370,22 +372,25 @@ const Dashboard = () => {
             }
             viewMode={viewMode}
           />
+          </div>
         );
       case 'clicks':
         return clicksLoading ? (
-          <div className="h-96 flex items-center justify-center">
-            <p className="text-gray-500">Loading data...</p>
-          </div>
+          <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-sm dark:border dark:border-dark-accent text-center text-gray-600 dark:text-dark-text">
+          Loading data...
+        </div>
         ) : clicksError ? (
-          <div className="h-96 flex items-center justify-center">
-            <p className="text-red-500">Error: {clicksError}</p>
-          </div>
+          <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-sm dark:border dark:border-dark-accent text-center text-red-500 dark:text-red-400">
+          Error: {clicksError}
+        </div>
         ) : (
+          <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-sm dark:border dark:border-dark-accent">
           <ClicksConversionChart
             conversions={filteredData}
             clicksHistory={clicksHistory}
             days={30}
           />
+          </div>
         );
       default:
         return null;
@@ -402,7 +407,7 @@ const Dashboard = () => {
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gray-200 dark:bg-dark-accent rounded-full" />
-          {user && <h1 className="text-xl font-semibold">BENTORNATO, {user}</h1>}
+          {user && <h1 className="text-xl font-semibold dark:text-dark-text">BENTORNATO, {user}</h1>}
         </div>
         <div className="flex items-center gap-4">
           {/* Theme Toggle Button */}
@@ -450,8 +455,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('daily')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'daily'
-              ? 'bg-light-green text-dark-green'
-              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
+              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
           >
             Daily View
@@ -459,8 +464,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('monthly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'monthly'
-              ? 'bg-light-green text-dark-green'
-              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
+              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
           >
             Monthly View
@@ -468,8 +473,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('yearly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'yearly'
-              ? 'bg-light-green text-dark-green'
-              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
+              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
           >
             Yearly View
@@ -483,8 +488,8 @@ const Dashboard = () => {
                 key={option.value}
                 onClick={() => setMonthRange(option.value)}
                 className={`px-4 py-2 rounded-lg transition-colors ${monthRange === option.value
-                  ? 'bg-light-green text-dark-green'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
+                  : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
               >
                 {option.label}
@@ -495,9 +500,9 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section with Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent p-6 mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Analytics</h2>
+          <h2 className="text-xl font-semibold dark:text-dark-text">Analytics</h2>
           <ChartTabs />
         </div>
         <ActiveChartContent />
@@ -505,8 +510,8 @@ const Dashboard = () => {
 
       {/* Latest Conversions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-semibold mb-6">Latest Commissions</h2>
+        <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent p-6">
+          <h2 className="text-xl font-semibold mb-6 dark:text-dark-text">Latest Commissions</h2>
           {filteredData.length > 0 ? (
             <div className="space-y-4">
               {filteredData
@@ -515,20 +520,20 @@ const Dashboard = () => {
                 .map((conv) => (
                   <div
                     key={conv.conversion_id}
-                    className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="p-4 rounded-lg bg-gray-50 dark:bg-dark-accent hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium text-gray-900">{conv.campaign_name}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 dark:text-dark-text">{conv.campaign_name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {new Date(conv.date).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">€ {parseFloat(conv.commission).toFixed(2)}</p>
-                        <span className={`text-sm px-2 py-1 rounded-full ${conv.status === 'paid' ? 'bg-green-100 text-dark-green' :
-                          conv.status === 'onhold' ? 'bg-yellow-100 text-yellow-600' :
-                            'bg-blue-100 text-dark-blue'
+                        <p className="font-bold text-gray-900 dark:text-dark-text">€ {parseFloat(conv.commission).toFixed(2)}</p>
+                        <span className={`text-sm px-2 py-1 rounded-full ${conv.status === 'paid' ? 'bg-green-100 text-dark-green dark:bg-green-900/30 dark:text-green-400' :
+                          conv.status === 'onhold' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                            'bg-blue-100 text-dark-blue dark:bg-blue-900/30 dark:text-blue-400'
                           }`}>
                           {conv.type.toUpperCase()}
                         </span>
@@ -538,18 +543,17 @@ const Dashboard = () => {
                 ))}
             </div>
           ) : (
-            <p className="text-gray-500">No conversions in selected period.</p>
+            <p className="text-gray-500 dark:text-gray-400">No conversions in selected period.</p>
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-semibold mb-6">Signup to deposit</h2>
+        <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent p-6">
+          <h2 className="text-xl font-semibold mb-6 dark:text-dark-text">Signup to deposit</h2>
           <SignupDepositChart
             cplPercentage={yearFilteredData.cplPercentage}
             cpaPercentage={yearFilteredData.cpaPercentage}
           />
         </div>
-
       </div>
     </div>
   );

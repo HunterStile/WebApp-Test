@@ -96,7 +96,7 @@ const ConversionList = () => {
   );
 
   return (
-    <div className="p-8 bg-white rounded-xl">
+    <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
       {/* Header Section */}
       <PageHeader title="Conversion Management" />
 
@@ -128,7 +128,6 @@ const ConversionList = () => {
         />
       </div>
 
-
       {/* Filters Section */}
       <FilterSection
         searchTerm={searchTerm}
@@ -146,38 +145,38 @@ const ConversionList = () => {
       />
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="p-4 text-left text-gray-600 font-semibold">Conversion ID</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Campaign Name</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Date</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Type</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Status</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Commission</th>
-                <th className="p-4 text-left text-gray-600 font-semibold">Campaign Status</th>
+              <tr className="bg-gray-50 dark:bg-dark-accent">
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Conversion ID</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Campaign Name</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Date</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Type</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Status</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Commission</th>
+                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Campaign Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-dark-accent">
               {filteredConversions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((conv) => (
-                <tr key={conv.conversion_id} className="hover:bg-gray-50">
-                  <td className="p-4 text-gray-900">{conv.conversion_id}</td>
-                  <td className="p-4 text-gray-900">{conv.campaign_name}</td>
-                  <td className="p-4 text-gray-600">
+                <tr key={conv.conversion_id} className="hover:bg-gray-50 dark:hover:bg-dark-accent">
+                  <td className="p-4 text-gray-900 dark:text-dark-text">{conv.conversion_id}</td>
+                  <td className="p-4 text-gray-900 dark:text-dark-text">{conv.campaign_name}</td>
+                  <td className="p-4 text-gray-600 dark:text-gray-400">
                     {new Date(conv.date).toLocaleDateString('it-IT', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
                     })}
                   </td>
-                  <td className="p-4 text-gray-600">{conv.type}</td>
+                  <td className="p-4 text-gray-600 dark:text-gray-400">{conv.type}</td>
                   <td className="p-4">
                     <StatusBadge status={conv.status} />
                   </td>
-                  <td className="p-4 text-gray-900">€ {parseFloat(conv.commission).toFixed(2)}</td>
-                  <td className="p-4 text-gray-600">{conv.campaign_status}</td>
+                  <td className="p-4 text-gray-900 dark:text-dark-text">€ {parseFloat(conv.commission).toFixed(2)}</td>
+                  <td className="p-4 text-gray-600 dark:text-gray-400">{conv.campaign_status}</td>
                 </tr>
               ))}
             </tbody>
@@ -197,18 +196,18 @@ const ConversionList = () => {
   );
 };
 
-// Status Badge Component
+// Status Badge Component with Dark Mode
 const StatusBadge = ({ status }) => {
   const getStatusStyle = () => {
     switch (status) {
       case 'paid':
-        return 'bg-green-50 text-green-600';
+        return 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400';
       case 'validated':
-        return 'bg-blue-50 text-blue-600';
+        return 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400';
       case 'refused':
-        return 'bg-red-50 text-red-600';
+        return 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400';
       default:
-        return 'bg-yellow-50 text-yellow-600';
+        return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400';
     }
   };
 

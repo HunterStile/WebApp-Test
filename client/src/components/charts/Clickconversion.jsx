@@ -7,7 +7,6 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days + 1);
     
-    // Crea un array di date per il periodo selezionato
     const dateArray = Array.from({ length: days }, (_, i) => {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
@@ -18,12 +17,10 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
       };
     });
 
-    // Mappa per tenere traccia dei dati per data
     const dataMap = new Map(
       dateArray.map(item => [item.date, { ...item }])
     );
 
-    // Aggiungi i click
     clicksHistory.forEach(click => {
       const clickDate = new Date(click.timestamp).toISOString().split('T')[0];
       if (dataMap.has(clickDate)) {
@@ -32,7 +29,6 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
       }
     });
 
-    // Aggiungi le conversioni
     conversions.forEach(conversion => {
       const convDate = new Date(conversion.date).toISOString().split('T')[0];
       if (dataMap.has(convDate)) {
@@ -41,7 +37,6 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
       }
     });
 
-    // Converti la mappa in array e formatta le date
     return Array.from(dataMap.values()).map(item => ({
       ...item,
       formattedDate: new Date(item.date).toLocaleDateString('it-IT', {
@@ -52,32 +47,49 @@ const ClicksConversionChart = ({ conversions, clicksHistory, days = 30 }) => {
   }, [conversions, clicksHistory, days]);
 
   return (
-    <div className="bg-white p-4 rounded-lg">
-      <h2 className="text-lg font-semibold mb-4 text-gray-800">
+    <div className="bg-white dark:bg-dark-card p-4 rounded-lg">
+      <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-dark-text">
         Andamento Click e Conversioni ultimi {days} giorni
       </h2>
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke="#f0f0f0" 
+              className="dark:stroke-dark-accent"
+            />
             <XAxis
               dataKey="formattedDate"
-              tick={{ fill: '#666' }}
-              tickLine={{ stroke: '#666' }}
+              tick={{ fill: '#666', className: 'dark:fill-dark-text' }}
+              tickLine={{ stroke: '#666', className: 'dark:stroke-dark-text' }}
             />
             <YAxis
-              tick={{ fill: '#666' }}
-              tickLine={{ stroke: '#666' }}
-              label={{ value: 'Numero di eventi', angle: -90, position: 'insideLeft', fill: '#666' }}
+              tick={{ fill: '#666', className: 'dark:fill-dark-text' }}
+              tickLine={{ stroke: '#666', className: 'dark:stroke-dark-text' }}
+              label={{ 
+                value: 'Numero di eventi', 
+                angle: -90, 
+                position: 'insideLeft', 
+                fill: '#666',
+                className: 'dark:fill-dark-text'
+              }}
             />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#fff',
                 border: '1px solid #ccc',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                className: 'dark:bg-dark-bg dark:border-dark-accent dark:text-dark-text'
               }}
             />
-            <Legend />
+            <Legend 
+              payload={[
+                { value: 'Clicks', type: 'line', color: '#1A2B88' },
+                { value: 'Conversioni', type: 'line', color: '#49A078' }
+              ]}
+              wrapperStyle={{ color: 'dark:text-dark-text' }}
+            />
             <Line
               type="monotone"
               dataKey="clicks"

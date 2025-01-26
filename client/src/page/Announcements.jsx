@@ -1,4 +1,3 @@
-// components/UserAnnouncements.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Megaphone, AlertTriangle } from 'lucide-react';
@@ -13,7 +12,6 @@ const UserAnnouncements = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`${API_BASE_URL}/announcements`);
-      // Ordina gli annunci per data, i più recenti prima
       const sortedAnnouncements = response.data.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
       );
@@ -32,64 +30,79 @@ const UserAnnouncements = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="text-center p-4">Caricamento annunci...</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
+        Caricamento annunci...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-400 p-4">{error}</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-red-600 dark:text-red-400">
+        {error}
+      </div>
+    );
   }
 
   if (announcements.length === 0) {
-    return <div className="text-center text-neutral-400 p-4">Nessun annuncio disponibile</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
+        Nessun annuncio disponibile
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 px-6">Annunci</h2>
+    <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-dark-text">
+        Annunci
+      </h1>
+      
       <div className="space-y-4">
         {announcements.map((announcement) => (
           <div 
-            key={announcement._id}
-            className="p-6 rounded-lg bg-neutral-800 border border-neutral-600"
+            key={announcement._id} 
+            className="bg-white dark:bg-dark-card border border-gray-100 dark:border-dark-accent rounded-xl p-4 shadow-sm"
           >
-            <div className="flex gap-4">
+            <div className="flex items-center mb-2">
               {announcement.priority === 'high' ? (
-                <AlertTriangle className="h-6 w-6 text-red-400 flex-shrink-0" />
+                <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 mr-2" />
               ) : (
-                <Megaphone className="h-6 w-6 text-blue-400 flex-shrink-0" />
+                <Megaphone className="w-5 h-5 text-blue-500 dark:text-blue-400 mr-2" />
               )}
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-lg font-semibold text-neutral-200">
-                    {announcement.title}
-                  </h3>
-                  <span className={`px-2 py-0.5 text-sm rounded ${
-                    announcement.priority === 'high' 
-                      ? 'bg-red-900/50 text-red-200' 
-                      : 'bg-blue-900/50 text-blue-200'
-                  }`}>
-                    {announcement.priority === 'high' ? 'Importante' : 'Informazione'}
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text">
+                {announcement.title}
+              </h2>
+              <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                announcement.priority === 'high' 
+                  ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' 
+                  : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+              }`}>
+                {announcement.priority === 'high' ? 'Importante' : 'Informazione'}
+              </span>
+            </div>
+            
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              {announcement.content}
+            </p>
+            
+            <div className="text-sm text-gray-500 dark:text-gray-500 flex items-center">
+              {new Date(announcement.createdAt).toLocaleString('it-IT', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+              {announcement.category && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {announcement.category}
                   </span>
-                </div>
-                <p className="mt-2 text-neutral-300">{announcement.content}</p>
-                <div className="mt-3 flex items-center gap-2 flex-wrap text-sm text-neutral-400">
-                  <time dateTime={announcement.createdAt}>
-                    {new Date(announcement.createdAt).toLocaleString('it-IT', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </time>
-                  {announcement.category && (
-                    <>
-                      <span className="text-neutral-500">•</span>
-                      <span>{announcement.category}</span>
-                    </>
-                  )}
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
         ))}

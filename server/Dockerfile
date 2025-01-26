@@ -7,6 +7,8 @@ WORKDIR /app
 
 # Create upload directories
 RUN mkdir -p /app/server/uploads/profile-images
+RUN chown -R nodeuser:nodegroup /app
+RUN chmod -R 775 /app/server/uploads  # More permissive for testing
 
 # Copia i file del progetto e installa le dipendenze come utente non-root
 COPY package*.json ./

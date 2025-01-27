@@ -12,6 +12,7 @@ function Navbar() {
   const { admin, logout: logoutAdmin } = useContext(AdminAuthContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [profileImage, setProfileImage] = useState(null);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -53,6 +54,23 @@ function Navbar() {
     return () => clearInterval(interval);
   }, [user]);
   
+
+  useEffect(() => {
+    if (user) {
+      axios.get(`${API_BASE_URL}/auth/profile?username=${user}`)
+        .then((response) => {
+          const userData = response.data.user;
+          setProfileImage(
+            userData.profileImage 
+            ? `${API_BASE_URL}/${userData.profileImage}` 
+            : null
+          );
+        })
+        .catch((error) => {
+          console.error('Error fetching profile:', error);
+        });
+    }
+  }, [user]);
   return (
     <>
       {/* Mobile Header */}
@@ -76,7 +94,22 @@ function Navbar() {
         {/* Logo */}
         <div className="p-6 hidden lg:block">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <img src={flogo} alt="Fast Affiliation" className="h-8" />
+          {profileImage ? (
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-400 dark:text-gray-500 mb-1">
+                  <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M3 22C3 17.0294 7.02944 13 12 13C16.9706 13 21 17.0294 21 22" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Upload your</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">photo</span>
+              </>
+            )}
             <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
           </Link>
         </div>

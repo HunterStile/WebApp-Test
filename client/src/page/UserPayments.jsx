@@ -29,6 +29,9 @@ const UserPayments = () => {
     const fetchPayments = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/auth/payments/${user}`);
+        console.log('API Response:', response.data); // Aggiungi un log per controllare i dati
+        setPayments(Array.isArray(response.data) ? response.data : []); // Garantisci che sia sempre un array
+        setFilteredPayments(Array.isArray(response.data) ? response.data : []);
         setPayments(response.data);
         setFilteredPayments(response.data);
       } catch (err) {
@@ -75,7 +78,10 @@ const UserPayments = () => {
   }, [searchTerm, filters, payments]);
 
   // Calculate total filtered amount
-  const totalFilteredAmount = filteredPayments.reduce((total, payment) => total + payment.amount, 0);
+  const totalFilteredAmount = Array.isArray(filteredPayments)
+  ? filteredPayments.reduce((total, payment) => total + payment.amount, 0)
+  : 0;
+
 
   // Filter change handlers
   const handleSearchChange = (e) => {

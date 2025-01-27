@@ -94,7 +94,19 @@ function Navbar() {
         {/* Logo */}
         <div className="p-6 hidden lg:block">
           <Link to="/dashboard" className="flex items-center gap-2">
-          {profileImage ? (
+            <img src={flogo} alt="Fast Affiliation" className="h-8" />
+            <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
+          </Link>
+        </div>
+
+        {/* Mobile spacing */}
+        <div className="lg:hidden h-16"></div>
+
+        {/* User info at top */}
+        <div className="px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-accent">
+            {profileImage ? (
               <img
                 src={profileImage}
                 alt="Profile"
@@ -110,17 +122,7 @@ function Navbar() {
                 <span className="text-xs text-gray-500 dark:text-gray-400">photo</span>
               </>
             )}
-            <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
-          </Link>
-        </div>
-
-        {/* Mobile spacing */}
-        <div className="lg:hidden h-16"></div>
-
-        {/* User info at top */}
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-accent"></div>
+            </div>
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Affiliate</p>
               <p className="font-medium text-black dark:text-dark-text">{user || admin || 'Guest'}</p>

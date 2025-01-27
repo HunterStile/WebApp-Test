@@ -294,4 +294,14 @@ router.post('/upload-profile-image', upload.single('profileImage'), async (req, 
   }
 });
 
+router.get('/payments/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    const payments = await Payment.find({ username }).exec();
+    res.json(payments);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero dei pagamenti' });
+  }
+});
+
 module.exports = router;

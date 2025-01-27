@@ -29,9 +29,6 @@ const UserPayments = () => {
     const fetchPayments = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/auth/payments/${user}`);
-        console.log('API Response:', response.data); // Aggiungi un log per controllare i dati
-        setPayments(Array.isArray(response.data) ? response.data : []); // Garantisci che sia sempre un array
-        setFilteredPayments(Array.isArray(response.data) ? response.data : []);
         setPayments(response.data);
         setFilteredPayments(response.data);
       } catch (err) {
@@ -40,7 +37,7 @@ const UserPayments = () => {
         setLoading(false);
       }
     };
-
+    
     fetchPayments();
   }, [user]);
 
@@ -50,7 +47,7 @@ const UserPayments = () => {
 
     // Search filter
     if (searchTerm) {
-      result = result.filter(payment =>
+      result = result.filter(payment => 
         payment.amount.toString().includes(searchTerm) ||
         payment.currency.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -63,13 +60,13 @@ const UserPayments = () => {
 
     // Date range filter
     if (filters.startDate) {
-      result = result.filter(payment =>
+      result = result.filter(payment => 
         new Date(payment.timestamp) >= new Date(filters.startDate)
       );
     }
 
     if (filters.endDate) {
-      result = result.filter(payment =>
+      result = result.filter(payment => 
         new Date(payment.timestamp) <= new Date(filters.endDate)
       );
     }
@@ -78,10 +75,7 @@ const UserPayments = () => {
   }, [searchTerm, filters, payments]);
 
   // Calculate total filtered amount
-  const totalFilteredAmount = Array.isArray(filteredPayments)
-    ? filteredPayments.reduce((total, payment) => total + payment.amount, 0)
-    : 0;
-
+  const totalFilteredAmount = filteredPayments.reduce((total, payment) => total + payment.amount, 0);
 
   // Filter change handlers
   const handleSearchChange = (e) => {
@@ -119,7 +113,7 @@ const UserPayments = () => {
   return (
     <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
       <div className="w-full">
-        <PageHeader title="Payment History" />
+      <PageHeader title="Payment History" />
 
         <FilterSection
           searchTerm={searchTerm}
@@ -158,11 +152,15 @@ const UserPayments = () => {
           Total Amount: {totalFilteredAmount.toFixed(2)}
         </div>
 
-        {Array.isArray(filteredPayments) && filteredPayments.length > 0 ? (
+        {filteredPayments.length === 0 ? (
+          <div className="flex items-center justify-center h-[calc(100%-250px)] text-gray-400 dark:text-gray-500 dark:bg-dark-bg">
+            No payments found.
+          </div>
+        ) : (
           <div className="overflow-y-auto h-[calc(100%-250px)] dark:bg-dark-bg">
             {filteredPayments.map((payment) => (
-              <div
-                key={payment._id}
+              <div 
+                key={payment._id} 
                 className="px-4 py-3 border-b border-gray-200 dark:border-dark-accent hover:bg-gray-50 dark:hover:bg-dark-accent"
               >
                 <div className="flex justify-between items-center">
@@ -181,12 +179,7 @@ const UserPayments = () => {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="flex items-center justify-center h-[calc(100%-250px)] text-gray-400 dark:text-gray-500 dark:bg-dark-bg">
-            No payments found.
-          </div>
         )}
-
       </div>
     </div>
   );

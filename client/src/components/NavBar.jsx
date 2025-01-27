@@ -105,7 +105,7 @@ function Navbar() {
         {/* User info at top */}
         <div className="px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-accent">
+          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-accent border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden">
             {profileImage ? (
               <img
                 src={profileImage}

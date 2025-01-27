@@ -75,7 +75,7 @@ function Navbar() {
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-dark-bg dark:border-b dark:border-dark-accent shadow-sm p-4 flex items-center justify-between z-50">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/dashboard" className="flex items-center gap-2">
           <img src={flogo} alt="Fast Affiliation" className="h-8" />
           <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
         </Link>

@@ -250,7 +250,6 @@ const ThreadList = () => {
                     <span className="bg-white dark:bg-dark-bg px-3">
                       {date}
                     </span>
-                    <hr className="absolute left-0 right-0 top-1/2 border-t dark:border-dark-accent" />
                   </div>
                   {dateMessages.map((message) => (
                     <div

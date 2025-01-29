@@ -8,11 +8,7 @@ const StatsCard = ({
   valueClassName = '' 
 }) => {
   return (
-    <div 
-      className={`bg-white dark:bg-dark-card p-6 rounded-xl 
-        ${className} 
-        ${!className.includes('dark') ? 'shadow-sm border border-gray-100' : 'border-dark-accent'}`}
-    >
+    <div className={`bg-white dark:bg-dark-card p-6 rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent ${className}`}>
       <h3 className={`text-gray-600 dark:text-dark-text text-xl text-center mb-2 ${titleClassName}`}>
         {title}
       </h3>

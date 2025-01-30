@@ -33,7 +33,7 @@ function Layout({ children }) {
   const location = useLocation();
 
   // Mostra la navbar solo se il percorso non è "/" o "/login2"
-  const showNavbar = !['/', '/login','/signup'].includes(location.pathname);
+  const showNavbar = !['/', '/login','/signup', '/termini', '/privacy', '/cookie'].includes(location.pathname);
 
   // Nasconde il footer se il percorso è "/messages o /admin/messages"
   const hiddenPaths = ['/', '/messages', '/admin/messages']; // Aggiungi qui altri percorsi

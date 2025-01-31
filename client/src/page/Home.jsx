@@ -6,6 +6,7 @@ import mapbase from "../assets/images/mapbase.png";
 import dashboard3d from "../assets/images/dashboard3d.png";
 import CampaignLogo from '../components/utils/CampaignLogo';
 import { Link } from 'react-router-dom';
+import Header from '../components/Header';
 
 const partners = [
   'BETANO - Exclusive',
@@ -55,20 +56,7 @@ const LandingPage = () => {
   
   return (
     <div className="min-h-screen bg-white flex flex-col items-center text-center px-0">
-      <header className="w-full py-4 flex justify-between items-center border-b border-gray-300 px-12">
-        <nav className="flex space-x-8">
-          <a href="#" className="text-gray-600">Home</a>
-          <a href="#" className="text-gray-600">About Us</a>
-          <a href="#" className="text-gray-600">Contact</a>
-        </nav>
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <img src={flogo} className="h-8" alt="Logo" />
-        </div>
-        <div className="flex space-x-4">
-          <Link to="/login" className="px-4 py-2 text-gray-600 rounded-full border">Log In</Link>
-          <Link to="/signup" className="px-4 py-2 bg-black text-white rounded-full">Sign up</Link>
-        </div>
-      </header>
+      <Header />
   
       <section className="py-16">
         <h1 className="text-5xl font-bold mb-6 space-y-1">Leading Affiliate Network<br />in the iGaming industry</h1>
@@ -122,7 +110,7 @@ const LandingPage = () => {
         <h2 className="text-2xl font-semibold mb-4">Ready to begin?</h2>
         <p className="mb-8">Sign up today or reach out for more details!</p>
         <div className="flex justify-center space-x-4">
-          <button className="px-6 py-3 bg-black text-white rounded-full">Sign up</button>
+          <button href="/signup" className="px-6 py-3 bg-black text-white rounded-full">Sign up</button>
           <button className="px-6 py-3 border border-gray-300 rounded-full">Contact us</button>
         </div>
       </section>
@@ -133,16 +121,19 @@ const LandingPage = () => {
           <span className="ml-4 font-bold">Fast Affiliation</span>
         </div>
         <nav className="flex justify-center space-x-6 mb-6">
-          <a href="#" className="text-white">Home</a>
+          <a href="/" className="text-white">Home</a>
           <a href="#" className="text-white">About</a>
           <a href="#" className="text-white">Service</a>
           <a href="#" className="text-white">Contact Us</a>
         </nav>
                 <div className="flex justify-center space-x-6">
-                  <Link to="/termini" className="hover:text-gray-400 dark:hover:text-gray-300">Termini e Condizioni</Link>
+                  <Link to="/termini" className="hover:text-gray-400 dark:hover:text-gray-300">Terms and Conditions</Link>
                   <Link to="/privacy" className="hover:text-gray-400 dark:hover:text-gray-300">Privacy Policy</Link>
-                  <Link to="/cookie" className="hover:text-gray-400 dark:hover:text-gray-300">Politica sui Cookies</Link>
+                  <Link to="/cookie" className="hover:text-gray-400 dark:hover:text-gray-300">Cookies Policy</Link>
                 </div>
+                <div className="mt-4">
+          <p>&copy; {new Date().getFullYear()} Fast Affiliation. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   )

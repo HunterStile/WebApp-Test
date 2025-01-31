@@ -26,6 +26,9 @@ module.exports = {
         'dark-text': '#E0E0E0',
         'dark-accent': '#2C2C2C',
       },
+      spacing: {
+        '1024': '1024px', 
+      },
     },
   },
   plugins: [],

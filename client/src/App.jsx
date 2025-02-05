@@ -27,16 +27,17 @@ import Footer from './components/Footer';
 import Termini from './components/Termini';
 import Privacy from './components/Privacy';
 import Cookies from './components/Cookies';
+import Contact from './page/Contact';
 import './App.css';
 
 function Layout({ children }) {
   const location = useLocation();
 
   // Mostra la navbar solo se il percorso non è "/" o "/login2"
-  const showNavbar = !['/', '/login','/signup', '/termini', '/privacy', '/cookie'].includes(location.pathname);
+  const showNavbar = !['/', '/login','/signup', '/termini', '/privacy', '/cookie', '/contact'].includes(location.pathname);
 
   // Nasconde il footer se il percorso è "/messages o /admin/messages"
-  const hiddenPaths = ['/', '/messages', '/admin/messages']; // Aggiungi qui altri percorsi
+  const hiddenPaths = ['/', '/messages', '/admin/messages', '/profile']; // Aggiungi qui altri percorsi
   const showFooter = !hiddenPaths.includes(location.pathname);
 
   return (
@@ -63,6 +64,7 @@ function App() {
                   <Route path="/login" element={<Auth />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/signup" element={<Auth />} />
+                  <Route path="/Contact" element={<Contact />} />
 
                   {/* Protected routes per utenti normali */}
                   <Route element={<PrivateRoute />}>

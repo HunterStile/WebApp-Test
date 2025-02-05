@@ -67,26 +67,33 @@ const LandingPage = () => {
       </section>
   
       <section className="py-16 w-full">
-        <h2 className="text-2xl font-semibold mb-12">Our Partners</h2>
-        <div className="relative w-full flex items-center justify-center">
-          <button className="p-2 bg-gray-800 text-white rounded-full shadow-md" onClick={() => scroll('left')}>
-            &#9664;
-          </button>
-          <div ref={scrollRef} className="flex overflow-x-hidden gap-12 scroll-smooth">
-            {partners.map((campaignName, index) => (
-              <div key={index} className="w-48 h-20 flex-shrink-0">
-                <CampaignLogo campaignName={campaignName} />
-              </div>
-            ))}
-          </div>
-          <button className="p-2 bg-gray-800 text-white rounded-full shadow-md" onClick={() => scroll('right')}>
-            &#9654;
-          </button>
+  <h2 className="text-2xl font-semibold mb-12">Our Partners</h2>
+  <div className="relative w-full flex items-center justify-center group">
+    <span 
+      className="absolute left-0 text-3xl text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+      onClick={() => scroll('left')}
+    >
+      &lt;
+    </span>
+    <div ref={scrollRef} className="flex overflow-x-hidden gap-12 scroll-smooth">
+      {partners.map((campaignName, index) => (
+        <div key={index} className="w-48 h-20 flex-shrink-0">
+          <CampaignLogo campaignName={campaignName} />
         </div>
-      </section>
+      ))}
+    </div>
+    <span 
+      className="absolute right-0 text-3xl text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+      onClick={() => scroll('right')}
+    >
+      &gt;
+    </span>
+  </div>
+</section>
+
   
-      <section className="py-16 text-center">
-      <h2 class="text-2xl font-semibold mb-10">Why choose us</h2>
+      <section className="p-16 text-center">
+      <h2 class="text-2xl font-semibold mb-6">Why choose us</h2>
       <section className="py-16 w-full grid grid-cols-1 md:grid-cols-4 gap-8">
         <FeatureCard icon={<Monitor className="w-8 h-8 text-teal-600" />} title="Tailored Services" features={["Personalized Affiliate Manager", "Arrangement of exclusive deals", "Built-in Messenger for direct communication with our Support Team"]} />
         <FeatureCard icon={<Building2 className="w-8 h-8 text-teal-600" />} title="Commission Payments" features={["Two monthly payment sessions each month", "Choose payment methods, including Bitcoin", "Adjustable payout according to your preferences"]} />
@@ -95,23 +102,23 @@ const LandingPage = () => {
       </section>
       </section>
 
-      <section className="py-16 flex justify-center space-x-16">
+      <section className="py-8 flex justify-center space-x-40">
         <StatCard number="50+" label="Campaigns" />
         <StatCard number="120+" label="Affiliates" />
         <StatCard number="20+" label="Brands" />
       </section>
   
       <section className="py-16 text-center">
-        <p className="text-xl mb-8">Providing global affiliate support with swift solutions for all gaming sectors.</p>
-        <img src={mapbase} alt="Global Map" className="w-full max-w-4xl mx-auto" />
+        <p className="text-3xl mb-8">Providing global affiliate support with swift solutions for all gaming sectors.</p>
+        <img src={mapbase} alt="Global Map" className="w-full max-w-6xl mx-auto" />
       </section>
   
       <section className="py-16 text-center">
-        <h2 className="text-2xl font-semibold mb-4">Ready to begin?</h2>
-        <p className="mb-8">Sign up today or reach out for more details!</p>
+        <h2 className="text-3xl font-semibold mb-4">Ready to begin?</h2>
+        <p className="mb-8 text-2xl">Sign up today or reach out for more details!</p>
         <div className="flex justify-center space-x-4">
-          <button href="/signup" className="px-6 py-3 bg-black text-white rounded-full">Sign up</button>
-          <button className="px-6 py-3 border border-gray-300 rounded-full">Contact us</button>
+        <Link to="/signup" className="px-6 py-3 bg-black text-white rounded-full">Sign up</Link>
+        <Link to="/contact" className="px-6 py-3 border border-gray-300 rounded-full">Contact us</Link>
         </div>
       </section>
   

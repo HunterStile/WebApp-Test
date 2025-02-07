@@ -6,7 +6,7 @@ const Header = () => {
     <header className="w-full py-4 flex justify-between items-center border-b border-gray-300 px-12">
       <nav className="flex space-x-8">
         <a href="/" className="text-gray-600">Home</a>
-        <a href="#" className="text-gray-600">About Us</a>
+        <a href="/faq" className="text-gray-600">FAQ</a>
         <a href="/contact" className="text-gray-600">Contact</a>
       </nav>
       <div className="absolute left-1/2 transform -translate-x-1/2">

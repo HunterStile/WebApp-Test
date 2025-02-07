@@ -6,12 +6,15 @@ import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, ReceiptEuro
 import flogo from "../assets/images/flogo.png"
 import API_BASE_URL from '../config';
 import axios from 'axios';
+import { useTheme } from '../context/ThemeContext';
+import { Moon, Sun } from 'lucide-react';
 
 function Navbar() {
   const { user, logout: logoutUser } = useContext(AuthContext);
   const { admin, logout: logoutAdmin } = useContext(AdminAuthContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { theme, toggleTheme } = useTheme();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -166,10 +169,13 @@ function Navbar() {
             <User size={20} />
             <span>Profile</span>
           </Link>
-          <Link to="/settings" className="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1">
-            <Settings size={20} />
-            <span>Settings</span>
-          </Link>
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1"
+          > 
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            <span>Theme</span>
+          </button>
           {(user || admin) ? (
             <button
               onClick={logout}

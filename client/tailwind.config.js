@@ -19,12 +19,15 @@ module.exports = {
         'light-green': '#C9EBE5',
         'dark-blue': '#1A2B88',
         'paid-green': '#49A078',
-        
+        'custom-black': '#1F2421',
+                
         // Dark mode colors
         'dark-bg': '#121212',
         'dark-card': '#1E1E1E',
         'dark-text': '#E0E0E0',
         'dark-accent': '#2C2C2C',
+
+      
       },
       spacing: {
         '1024': '1024px',

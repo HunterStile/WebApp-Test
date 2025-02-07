@@ -28,13 +28,14 @@ import Termini from './components/Termini';
 import Privacy from './components/Privacy';
 import Cookies from './components/Cookies';
 import Contact from './page/Contact';
+import Faq from './components/Faq';
 import './App.css';
 
 function Layout({ children }) {
   const location = useLocation();
 
   // Mostra la navbar solo se il percorso non è "/" o "/login2"
-  const showNavbar = !['/', '/login','/signup', '/termini', '/privacy', '/cookie', '/contact'].includes(location.pathname);
+  const showNavbar = !['/', '/login','/signup', '/termini', '/privacy', '/cookie', '/contact', '/faq'].includes(location.pathname);
 
   // Nasconde il footer se il percorso è "/messages o /admin/messages"
   const hiddenPaths = ['/', '/messages', '/admin/messages', '/profile']; // Aggiungi qui altri percorsi
@@ -65,6 +66,7 @@ function App() {
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/signup" element={<Auth />} />
                   <Route path="/Contact" element={<Contact />} />
+                  <Route path="/faq" element={<Faq />} />
 
                   {/* Protected routes per utenti normali */}
                   <Route element={<PrivateRoute />}>

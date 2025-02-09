@@ -47,17 +47,16 @@ const ContactAdmin = () => {
 
   const sendResponse = async (contactId) => {
     try {
-      const res = await fetch('/api/contacts/respond', {
+      const res = await fetch(`/api/contacts/respond/${contactId}`, {  // Aggiungi l'ID nell'URL
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contactId,
-          response,
+          response,  // Invia solo la risposta, l'ID è già nell'URL
         }),
       });
-
+  
       if (res.ok) {
         showMessage('Risposta inviata con successo', 'success');
         setResponse('');

@@ -156,14 +156,21 @@ const ConversionList = () => {
                 <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Type</th>
                 <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Status</th>
                 <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Commission</th>
-                <th className="p-4 text-left text-gray-600 dark:text-dark-text font-semibold">Campaign Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-dark-accent">
               {filteredConversions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((conv) => (
                 <tr key={conv.conversion_id} className="hover:bg-gray-50 dark:hover:bg-dark-accent">
                   <td className="p-4 text-gray-900 dark:text-dark-text">{conv.conversion_id}</td>
-                  <td className="p-4 text-gray-900 dark:text-dark-text">{conv.campaign_name}</td>
+                  <td className="p-4 text-gray-900 dark:text-dark-text">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${conv.campaign_status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                          }`}
+                      />
+                      <span>{conv.campaign_name}</span>
+                    </div>
+                  </td>
                   <td className="p-4 text-gray-600 dark:text-gray-400">
                     {new Date(conv.date).toLocaleDateString('it-IT', {
                       day: '2-digit',
@@ -176,7 +183,6 @@ const ConversionList = () => {
                     <StatusBadge status={conv.status} />
                   </td>
                   <td className="p-4 text-gray-900 dark:text-dark-text">€ {parseFloat(conv.commission).toFixed(2)}</td>
-                  <td className="p-4 text-gray-600 dark:text-gray-400">{conv.campaign_status}</td>
                 </tr>
               ))}
             </tbody>

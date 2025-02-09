@@ -397,8 +397,8 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) return <div className="p-4">Caricamento...</div>;
-  if (error) return <div className="p-4 text-red-500">Errore: {error}</div>;
+  if (loading) return <div className="p-4">Loading...</div>;
+  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
 
   // Main Page Content
   return (
@@ -407,7 +407,7 @@ const Dashboard = () => {
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gray-200 dark:bg-dark-accent rounded-full" />
-          {user && <h1 className="text-xl font-semibold dark:text-dark-text">BENTORNATO, {user}</h1>}
+          {user && <h1 className="text-xl font-semibold dark:text-dark-text">WELCOME, {user}</h1>}
         </div>
         <div className="flex items-center gap-4">
           {/* Theme Toggle Button */}
@@ -418,14 +418,6 @@ const Dashboard = () => {
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
 
-          {user && (
-            <button
-              onClick={logout}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
-            >
-              •••
-            </button>
-          )}
         </div>
       </div>
 

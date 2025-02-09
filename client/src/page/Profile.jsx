@@ -95,10 +95,10 @@ const ProfilePage = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-dark-bg">
-      <div className="w-full m-auto max-w-custom p-8 bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent">
+      <div className="h-900 w-full m-auto max-w-1600 p-8 bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent">
         {/* Profile Picture Section */}
-        <div className="mb-12">
-          <h3 className="text-gray-700 dark:text-dark-text mb-4">Your Profile Picture</h3>
+        <div className="mb-10">
+          <h3 className="text-gray-700 dark:text-dark-text mb-4 text-2xl font-semibold">Your Profile Picture:</h3>
           <div
             onClick={() => fileInputRef.current?.click()}
             className="w-[104px] h-[104px] rounded-full border-2 border-dashed border-gray-300 dark:border-dark-accent flex flex-col items-center justify-center cursor-pointer overflow-hidden relative bg-gray-50 dark:bg-dark-bg"
@@ -128,6 +128,8 @@ const ProfilePage = () => {
             />
           </div>
         </div>
+
+        <div class="border-t border-gray-300 my-4"></div>
 
         {/* Form Fields */}
         <div className="space-y-6">
@@ -218,7 +220,7 @@ const ProfilePage = () => {
         )}
 
         {/* Buttons */}
-        <div className="flex space-x-4 mt-8">
+        <div className="flex space-x-4 mt-72">
           <button
             onClick={handleUpdate}
             className="bg-[#4EB37E] hover:bg-[#45a070] dark:bg-[#3a8f64] dark:hover:bg-[#2f7553] text-white px-6 py-2 rounded-md font-normal"

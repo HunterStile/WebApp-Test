@@ -19,7 +19,7 @@ const UserAnnouncements = () => {
       setError(null);
     } catch (error) {
       console.error('Error fetching announcements:', error);
-      setError('Impossibile caricare gli annunci. Riprova più tardi.');
+      setError('Unable to load announcements. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +32,7 @@ const UserAnnouncements = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
-        Caricamento annunci...
+        Loading announcements...
       </div>
     );
   }
@@ -48,7 +48,7 @@ const UserAnnouncements = () => {
   if (announcements.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
-        Nessun annuncio disponibile
+        No announcements available
       </div>
     );
   }
@@ -56,7 +56,7 @@ const UserAnnouncements = () => {
   return (
     <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
       <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-dark-text">
-        Annunci
+        Announcements
       </h1>
       
       <div className="space-y-4">
@@ -79,7 +79,7 @@ const UserAnnouncements = () => {
                   ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' 
                   : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
               }`}>
-                {announcement.priority === 'high' ? 'Importante' : 'Informazione'}
+                {announcement.priority === 'high' ? 'Important' : 'Information'}
               </span>
             </div>
             
@@ -88,7 +88,7 @@ const UserAnnouncements = () => {
             </p>
             
             <div className="text-sm text-gray-500 dark:text-gray-500 flex items-center">
-              {new Date(announcement.createdAt).toLocaleString('it-IT', {
+              {new Date(announcement.createdAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',

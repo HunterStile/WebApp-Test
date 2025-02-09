@@ -7,7 +7,7 @@ const Campaign = require('../models/Campaign');
 // Endpoint per ottenere tutte le campagne
 router.get('/campaigns', async (req, res) => {
   try {
-    const campaigns = await Campaign.find();
+    const campaigns = await Campaign.find().sort({ createdAt: -1 });
     res.json(campaigns);
   } catch (error) {
     res.status(500).json({ message: 'Errore nel recupero delle campagne', error: error.message });

@@ -26,8 +26,8 @@ const ConversionsPage = () => {
 
   // Filters state
   const [userListFilters, setUserListFilters] = useState({
-    sortBy: 'username',
-    sortOrder: 'asc',
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
     minValidatedCommissions: '',
     minTotalPayments: '',
     validatedCommissionsSortOrder: 'desc',
@@ -366,18 +366,19 @@ const ConversionsPage = () => {
         <div className="flex space-x-4 mb-4 flex-wrap">
           {/* Username Sort */}
           <div className="flex items-center space-x-2">
-            <label className="text-sm">Username</label>
+            <label className="text-sm">Data Registrazione</label>
             <select
               value={userListFilters.sortOrder}
               onChange={(e) => setUserListFilters(prev => ({
                 ...prev,
+                sortBy: 'createdAt',
                 sortOrder: e.target.value
               }))}
               className="p-2 border rounded-lg"
             >
               <option value="">Nessun Ordine</option>
-              <option value="asc">Crescente</option>
-              <option value="desc">Decrescente</option>
+              <option value="asc">Meno Recente</option>
+              <option value="desc">Più Recente</option>
             </select>
           </div>
 
@@ -497,6 +498,7 @@ const ConversionsPage = () => {
                     <tr className="bg-gray-100">
                       <th className="p-3 text-left">Username</th>
                       <th className="p-3 text-left">Metodo Pagamento</th>
+                      <th className="p-3 text-left">Data Registrazione</th> {/* New column */}
                       <th className="p-3 text-right">Commissioni Validate</th>
                       <th className="p-3 text-right">Totale Pagamenti</th>
                       <th className="p-3 text-center">Azioni</th>
@@ -505,8 +507,16 @@ const ConversionsPage = () => {
                   <tbody>
                     {userList.map((user) => (
                       <tr key={user.username} className="border-b hover:bg-gray-50">
-                        <td className="p-3">{user.username}</td>
+                        <td className="p-3">
+                          <div className="flex flex-col">
+                            <span className="font-medium">{user.username}</span>
+                            <span className="text-xs text-gray-500">
+                              {user.firstName} {user.lastName}
+                            </span>
+                          </div>
+                        </td>
                         <td className="p-3">{user.paymentMethod ? user.paymentMethod.toUpperCase() : 'N/A'}</td>
+                        <td className="p-3">{new Date(user.createdAt).toLocaleDateString('it-IT')}</td>
                         <td className="p-3 text-right">€{user.totalValidatedCommissions?.toFixed(2) || '0.00'}</td>
                         <td className="p-3 text-right">€{user.totalPayments?.toFixed(2) || '0.00'}</td>
                         <td className="p-3 text-center">
@@ -535,6 +545,8 @@ const ConversionsPage = () => {
           <div className="bg-gray-100 p-4 rounded-lg">
             <h3 className="text-xl font-semibold mb-2">Dettagli Commissioni</h3>
             <p>Username: {userCommissions.username}</p>
+            <p>Nome: {userCommissions.firstName}</p>
+            <p>Cognome: {userCommissions.lastName}</p>
             <p>Metodo di Pagamento: {userCommissions.payment_method.toUpperCase()}</p>
             <p>Indirizzo: {userCommissions.payment_address}</p>
             <p>Commissioni Validate: €{userCommissions.total_validated_commission}</p>

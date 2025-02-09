@@ -20,6 +20,7 @@ import Profile from './page/Profile';
 import UserPayments from './page/UserPayments';
 import AdminPayments from './page/private/AdminPayments';
 import NewsLetter from './page/private/NewsLetter';
+import ContactSchema from './page/private/AdminContact';
 import { AuthProvider } from './context/AuthContext';
 import { ConversionProvider } from './context/ConversionContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -88,7 +89,9 @@ function App() {
                     <Route path="/admin/messages" element={<AdminMessages />} />
                     <Route path="/admin/announcements" element={<AdminAnnouncements />} />
                     <Route path="/admin/payments" element={<AdminPayments />} />
+                    <Route path="/admin/contact" element={<ContactSchema />} />
                     <Route path="/admin/newsletter" element={<NewsLetter />} />
+
 
                   </Route>
 

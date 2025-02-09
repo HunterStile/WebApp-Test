@@ -136,6 +136,75 @@ class EmailService {
   
     return this.sendEmail(user.email, subject, html);
   }
+
+  async sendContactConfirmation(email, name) {
+    const subject = 'Abbiamo ricevuto il tuo messaggio';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Grazie per averci contattato, ${name}!</h2>
+        
+        <p>Abbiamo ricevuto il tuo messaggio e ti risponderemo il prima possibile.</p>
+        
+        <p>Nel frattempo, se hai altre domande, non esitare a contattarci nuovamente.</p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+          <p style="color: #888; font-size: 12px;">
+            Cordiali saluti,<br>
+            Il team FastAffiliation
+          </p>
+        </div>
+      </div>
+    `;
+
+    return this.sendEmail(email, subject, html);
+  }
+
+  async sendAdminNotification(contact) {
+    const subject = 'Nuovo messaggio di contatto ricevuto';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Nuovo messaggio di contatto</h2>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p><strong>Nome:</strong> ${contact.name}</p>
+          <p><strong>Email:</strong> ${contact.email}</p>
+          <p><strong>Messaggio:</strong><br>${contact.message}</p>
+        </div>
+        
+        <p>Accedi al pannello admin per rispondere.</p>
+      </div>
+    `;
+
+    // Invia a tutti gli admin (puoi configurare gli indirizzi in .env)
+    const adminEmails = process.env.ADMIN_EMAILS.split(',');
+    return Promise.all(adminEmails.map(email => this.sendEmail(email, subject, html)));
+  }
+
+  async sendResponseEmail(email, name, response) {
+    const subject = 'Risposta al tuo messaggio';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Ciao ${name},</h2>
+        
+        <p>Abbiamo risposto al tuo messaggio:</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          ${response}
+        </div>
+        
+        <p>Se hai altre domande, non esitare a risponderci.</p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+          <p style="color: #888; font-size: 12px;">
+            Cordiali saluti,<br>
+            Il team FastAffiliation
+          </p>
+        </div>
+      </div>
+    `;
+
+    return this.sendEmail(email, subject, html);
+  }
 }
 
 module.exports = new EmailService();

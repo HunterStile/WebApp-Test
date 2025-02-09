@@ -15,8 +15,12 @@ const ContactAdmin = () => {
     try {
       setLoading(true);
       const response = await fetch('/api/contacts');
-      const data = await response.json();
-      setContacts(data);
+      const result = await response.json();
+      if (result.success) {
+        setContacts(result.data); // Ora accediamo a result.data invece che direttamente a result
+      } else {
+        showMessage('Errore nel caricamento dei contatti', 'error');
+      }
     } catch (error) {
       showMessage('Errore nel caricamento dei contatti', 'error');
     } finally {
@@ -28,8 +32,12 @@ const ContactAdmin = () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/contacts/search?email=${searchEmail}`);
-      const data = await response.json();
-      setContacts(data);
+      const result = await response.json();
+      if (result.success) {
+        setContacts(result.data); // Accediamo a result.data
+      } else {
+        showMessage('Errore nella ricerca', 'error');
+      }
     } catch (error) {
       showMessage('Errore nella ricerca', 'error');
     } finally {

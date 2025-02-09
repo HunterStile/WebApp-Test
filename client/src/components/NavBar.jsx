@@ -194,6 +194,14 @@ function Navbar() {
                 <Bell size={20} />
                 <span>Announcements</span>
               </Link>
+              <Link to="/admin/newsletter" className="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1">
+                <Bell size={20} />
+                <span>Newsletter</span>
+              </Link>
+              <Link to="/admin/contact" className="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1">
+                <Bell size={20} />
+                <span>Contacts</span>
+              </Link>
             </>
           )}
         </nav>

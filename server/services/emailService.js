@@ -176,7 +176,11 @@ class EmailService {
     `;
 
     // Invia a tutti gli admin (puoi configurare gli indirizzi in .env)
-    const adminEmails = process.env.ADMIN_EMAILS.split(',');
+    //const adminEmails = process.env.ADMIN_EMAILS.split(',');
+    //return Promise.all(adminEmails.map(email => this.sendEmail(email, subject, html)));
+
+    // Email dell'admin impostata manualmente
+    const adminEmails = ['talkchainsrl@gmail.com'];
     return Promise.all(adminEmails.map(email => this.sendEmail(email, subject, html)));
   }
 

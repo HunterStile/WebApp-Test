@@ -25,7 +25,7 @@ router.get('/fetch-conversions', async (req, res) => {
     // Recupera tutte le campagne che richiedono rimappatura
     const mappingCampaigns = await Campaign.find({
       requiresMapping: true
-    }, 'name mappedName commissionAdjustment'); // Aggiungi commissionAdjustment qui
+    }, 'name mappedName commissionAdjustment');
 
     // Crea l'oggetto di mappatura
     const campaignNameMapping = mappingCampaigns.reduce((acc, campaign) => {
@@ -71,13 +71,6 @@ router.get('/fetch-conversions', async (req, res) => {
         c.name === conv.campaign_name || c.mappedName === conv.campaign_name
       );
 
-      // Calcola la commissione aggiustata
-      let adjustedCommission = parseFloat(conv.commission);
-      if (campaign && campaign.commissionAdjustment) {
-        adjustedCommission -= campaign.commissionAdjustment;
-        adjustedCommission = Math.max(0, adjustedCommission);
-      }
-
       // Usa la mappatura dal database
       const mappedCampaignName = campaignNameMapping[conv.campaign_name] || conv.campaign_name;
 
@@ -91,9 +84,9 @@ router.get('/fetch-conversions', async (req, res) => {
         tracking: conv.tracking,
         aff_var: conv.aff_var,
         netrevenue: conv.netrevenue ? parseFloat(conv.netrevenue) : null,
-        commission: adjustedCommission.toFixed(2),
+        commission: parseFloat(conv.commission), // Manteniamo la commissione originale per ora
         original_commission: conv.commission,
-        adjustment_applied: campaign ? campaign.commissionAdjustment : 0, // Aggiungi questo per debug
+        adjustment_applied: 0, // Default a 0
         payment: conv.payment,
         status: conv.status,
         campaign_status: conv.campaign_status
@@ -107,31 +100,56 @@ router.get('/fetch-conversions', async (req, res) => {
 
       // Determina lo status da salvare
       let statusToSave = conv.status;
+      let finalCommission = parseFloat(conv.commission);
+      let adjustmentApplied = 0;
+
       if (existingConversion) {
-        // Se esistente e lo status attuale è 'validated'
+        // Se la conversione esiste, mantieni la commissione originale
+        finalCommission = parseFloat(existingConversion.commission);
+        adjustmentApplied = existingConversion.adjustment_applied;
+
+        // Logica per lo status
         if (existingConversion.status === 'validated') {
-          // Mantieni 'validated' se l'API passa 'paid'
           statusToSave = existingConversion.status;
         }
-        // Se esistente e lo status attuale è 'paid'
         if (existingConversion.status === 'paid') {
-          // Mantieni sempre 'paid'
           statusToSave = existingConversion.status;
+        }
+
+        if (existingConversion.status === 'onhold' && conv.status === 'paid') {
+          statusToSave = 'validated';
+        }
+        
+        if (existingConversion.status === 'refused') {
+          statusToSave = 'refused';
         }
       } else {
+        // Solo per nuove conversioni, applica l'adjustment
+        const campaign = mappingCampaigns.find(c =>
+          c.name === conv.original_campaign_name || c.mappedName === conv.original_campaign_name
+        );
+        
+        if (campaign && campaign.commissionAdjustment) {
+          finalCommission -= campaign.commissionAdjustment;
+          finalCommission = Math.max(0, finalCommission);
+          adjustmentApplied = campaign.commissionAdjustment;
+        }
+
         // Per nuove conversioni, se arriva 'paid', imposta a 'validated'
         if (conv.status === 'paid') {
           statusToSave = 'validated';
         }
       }
 
-      // Aggiorna con lo status determinato
+      // Aggiorna con lo status determinato e la commissione appropriata
       return {
         updateOne: {
           filter: { conversion_id: conv.conversion_id },
           update: {
             ...conv,
-            status: statusToSave
+            status: statusToSave,
+            commission: finalCommission.toFixed(2),
+            adjustment_applied: adjustmentApplied
           },
           upsert: true
         }

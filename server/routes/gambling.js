@@ -25,7 +25,7 @@ router.get('/fetch-conversions', async (req, res) => {
     // Recupera tutte le campagne che richiedono rimappatura
     const mappingCampaigns = await Campaign.find({
       requiresMapping: true
-    }, 'name mappedName commissionAdjustment'); // Aggiungi commissionAdjustment qui
+    }, 'name mappedName commissionAdjustment');
 
     // Crea l'oggetto di mappatura
     const campaignNameMapping = mappingCampaigns.reduce((acc, campaign) => {
@@ -71,13 +71,6 @@ router.get('/fetch-conversions', async (req, res) => {
         c.name === conv.campaign_name || c.mappedName === conv.campaign_name
       );
 
-      // Calcola la commissione aggiustata
-      let adjustedCommission = parseFloat(conv.commission);
-      if (campaign && campaign.commissionAdjustment) {
-        adjustedCommission -= campaign.commissionAdjustment;
-        adjustedCommission = Math.max(0, adjustedCommission);
-      }
-
       // Usa la mappatura dal database
       const mappedCampaignName = campaignNameMapping[conv.campaign_name] || conv.campaign_name;
 
@@ -91,9 +84,9 @@ router.get('/fetch-conversions', async (req, res) => {
         tracking: conv.tracking,
         aff_var: conv.aff_var,
         netrevenue: conv.netrevenue ? parseFloat(conv.netrevenue) : null,
-        commission: adjustedCommission.toFixed(2),
+        commission: parseFloat(conv.commission), // Manteniamo la commissione originale per ora
         original_commission: conv.commission,
-        adjustment_applied: campaign ? campaign.commissionAdjustment : 0, // Aggiungi questo per debug
+        adjustment_applied: 0, // Default a 0
         payment: conv.payment,
         status: conv.status,
         campaign_status: conv.campaign_status
@@ -107,31 +100,56 @@ router.get('/fetch-conversions', async (req, res) => {
 
       // Determina lo status da salvare
       let statusToSave = conv.status;
+      let finalCommission = parseFloat(conv.commission);
+      let adjustmentApplied = 0;
+
       if (existingConversion) {
-        // Se esistente e lo status attuale è 'validated'
+        // Se la conversione esiste, mantieni la commissione originale
+        finalCommission = parseFloat(existingConversion.commission);
+        adjustmentApplied = existingConversion.adjustment_applied;
+
+        // Logica per lo status
         if (existingConversion.status === 'validated') {
-          // Mantieni 'validated' se l'API passa 'paid'
           statusToSave = existingConversion.status;
         }
-        // Se esistente e lo status attuale è 'paid'
         if (existingConversion.status === 'paid') {
-          // Mantieni sempre 'paid'
           statusToSave = existingConversion.status;
+        }
+
+        if (existingConversion.status === 'onhold' && conv.status === 'paid') {
+          statusToSave = 'validated';
+        }
+
+        if (existingConversion.status === 'refused') {
+          statusToSave = 'refused';
         }
       } else {
+        // Solo per nuove conversioni, applica l'adjustment
+        const campaign = mappingCampaigns.find(c =>
+          c.name === conv.original_campaign_name || c.mappedName === conv.original_campaign_name
+        );
+
+        if (campaign && campaign.commissionAdjustment) {
+          finalCommission -= campaign.commissionAdjustment;
+          finalCommission = Math.max(0, finalCommission);
+          adjustmentApplied = campaign.commissionAdjustment;
+        }
+
         // Per nuove conversioni, se arriva 'paid', imposta a 'validated'
         if (conv.status === 'paid') {
           statusToSave = 'validated';
         }
       }
 
-      // Aggiorna con lo status determinato
+      // Aggiorna con lo status determinato e la commissione appropriata
       return {
         updateOne: {
           filter: { conversion_id: conv.conversion_id },
           update: {
             ...conv,
-            status: statusToSave
+            status: statusToSave,
+            commission: finalCommission.toFixed(2),
+            adjustment_applied: adjustmentApplied
           },
           upsert: true
         }
@@ -243,12 +261,11 @@ router.get('/all-conversions', async (req, res) => {
 });
 
 
-// In routes/gambling.js, add this route:
 router.get('/user-commissions/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
-    // Find the user to get payment method
+    // Find the user to get payment method and personal info
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ error: 'Utente non trovato' });
@@ -278,6 +295,8 @@ router.get('/user-commissions/:username', async (req, res) => {
 
     res.json({
       username,
+      firstName: user.firstName,     // Aggiunti questi
+      lastName: user.lastName,       // due campi
       payment_method: user.paymentMethod,
       payment_address: user.paymentMethod === 'paypal' ? user.paypalAddress : user.bitcoinAddress,
       total_validated_commission: result.total_commission.toFixed(2),
@@ -343,8 +362,8 @@ router.get('/user-payment-list', async (req, res) => {
     const { 
       page = 1, 
       limit = 10, 
-      sortBy = 'username', 
-      sortOrder = 'asc',
+      sortBy = 'createdAt', // Default changed to createdAt
+      sortOrder = 'desc',   // Default changed to desc
       minValidatedCommissions,
       minTotalPayments,
       validatedCommissionsSortOrder,
@@ -403,8 +422,11 @@ router.get('/user-payment-list', async (req, res) => {
       {
         $project: {
           username: 1,
+          firstName: 1,   // Aggiungi questi
+          lastName: 1,    // due campi
           paymentMethod: 1,
           email: 1,
+          createdAt: 1, // Aggiungiamo createdAt
           totalValidatedCommissions: { 
             $ifNull: [{ $arrayElemAt: ['$validatedCommissions.totalValidatedCommissions', 0] }, 0] 
           },
@@ -437,9 +459,12 @@ router.get('/user-payment-list', async (req, res) => {
     // Add sorting stages
     const sortStages = [];
 
-    // Main sort
-    const mainSortStage = { $sort: {} };
-    mainSortStage.$sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    // Main sort - Gestione speciale per createdAt
+    const mainSortStage = { 
+      $sort: { 
+        [sortBy]: sortOrder === 'asc' ? 1 : -1 
+      } 
+    };
     sortStages.push(mainSortStage);
 
     // Additional sorting for validated commissions
@@ -465,19 +490,28 @@ router.get('/user-payment-list', async (req, res) => {
     // Add sort stages to pipeline
     pipeline.push(...sortStages);
 
-    // Execute aggregation
-    const userList = await User.aggregate(pipeline);
+    // Add pagination stages
+    pipeline.push(
+      { $skip: skip },
+      { $limit: Number(limit) }
+    );
 
-    // Pagination
-    const totalUsers = userList.length;
-    const paginatedUsers = userList.slice(skip, skip + Number(limit));
+    // Execute count pipeline for total
+    const countPipeline = [...pipeline];
+    countPipeline.pop(); // Remove $limit
+    countPipeline.pop(); // Remove $skip
+    const totalUsers = await User.aggregate(countPipeline).then(results => results.length);
+
+    // Execute main pipeline
+    const userList = await User.aggregate(pipeline);
 
     res.json({
       total: totalUsers,
-      users: paginatedUsers,
+      users: userList,
       totalPages: Math.ceil(totalUsers / limit)
     });
   } catch (error) {
+    console.error('Error in user-payment-list:', error); // Add this for debugging
     res.status(500).json({
       error: 'Errore nel recupero della lista utenti',
       details: error.message

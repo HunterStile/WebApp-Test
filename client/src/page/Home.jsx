@@ -7,6 +7,8 @@ import dashboard3d from "../assets/images/dashboard3d.png";
 import CampaignLogo from '../components/utils/CampaignLogo';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import dashboard2 from "../assets/images/dashboard2.png";
+import mapbase2 from "../assets/images/mapbase2.png";
 
 const partners = [
   'BETANO - Exclusive',
@@ -58,12 +60,13 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white flex flex-col items-center text-center px-0 text-custom-black">
       <Header />
   
-      <section className="py-16">
-        <h1 className="text-6xl font-bold mb-6">Leading Affiliate Network<br />in the iGaming industry</h1>
+      <section className="py-14">
+        <h1 className="text-6xl font-bold mb-1">Leading Affiliate Network</h1>
+        <h2 className="text-6xl font-bold mb-6">in the iGaming industry</h2>
         <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
           Fast Affiliation is a network for gambling, online poker, and sports betting, offering tools and support to maximize your engagement and earnings.
         </p>
-        <img src={dashboard3d} alt="Dashboard Preview" className="w-full max-w-5xl ml-16" />
+        <img src={dashboard2} alt="Dashboard Preview" className="w-full max-w-5xl items-center ml-24" />
       </section>
   
       <section className="py-10 pb-10 w-full">
@@ -110,7 +113,7 @@ const LandingPage = () => {
   
       <section className="py-16 text-center">
         <p className="text-4xl mb-10">Providing global affiliate support with swift solutions for all gaming sectors.</p>
-        <img src={mapbase} alt="Global Map" className="w-full max-w-6xl mx-auto items-center" />
+        <img src={mapbase2} alt="Global Map" className="w-full max-w-6xl mx-auto items-center" />
       </section>
   
       <section className="py-16 text-center">

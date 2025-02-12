@@ -3,6 +3,9 @@ import { AuthContext } from '../context/AuthContext';
 import ReCAPTCHA from 'react-google-recaptcha';
 import homeimage from "../assets/images/home1.png"
 import { useNavigate, useLocation } from 'react-router-dom';
+import Header from '../components/Header';
+import social2 from "../assets/images/social2.png";
+import flogo from "../assets/images/flogo.png";
 
 function Auth() {
   const location = useLocation();
@@ -221,7 +224,11 @@ function Auth() {
       <div className="w-full md:w-full lg:w-1/2 flex items-center justify-center bg-white order-2 md:order-1">
         <div className="w-full max-w-2xl mx-auto px-4 py-8 md:px-8">
           <div className="flex flex-col items-center gap-1.5 rounded-[18px] bg-gray-100 p-6 md:p-8 shadow-xs">
+          <a href="/" className="flex items-center ">
+                <img src={flogo} alt="Company Logo" className="h-14" />
+                </a>
             <div className="flex flex-col items-center w-full">
+           
               <h1 className="text-3xl md:text-6xl font-semibold mb-4 mt-4 md:mb-8 md:mt-6 text-[#1e1e1e] text-center">
                 {isRegister ? 'Sign up' : 'Log in'}
               </h1>
@@ -438,9 +445,9 @@ function Auth() {
       {/* Image Section */}
       <div className="hidden lg:w-1/2 lg:p-8 lg:flex lg:items-center lg:justify-center order-1 lg:order-3">
         <img
-          src={homeimage}
+          src={social2}
           alt="Welcome illustration"
-          className="min-w-[110%] lg:max-w-md w-full object-contain"
+          className="min-w-[110%] lg:max-w-md w-full object-contain mb-6"
         />
       </div>
     </div>

@@ -4,6 +4,7 @@ import { AdminAuthContext } from '../context/AdminAuthContext';
 import { Link } from 'react-router-dom';
 import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, ReceiptEuro, User, Settings } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
+import flogowhite from "../assets/images/flogowhite.png";
 import API_BASE_URL from '../config';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
@@ -14,6 +15,7 @@ function Navbar() {
   const { admin, logout: logoutAdmin } = useContext(AdminAuthContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [profileImage, setProfileImage] = useState(null);
   const { theme, toggleTheme } = useTheme();
 
   const toggleMobileMenu = () => {
@@ -56,12 +58,33 @@ function Navbar() {
     return () => clearInterval(interval);
   }, [user]);
   
+
+  useEffect(() => {
+    if (user) {
+      axios.get(`${API_BASE_URL}/auth/profile?username=${user}`)
+        .then((response) => {
+          const userData = response.data.user;
+          setProfileImage(
+            userData.profileImage 
+            ? `${API_BASE_URL}/${userData.profileImage}` 
+            : null
+          );
+        })
+        .catch((error) => {
+          console.error('Error fetching profile:', error);
+        });
+    }
+  }, [user]);
   return (
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-dark-bg dark:border-b dark:border-dark-accent shadow-sm p-4 flex items-center justify-between z-50">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <img src={flogo} alt="Fast Affiliation" className="h-8" />
+      <Link to="/dashboard" className="flex items-center gap-2">
+          <img 
+            src={theme === 'dark' ? flogowhite : flogo} 
+            alt="Fast Affiliation" 
+            className="h-8" 
+          />
           <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
         </Link>
         <button
@@ -78,8 +101,12 @@ function Navbar() {
 
         {/* Logo */}
         <div className="p-6 hidden lg:block">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <img src={flogo} alt="Fast Affiliation" className="h-8" />
+        <Link to="/dashboard" className="flex items-center gap-2">
+            <img 
+              src={theme === 'dark' ? flogowhite : flogo} 
+              alt="Fast Affiliation" 
+              className="h-8" 
+            />
             <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
           </Link>
         </div>
@@ -90,7 +117,24 @@ function Navbar() {
         {/* User info at top */}
         <div className="px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-accent"></div>
+          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-accent border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden">
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-400 dark:text-gray-500 mb-1">
+                  <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M3 22C3 17.0294 7.02944 13 12 13C16.9706 13 21 17.0294 21 22" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Upload your</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">photo</span>
+              </>
+            )}
+            </div>
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Affiliate</p>
               <p className="font-medium text-black dark:text-dark-text">{user || admin || 'Guest'}</p>
@@ -158,6 +202,14 @@ function Navbar() {
               <Link to="/admin/announcements" className="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1">
                 <Bell size={20} />
                 <span>Announcements</span>
+              </Link>
+              <Link to="/admin/newsletter" className="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1">
+                <Bell size={20} />
+                <span>Newsletter</span>
+              </Link>
+              <Link to="/admin/contact" className="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent rounded-lg mb-1">
+                <Bell size={20} />
+                <span>Contacts</span>
               </Link>
             </>
           )}

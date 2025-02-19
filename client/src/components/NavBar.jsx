@@ -4,6 +4,7 @@ import { AdminAuthContext } from '../context/AdminAuthContext';
 import { Link } from 'react-router-dom';
 import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, ReceiptEuro, User, Settings } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
+import flogowhite from "../assets/images/flogowhite.png";
 import API_BASE_URL from '../config';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
@@ -78,8 +79,12 @@ function Navbar() {
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-dark-bg dark:border-b dark:border-dark-accent shadow-sm p-4 flex items-center justify-between z-50">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <img src={flogo} alt="Fast Affiliation" className="h-8" />
+      <Link to="/dashboard" className="flex items-center gap-2">
+          <img 
+            src={theme === 'dark' ? flogowhite : flogo} 
+            alt="Fast Affiliation" 
+            className="h-8" 
+          />
           <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
         </Link>
         <button
@@ -96,8 +101,12 @@ function Navbar() {
 
         {/* Logo */}
         <div className="p-6 hidden lg:block">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <img src={flogo} alt="Fast Affiliation" className="h-8" />
+        <Link to="/dashboard" className="flex items-center gap-2">
+            <img 
+              src={theme === 'dark' ? flogowhite : flogo} 
+              alt="Fast Affiliation" 
+              className="h-8" 
+            />
             <span className="font-bold text-[#1F2421] dark:text-dark-text">Fast Affiliation</span>
           </Link>
         </div>

@@ -119,7 +119,7 @@ router.get('/fetch-conversions', async (req, res) => {
         if (existingConversion.status === 'onhold' && conv.status === 'paid') {
           statusToSave = 'validated';
         }
-        
+
         if (existingConversion.status === 'refused') {
           statusToSave = 'refused';
         }
@@ -128,7 +128,7 @@ router.get('/fetch-conversions', async (req, res) => {
         const campaign = mappingCampaigns.find(c =>
           c.name === conv.original_campaign_name || c.mappedName === conv.original_campaign_name
         );
-        
+
         if (campaign && campaign.commissionAdjustment) {
           finalCommission -= campaign.commissionAdjustment;
           finalCommission = Math.max(0, finalCommission);
@@ -261,12 +261,11 @@ router.get('/all-conversions', async (req, res) => {
 });
 
 
-// In routes/gambling.js, add this route:
 router.get('/user-commissions/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
-    // Find the user to get payment method
+    // Find the user to get payment method and personal info
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ error: 'Utente non trovato' });
@@ -296,6 +295,8 @@ router.get('/user-commissions/:username', async (req, res) => {
 
     res.json({
       username,
+      firstName: user.firstName,     // Aggiunti questi
+      lastName: user.lastName,       // due campi
       payment_method: user.paymentMethod,
       payment_address: user.paymentMethod === 'paypal' ? user.paypalAddress : user.bitcoinAddress,
       total_validated_commission: result.total_commission.toFixed(2),
@@ -361,8 +362,8 @@ router.get('/user-payment-list', async (req, res) => {
     const { 
       page = 1, 
       limit = 10, 
-      sortBy = 'username', 
-      sortOrder = 'asc',
+      sortBy = 'createdAt', // Default changed to createdAt
+      sortOrder = 'desc',   // Default changed to desc
       minValidatedCommissions,
       minTotalPayments,
       validatedCommissionsSortOrder,
@@ -421,8 +422,11 @@ router.get('/user-payment-list', async (req, res) => {
       {
         $project: {
           username: 1,
+          firstName: 1,   // Aggiungi questi
+          lastName: 1,    // due campi
           paymentMethod: 1,
           email: 1,
+          createdAt: 1, // Aggiungiamo createdAt
           totalValidatedCommissions: { 
             $ifNull: [{ $arrayElemAt: ['$validatedCommissions.totalValidatedCommissions', 0] }, 0] 
           },
@@ -455,9 +459,12 @@ router.get('/user-payment-list', async (req, res) => {
     // Add sorting stages
     const sortStages = [];
 
-    // Main sort
-    const mainSortStage = { $sort: {} };
-    mainSortStage.$sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    // Main sort - Gestione speciale per createdAt
+    const mainSortStage = { 
+      $sort: { 
+        [sortBy]: sortOrder === 'asc' ? 1 : -1 
+      } 
+    };
     sortStages.push(mainSortStage);
 
     // Additional sorting for validated commissions
@@ -483,19 +490,28 @@ router.get('/user-payment-list', async (req, res) => {
     // Add sort stages to pipeline
     pipeline.push(...sortStages);
 
-    // Execute aggregation
-    const userList = await User.aggregate(pipeline);
+    // Add pagination stages
+    pipeline.push(
+      { $skip: skip },
+      { $limit: Number(limit) }
+    );
 
-    // Pagination
-    const totalUsers = userList.length;
-    const paginatedUsers = userList.slice(skip, skip + Number(limit));
+    // Execute count pipeline for total
+    const countPipeline = [...pipeline];
+    countPipeline.pop(); // Remove $limit
+    countPipeline.pop(); // Remove $skip
+    const totalUsers = await User.aggregate(countPipeline).then(results => results.length);
+
+    // Execute main pipeline
+    const userList = await User.aggregate(pipeline);
 
     res.json({
       total: totalUsers,
-      users: paginatedUsers,
+      users: userList,
       totalPages: Math.ceil(totalUsers / limit)
     });
   } catch (error) {
+    console.error('Error in user-payment-list:', error); // Add this for debugging
     res.status(500).json({
       error: 'Errore nel recupero della lista utenti',
       details: error.message

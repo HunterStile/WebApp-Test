@@ -144,7 +144,7 @@ const CampaignTable = () => {
     if (userRequests.rejected.some(req => req.campaign === campaignName)) {
       return 'rejected';
     }
-    return 'notrequested';
+    return 'not requested';
   };
 
   const getRequestDetails = (campaignName) => {
@@ -159,7 +159,7 @@ const CampaignTable = () => {
   // Extract unique values for filter options
   const uniqueTypes = [...new Set(campaigns.map(c => c.type))];
   const uniqueCountries = [...new Set(campaigns.map(c => c.country))];
-  const requestStatuses = ['approved', 'pending', 'rejected', 'notrequested', 'deactivated'];
+  const requestStatuses = ['approved', 'pending', 'rejected', 'not requested', 'deactivated'];
 
   // Reset filters
   const resetFilters = () => {
@@ -356,7 +356,7 @@ const StatusBadge = ({ status, campaignStatus }) => {
   const getStatusText = () => {
     if (status === 'deactivated') return 'Deactivated';
     if (campaignStatus === 'disattivo') return 'Campaign Deactivated';
-    if (status === 'notrequested') return 'Not Requested';  // Aggiunto spazio qui
+    if (status === 'not requested') return 'Not Requested';  // Aggiunto spazio qui
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
@@ -393,7 +393,7 @@ const ActionButton = ({ status, campaign, requestDetails, onRequest, onCopy, cop
     );
   }
 
-  if (status === 'notrequested' && campaign.status === 'attivo') {
+  if (status === 'not requested' && campaign.status === 'attivo') {
     return (
       <button
         onClick={() => onRequest(campaign.name)}

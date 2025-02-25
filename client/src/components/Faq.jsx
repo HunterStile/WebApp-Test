@@ -129,35 +129,35 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return( 
-   <div className="App min-h-screen bg-white dark:bg-dark-bg text-custom-black dark:text-dark-text transition-colors duration-300">
-    <Header />
-    <div className="max-w-6xl mx-auto py-10 px-4">
-      <h1 className="text-4xl font-bold text-center mt-4">Welcome to the Fast Affiliation FAQ section.</h1>
-      <p className="text-center text-lg text-gray-600 mt-2 mb-8">
-        Here you will find answers to the most common questions about our affiliate program.
-      </p>
-      <div className="mt-6 space-y-4">
-        {faqs.map((faq, index) => (
-          <div
-            key={index}
-            className={`border shadow-lg rounded-xl p-16 transition-all ${openIndex === index ? "border-green-600" : "border-gray-300"}`}
-          >
-            <button
-              className="w-full flex justify-between items-center text-left text-2xl font-semibold"
-              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+    <div className="App min-h-screen bg-white text-custom-black">
+      <Header />
+      <div className="max-w-6xl mx-auto py-10 px-4">
+        <h1 className="text-4xl font-bold text-center mt-4">Welcome to the Fast Affiliation FAQ section.</h1>
+        <p className="text-center text-lg text-gray-600 mt-2 mb-8">
+          Here you will find answers to the most common questions about our affiliate program.
+        </p>
+        <div className="mt-6 space-y-4">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className={`border shadow-lg rounded-xl p-16 transition-all ${openIndex === index ? "border-green-600" : "border-gray-300"}`}
             >
-              {faq.question}
-              {openIndex === index ? (
-                <ChevronDown className="text-green-600" />
-              ) : (
-                <ChevronRight className="text-gray-600" />
-              )}
-            </button>
-            {openIndex === index && <p className="mt-2 text-lg text-gray-600">{faq.answer}</p>}
-          </div>
-        ))}
+              <button
+                className="w-full flex justify-between items-center text-left text-2xl font-semibold"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              >
+                {faq.question}
+                {openIndex === index ? (
+                  <ChevronDown className="text-green-600" />
+                ) : (
+                  <ChevronRight className="text-gray-600" />
+                )}
+              </button>
+              {openIndex === index && <p className="mt-2 text-lg text-gray-600">{faq.answer}</p>}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
-    </div>
- )
+  );
 }

@@ -61,7 +61,7 @@ const LandingPage = () => {
       <Header />
   
       <section className="py-14">
-        <h1 className="text-6xl font-bold mb-1">Leading Affiliate Network</h1>
+        <h1 className="text-6xl font-bold mb-1">Leading Affiliate Network!</h1>
         <h2 className="text-6xl font-bold mb-6">in the iGaming industry</h2>
         <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
           Fast Affiliation is a network for gambling, online poker, and sports betting, offering tools and support to maximize your engagement and earnings.

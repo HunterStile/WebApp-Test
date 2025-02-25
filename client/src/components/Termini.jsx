@@ -1,10 +1,13 @@
 // src/components/Terms.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../components/Header';
 
 const Terms = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
-    <div className="App min-h-screen bg-white dark:bg-dark-bg text-black dark:text-dark-text transition-colors duration-300">
+    <div className="App min-h-screen bg-white  text-black transition-colors duration-300">
       <Header />
       <div className="flex justify-center p-8">
         <div className="w-full max-w-6xl bg-white text-gray-900 p-8 rounded-lg shadow-lg">

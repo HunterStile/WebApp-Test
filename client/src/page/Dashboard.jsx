@@ -447,8 +447,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('daily')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'daily'
-              ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
-              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'bg-light-green text-dark-green dark:bg-dark-green/20 dark:text-dark-text'
+              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-card'
               }`}
           >
             Daily View
@@ -456,8 +456,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('monthly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'monthly'
-              ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
-              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'bg-light-green text-dark-green dark:bg-dark-green/20 dark:text-dark-text'
+              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-card'
               }`}
           >
             Monthly View
@@ -465,8 +465,8 @@ const Dashboard = () => {
           <button
             onClick={() => setViewMode('yearly')}
             className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'yearly'
-              ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
-              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'bg-light-green text-dark-green dark:bg-dark-green/20 dark:text-dark-text'
+              : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-card'
               }`}
           >
             Yearly View
@@ -480,8 +480,8 @@ const Dashboard = () => {
                 key={option.value}
                 onClick={() => setMonthRange(option.value)}
                 className={`px-4 py-2 rounded-lg transition-colors ${monthRange === option.value
-                  ? 'bg-light-green text-dark-green dark:bg-dark-blue dark:text-white'
-                  : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-light-green text-dark-green dark:bg-dark-green/20 dark:text-dark-text'
+                  : 'bg-gray-50 dark:bg-dark-accent text-gray-600 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-card'
                   }`}
               >
                 {option.label}

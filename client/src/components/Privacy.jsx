@@ -1,10 +1,14 @@
 // src/components/Privacy.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../components/Header';
+import { Link } from 'react-router-dom';
 
 const Privacy = () => {
+  useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
   return (
-    <div className="App min-h-screen bg-white dark:bg-dark-bg text-black dark:text-dark-text transition-colors duration-300">
+    <div className="App min-h-screen bg-white text-black transition-colors duration-300">
       <Header />
       <div className="flex justify-center p-8">
         <div className="w-full max-w-6xl bg-white text-gray-900 p-8 rounded-lg shadow-lg">
@@ -12,7 +16,9 @@ const Privacy = () => {
           <p className="text-justify">Your privacy is important to us. This Privacy Policy describes how we collect, use, and protect your personal data.</p>
 
           <h2 className="text-2xl font-semibold mt-6">1. Data Controller Identification</h2>
-          <p className="text-justify">The data controller is Fast Affiliation and can be contacted via email at [Email] for any data protection inquiries.</p>
+          <p className="text-justify">The data controller is Fast Affiliation and can be contacted via email at <Link to="/contact" className="text-green-600 hover:text-green-800 underline">
+              Contact page
+            </Link>{' '} for any data protection inquiries.</p>
 
           <h2 className="text-2xl font-semibold mt-6">2. Purposes of Data Processing</h2>
           <ul className="ml-8 text-justify space-y-2 list-disc">
@@ -67,7 +73,6 @@ const Privacy = () => {
             <li>Right to data portability.</li>
             <li>Right to withdraw consent at any time.</li>
           </ul>
-          <p className="text-justify">You can exercise your rights by contacting us at [Email] or via postal mail at [Address].</p>
 
           <h2 className="text-2xl font-semibold mt-6">9. Data Security</h2>
           <p className="text-justify">We implement adequate security measures to protect data, including secure servers and contracts with reliable providers.</p>
@@ -79,7 +84,13 @@ const Privacy = () => {
           <p className="text-justify">This policy may be updated. Users will be informed of any changes.</p>
 
           <h2 className="text-2xl font-semibold mt-6">12. Contact Information</h2>
-          <p className="text-justify">For any privacy-related inquiries, please contact us at [Email].</p>
+          <p className="text-justify">
+            For any privacy-related inquiries, please visit our{' '}
+            <Link to="/contact" className="text-green-600 hover:text-green-800 underline">
+              Contact page
+            </Link>{' '}
+            accessible from the navigation bar or footer on our homepage.
+          </p>
         </div>
       </div>
     </div>

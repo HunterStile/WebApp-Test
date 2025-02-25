@@ -14,7 +14,8 @@ const ConversionList = () => {
     status: '',
     type: '',
     campaign_status: '',
-    dateRange: ''
+    startDate: '',
+    endDate: ''
   });
   const itemsPerPage = 10;
 
@@ -29,21 +30,16 @@ const ConversionList = () => {
       const matchesType = !filters.type || conv.type === filters.type;
       const matchesCampaignStatus = !filters.campaign_status || conv.campaign_status === filters.campaign_status;
 
+      // Date range filter
       let matchesDateRange = true;
-      if (filters.dateRange) {
-        const convDate = new Date(conv.date);
-        const today = new Date();
-        switch (filters.dateRange) {
-          case '7days':
-            matchesDateRange = (today - convDate) <= 7 * 24 * 60 * 60 * 1000;
-            break;
-          case '30days':
-            matchesDateRange = (today - convDate) <= 30 * 24 * 60 * 60 * 1000;
-            break;
-          case '90days':
-            matchesDateRange = (today - convDate) <= 90 * 24 * 60 * 60 * 1000;
-            break;
-        }
+      const convDate = new Date(conv.date);
+      
+      if (filters.startDate) {
+        matchesDateRange = convDate >= new Date(filters.startDate);
+      }
+      
+      if (filters.endDate && matchesDateRange) {
+        matchesDateRange = convDate <= new Date(filters.endDate);
       }
 
       return matchesSearch && matchesStatus && matchesType && matchesCampaignStatus && matchesDateRange;
@@ -83,7 +79,8 @@ const ConversionList = () => {
       status: '',
       type: '',
       campaign_status: '',
-      dateRange: ''
+      startDate: '',
+      endDate: ''
     });
     setSearchTerm('');
     setCurrentPage(1);
@@ -94,6 +91,14 @@ const ConversionList = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Handler per i cambi dei filtri date
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
   return (
     <div className="p-8 bg-white dark:bg-dark-bg rounded-xl">
@@ -139,10 +144,31 @@ const ConversionList = () => {
         filterOptions={{
           type: uniqueTypes,
           status: uniqueStatuses,
-          campaign_status: uniqueCampaignStatuses,
-          dateRange: ['7days', '30days', '90days']
+          campaign_status: uniqueCampaignStatuses
         }}
-      />
+      >
+        {/* Additional date range inputs */}
+        <div className="flex gap-4 mt-4">
+          <div className="flex-1">
+            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Start Date</label>
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-accent rounded-lg bg-white dark:bg-dark-card dark:text-dark-text"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">End Date</label>
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-accent rounded-lg bg-white dark:bg-dark-card dark:text-dark-text"
+            />
+          </div>
+        </div>
+      </FilterSection>
 
       {/* Table */}
       <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-gray-100 dark:border-dark-accent overflow-hidden">

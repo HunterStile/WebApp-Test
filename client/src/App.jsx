@@ -31,6 +31,7 @@ import Privacy from './components/Privacy';
 import Cookies from './components/Cookies';
 import Contact from './page/Contact';
 import Faq from './components/Faq';
+import { NotFound, Forbidden, ServerError } from './page/error';
 import './App.css';
 
 function Layout({ children }) {
@@ -99,6 +100,11 @@ function App() {
                   <Route path="/termini" element={<Termini />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/cookie" element={<Cookies />} />
+
+                  {/* Rotte per errori */}
+                  <Route path="/403" element={<Forbidden />} />
+                  <Route path="/500" element={<ServerError />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Layout>
             </Router>

@@ -6,7 +6,7 @@ const Payment = require('../models/Payment');
 const axios = require('axios');
 const multer = require('multer');
 const path = require('path');
-
+const Conversion = require('../models/Conversion')
 
 // Validazione email
 const isValidEmail = (email) => {
@@ -106,6 +106,27 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
+
+    // Crea una conversione manuale per il bonus di benvenuto
+    const newConversion = new Conversion({
+      conversion_id: `${Date.now()}`, // ID univoco per la conversione manuale
+      campaign_name: 'Bonus benvenuto',
+      original_campaign_name: 'Bonus benvenuto',
+      site_url: req.headers.origin || 'registrazione_diretta',
+      date: new Date(),
+      type: 'bonus', // tipo di conversione manuale
+      tracking: 'welcome_bonus',
+      aff_var: username, // username dell'utente
+      netrevenue: null,
+      commission: '10.00', // bonus di 10 euro
+      original_commission: '10.00',
+      adjustment_applied: 0,
+      payment: null,
+      status: 'validated', // imposta lo stato come validato
+      campaign_status: 'active'
+    });
+
+    await newConversion.save();
 
     res.status(201).json({
       message: 'Utente registrato con successo',

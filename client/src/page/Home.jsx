@@ -69,40 +69,39 @@ const LandingPage = () => {
         <img src={dashboard2} alt="Dashboard Preview" className="w-full max-w-5xl items-center ml-24" />
       </section>
   
-      <section className="py-10 pb-10 w-full">
-  <h2 className="text-3xl font-semibold mb-12">Our Partners</h2>
-  <div className="relative w-full flex items-center justify-center group">
-    <span 
-      className=" p-2 absolute left-0 text-3xl text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-      onClick={() => scroll('left')}
-    >
-      &lt;
-    </span>
-    <div ref={scrollRef} className="flex overflow-x-hidden gap-12 scroll-smooth">
-      {partners.map((campaignName, index) => (
-        <div key={index} className="w-48 h-20 flex-shrink-0">
-          <CampaignLogo campaignName={campaignName} />
+      <section className="py-10 pb-10 w-full px-16">
+        <h2 className="text-3xl font-semibold mb-12">Our Partners</h2>
+        <div className="relative w-full flex items-center justify-center group mx-auto max-w-5xl">
+          <span 
+            className="p-2 absolute left-4 text-3xl text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer z-10"
+            onClick={() => scroll('left')}
+          >
+            &lt;
+          </span>
+          <div ref={scrollRef} className="flex overflow-x-hidden gap-12 scroll-smooth px-16 mx-auto">
+            {partners.map((campaignName, index) => (
+              <div key={index} className="w-48 h-20 flex-shrink-0">
+                <CampaignLogo campaignName={campaignName} />
+              </div>
+            ))}
+          </div>
+          <span 
+            className="p-2 absolute right-4 text-3xl text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer z-10"
+            onClick={() => scroll('right')}
+          >
+            &gt;
+          </span>
         </div>
-      ))}
-    </div>
-    <span 
-      className="p-2 absolute right-0 text-3xl text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-      onClick={() => scroll('right')}
-    >
-      &gt;
-    </span>
-  </div>
-</section>
-
+      </section>
   
       <section className="px-16 py-10 text-center">
-      <h2 class="text-3xl font-semibold mb-6">Why choose us</h2>
-      <section className="py-10 w-full grid grid-cols-1 md:grid-cols-4 gap-14">
-        <FeatureCard icon={<Monitor className="w-14 h-14 text-teal-600" />} title="Tailored Services" features={["Personalized Affiliate Manager", "Arrangement of exclusive deals", "Built-in Messenger for direct communication with our Support Team"]} />
-        <FeatureCard icon={<Building2 className="w-14 h-14 text-teal-600" />} title="Commission Payments" features={["Two monthly payment sessions each month", "Choose payment methods, including Bitcoin", "Adjustable payout according to your preferences"]} />
-        <FeatureCard icon={<Globe className="w-14 h-14 text-teal-600" />} title="Campaign Portfolio" features={["Collaborations with leading operators", "Diverse verticals: Sportsbook, Casino, Poker", "Flexible deal options: CPA, Revenue Share, Hybrid"]} />
-        <FeatureCard icon={<BarChart3 className="w-14 h-14 text-teal-600" />} title="Affiliate Rewards" features={["Loyalty Program: Unlock exclusive rewards through our VIP room.", "Referral Program: Receive 5% commission on referrals' earnings."]} />
-      </section>
+        <h2 className="text-3xl font-semibold mb-6">Why choose us</h2>
+        <section className="py-10 w-full grid grid-cols-1 md:grid-cols-4 gap-14">
+          <FeatureCard icon={<Monitor className="w-14 h-14 text-teal-600" />} title="Tailored Services" features={["Personalized Affiliate Manager", "Arrangement of exclusive deals", "Built-in Messenger for direct communication with our Support Team"]} />
+          <FeatureCard icon={<Building2 className="w-14 h-14 text-teal-600" />} title="Commission Payments" features={["Two monthly payment sessions each month", "Choose payment methods, including Bitcoin", "Adjustable payout according to your preferences"]} />
+          <FeatureCard icon={<Globe className="w-14 h-14 text-teal-600" />} title="Campaign Portfolio" features={["Collaborations with leading operators", "Diverse verticals: Sportsbook, Casino, Poker", "Flexible deal options: CPA, Revenue Share, Hybrid"]} />
+          <FeatureCard icon={<BarChart3 className="w-14 h-14 text-teal-600" />} title="Affiliate Rewards" features={["Loyalty Program: Unlock exclusive rewards through our VIP room.", "Referral Program: Receive 5% commission on referrals' earnings."]} />
+        </section>
       </section>
 
       <section className="py-10 flex justify-center space-x-56">
@@ -136,18 +135,17 @@ const LandingPage = () => {
           <a href="#" className="text-white">Service</a>
           <a href="/contact" className="text-white">Contact Us</a>
         </nav>
-                <div className="flex justify-center space-x-6">
-                  <Link to="/termini" className="hover:text-gray-400 dark:hover:text-gray-300">Terms and Conditions</Link>
-                  <Link to="/privacy" className="hover:text-gray-400 dark:hover:text-gray-300">Privacy Policy</Link>
-                  <Link to="/cookie" className="hover:text-gray-400 dark:hover:text-gray-300">Cookies Policy</Link>
-                </div>
-                <div className="mt-4">
+        <div className="flex justify-center space-x-6">
+          <Link to="/termini" className="hover:text-gray-400 dark:hover:text-gray-300">Terms and Conditions</Link>
+          <Link to="/privacy" className="hover:text-gray-400 dark:hover:text-gray-300">Privacy Policy</Link>
+          <Link to="/cookie" className="hover:text-gray-400 dark:hover:text-gray-300">Cookies Policy</Link>
+        </div>
+        <div className="mt-4">
           <p>&copy; {new Date().getFullYear()} Fast Affiliation. All rights reserved.</p>
         </div>
       </footer>
     </div>
-  )
-  
-  
-}
-  export default LandingPage;
+  );
+};
+
+export default LandingPage;

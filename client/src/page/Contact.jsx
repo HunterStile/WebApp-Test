@@ -60,7 +60,7 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="App min-h-screen bg-white dark:bg-dark-bg text-black dark:text-dark-text transition-colors duration-300">
+    <div className="App min-h-screen bg-white text-black transition-colors duration-300">
       <Header />
       <div className="flex justify-center items-center h-screen">
         <div className="w-full max-w-7xl bg-white text-gray-900 p-8 rounded-lg flex gap-x-12">

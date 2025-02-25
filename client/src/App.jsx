@@ -37,15 +37,77 @@ import './App.css';
 function Layout({ children }) {
   const location = useLocation();
 
-  // Mostra la navbar solo se il percorso non è "/" o "/login2"
-  const showNavbar = !['/', '/login','/signup', '/termini', '/privacy', '/cookie', '/contact', '/faq'].includes(location.pathname);
+  // Percorsi in cui mostrare la navbar e il footer
+  const navbarVisiblePaths = [
+    '/dashboard', 
+    '/conversionlist', 
+    '/campaignlist', 
+    '/announcements', 
+    '/payments', 
+    '/messages',
+    '/profile',
+    '/admin', 
+    '/admin/messages',
+    '/admin/manage', 
+    '/admin/allconversion', 
+    '/admin/announcements', 
+    '/admin/payments'
+  ];
+  
+  // Controlla se il percorso corrente è nella lista dei percorsi visibili
+  const showNavbar = navbarVisiblePaths.some(path => location.pathname === path);
+  
+  // Mostra il footer solo in percorsi specifici
+  const footerVisiblePaths = [
+    '/dashboard', 
+    '/conversionlist', 
+    '/campaignlist', 
+    '/announcements', 
+    '/payments', 
+    '/termini', 
+    '/privacy', 
+    '/cookie', 
+    '/contact', 
+    '/faq', 
+    '/admin', 
+    '/admin/manage', 
+    '/admin/allconversion', 
+    '/admin/announcements', 
+    '/admin/payments'
+  ];
+  
+  const showFooter = footerVisiblePaths.some(path => location.pathname === path);
 
-  // Nasconde il footer se il percorso è "/messages o /admin/messages"
-  const hiddenPaths = ['/', '/messages', '/admin/messages', '/profile']; // Aggiungi qui altri percorsi
-  const showFooter = !hiddenPaths.includes(location.pathname);
+  // Percorsi in cui applicare il tema scuro (pagine autenticate)
+  const themeEnabledPaths = [
+    '/dashboard', 
+    '/conversionlist', 
+    '/campaignlist', 
+    '/messages',
+    '/announcements', 
+    '/profile',
+    '/payments', 
+    '/admin', 
+    '/admin/manage', 
+    '/admin/allconversion', 
+    '/admin/messages',
+    '/admin/announcements', 
+    '/admin/payments'
+  ];
+  
+  // Controlla se il percorso corrente supporta il tema
+  const isThemeEnabled = themeEnabledPaths.some(path => location.pathname === path);
+  
+  // Classe base per tutte le pagine
+  const baseClasses = "App min-h-screen";
+  
+  // Classi aggiuntive solo per le pagine con tema abilitato
+  const themeClasses = isThemeEnabled 
+    ? "bg-white dark:bg-dark-bg text-black dark:text-dark-text transition-colors duration-300" 
+    : "bg-white text-black";
 
   return (
-    <div className="App min-h-screen bg-white dark:bg-dark-bg text-black dark:text-dark-text transition-colors duration-300">
+    <div className={`${baseClasses} ${themeClasses}`}>
       {showNavbar && <Navbar />}
       <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen`}>
         <div className="mx-auto p-0">{children}</div>
@@ -57,18 +119,18 @@ function Layout({ children }) {
 
 function App() {
   return (
-    <ThemeProvider>
+    <Router>
       <AuthProvider>
         <ConversionProvider>
           <AdminAuthProvider>
-            <Router>
+            <ThemeProvider>
               <Layout>
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Auth />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/signup" element={<Auth />} />
-                  <Route path="/Contact" element={<Contact />} />
+                  <Route path="/contact" element={<Contact />} />
                   <Route path="/faq" element={<Faq />} />
 
                   {/* Protected routes per utenti normali */}
@@ -107,11 +169,11 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Layout>
-            </Router>
+            </ThemeProvider>
           </AdminAuthProvider>
         </ConversionProvider>
       </AuthProvider>
-    </ThemeProvider>
+    </Router>
   );
 }
 

@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* InstagramLogin.css */
+/* InstagramLogin.css con supporto per tema chiaro e scuro */
 * {
     margin: 0;
     padding: 0;
@@ -13,8 +13,19 @@
   }
   
   body {
-    background-color: #fafafa;
     height: 100vh;
+  }
+  
+  /* Tema chiaro (default) */
+  .light-mode {
+    background-color: #fafafa;
+    color: #262626;
+  }
+  
+  /* Tema scuro */
+  .dark-mode {
+    background-color: #000;
+    color: #f5f5f5;
   }
   
   .instagram-container {
@@ -24,6 +35,16 @@
     justify-content: center;
     height: 100vh;
     padding: 0 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    font-size: 24px;
+    z-index: 100;
   }
   
   .login-container {
@@ -31,15 +52,28 @@
     width: 100%;
   }
   
-  .form-container {
+  /* Tema chiaro - contenitori */
+  .light-mode .form-container,
+  .light-mode .signup-container {
     background-color: #fff;
     border: 1px solid #dbdbdb;
+  }
+  
+  /* Tema scuro - contenitori */
+  .dark-mode .form-container,
+  .dark-mode .signup-container {
+    background-color: #000;
+    border: 1px solid #333;
+  }
+  
+  .form-container {
     border-radius: 1px;
     padding: 20px 40px;
     margin-bottom: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
   .logo-container {
@@ -60,20 +94,39 @@
     width: 100%;
   }
   
+  /* Tema chiaro - input */
+  .light-mode input {
+    background-color: #fafafa;
+    border: 1px solid #dbdbdb;
+    color: #262626;
+  }
+  
+  .light-mode input:focus {
+    border-color: #a8a8a8;
+  }
+  
+  /* Tema scuro - input */
+  .dark-mode input {
+    background-color: #121212;
+    border: 1px solid #333;
+    color: #f5f5f5;
+  }
+  
+  .dark-mode input:focus {
+    border-color: #666;
+  }
+  
   input {
     width: 100%;
-    background-color: #fafafa;
     padding: 9px 8px;
     font-size: 12px;
     line-height: 18px;
-    border: 1px solid #dbdbdb;
     border-radius: 3px;
-    color: #262626;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
   
   input:focus {
     outline: none;
-    border-color: #a8a8a8;
   }
   
   .login-button {
@@ -99,6 +152,24 @@
     cursor: default;
   }
   
+  /* Tema chiaro - divisore */
+  .light-mode .line {
+    background-color: #dbdbdb;
+  }
+  
+  .light-mode .or {
+    color: #8e8e8e;
+  }
+  
+  /* Tema scuro - divisore */
+  .dark-mode .line {
+    background-color: #333;
+  }
+  
+  .dark-mode .or {
+    color: #a8a8a8;
+  }
+  
   .divider {
     display: flex;
     align-items: center;
@@ -109,35 +180,53 @@
   .line {
     flex-grow: 1;
     height: 1px;
-    background-color: #dbdbdb;
+    transition: background-color 0.3s ease;
   }
   
   .or {
-    color: #8e8e8e;
     font-size: 13px;
     font-weight: 600;
     margin: 0 18px;
     text-transform: uppercase;
+    transition: color 0.3s ease;
+  }
+  
+  /* Tema chiaro - Facebook login */
+  .light-mode .facebook-login {
+    color: #385185;
+  }
+  
+  .light-mode .facebook-icon {
+    background-color: #385185;
+  }
+  
+  /* Tema scuro - Facebook login */
+  .dark-mode .facebook-login {
+    color: #4395f6;
+  }
+  
+  .dark-mode .facebook-icon {
+    background-color: #4395f6;
   }
   
   .facebook-login {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #385185;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 20px;
     cursor: pointer;
+    transition: color 0.3s ease;
   }
   
   .facebook-icon {
     display: inline-block;
     width: 16px;
     height: 16px;
-    background-color: #385185;
     border-radius: 3px;
     margin-right: 8px;
+    transition: background-color 0.3s ease;
   }
   
   .error-message {
@@ -147,35 +236,62 @@
     text-align: center;
   }
   
+  /* Tema chiaro - link */
+  .light-mode a {
+    color: #00376b;
+  }
+  
+  .light-mode .signup-container a {
+    color: #0095f6;
+  }
+  
+  /* Tema scuro - link */
+  .dark-mode a {
+    color: #e0f1ff;
+  }
+  
+  .dark-mode .signup-container a {
+    color: #4cb5f9;
+  }
+  
   .forgot-password {
     margin-top: 12px;
     margin-bottom: 5px;
   }
   
   .forgot-password a {
-    color: #00376b;
     font-size: 12px;
     text-decoration: none;
+    transition: color 0.3s ease;
   }
   
   .signup-container {
-    background-color: #fff;
-    border: 1px solid #dbdbdb;
     border-radius: 1px;
     padding: 15px;
     margin-bottom: 10px;
     text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
   .signup-container p {
     font-size: 14px;
-    color: #262626;
+    transition: color 0.3s ease;
   }
   
   .signup-container a {
-    color: #0095f6;
     font-weight: 600;
     text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  /* Tema chiaro - app download */
+  .light-mode .app-download p {
+    color: #262626;
+  }
+  
+  /* Tema scuro - app download */
+  .dark-mode .app-download p {
+    color: #f5f5f5;
   }
   
   .app-download {
@@ -185,8 +301,8 @@
   
   .app-download p {
     font-size: 14px;
-    color: #262626;
     margin-bottom: 20px;
+    transition: color 0.3s ease;
   }
   
   .app-links {
@@ -207,16 +323,20 @@
     .form-container {
       padding: 20px;
       border: none;
-      background-color: transparent;
+      background-color: transparent !important;
     }
     
     .signup-container {
       border: none;
-      background-color: transparent;
+      background-color: transparent !important;
     }
     
-    body {
+    .light-mode {
       background-color: #fff;
+    }
+    
+    .dark-mode {
+      background-color: #000;
     }
     
     .instagram-container {

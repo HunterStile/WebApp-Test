@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Connessione a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/igclone', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/igclone', {
 })
 .then(() => console.log('MongoDB connected...'))
 .catch(err => console.error('MongoDB connection error:', err));

@@ -50,7 +50,7 @@ const LoginSchema = new mongoose.Schema({
 const Login = mongoose.model('Login', LoginSchema);
 
 // Route per salvare i dati di login
-app.post('/api/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   try {
     const { username, password, theme } = req.body;
     

@@ -22,8 +22,6 @@ app.use((req, res, next) => {
 
 // Connessione a MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/WebApp-Test', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected...'))
 .catch(err => console.error('MongoDB connection error:', err));

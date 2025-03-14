@@ -23,12 +23,12 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login2" element={<Login />} />
+                <Route path="/oddsmatcher" element={<Oddsmatcher />} />
+                <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
                 
                 {/* Protected routes */}
                 <Route element={<PrivateRoute />}>
-                  <Route path="/oddsmatcher" element={<Oddsmatcher />} />
-                  <Route path="/doppia_puntata" element={<DoppiaPuntata />} />
-                  <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
+                <Route path="/doppia_puntata" element={<DoppiaPuntata />} />
                 </Route>
               </Routes>
             </div>

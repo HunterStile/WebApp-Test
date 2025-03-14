@@ -8,6 +8,7 @@ import DateRangeFilter from '../components/filters/DateRangeFilter';
 import RatingRangeFilter from '../components/filters/RatingRangeFilter';
 import OddsRangeFilter from '../components/filters/OddsRangeFilter';
 import BookmakersFilter from '../components/filters/BookmakersFilterbase';
+import Table from '../components/Table';
 
 const bookmakerMapping = {
     'Unibet': 'unibet',
@@ -394,277 +395,260 @@ const OddsList = () => {
         setTotalPages(Math.ceil(filteredOdds.length / ITEMS_PER_PAGE));
     }, [filteredOdds]);
 
-    //MAIN PAGE//
-    return (
-        <div className="min-h-screen bg-slate-900 text-white p-6">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-6">
-                    <h2 className="text-3xl font-bold text-purple-400 mb-4">TRIPLA PUNTATA</h2>
-
-                    {/* Filters Section */}
-                    <div className="bg-slate-800 rounded-lg p-4 mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <DateRangeFilter
-                                dateRange={dateRange}
-                                setDateRange={setDateRange}
-                            />
-                            <RatingRangeFilter
-                                ratingRange={ratingRange}
-                                setRatingRange={setRatingRange}
-                            />
-                            <OddsRangeFilter 
-                               oddsRange={oddsRange}
-                               setOddsRange={setOddsRange}
-                            />
-                            <BookmakersFilter
-                                selectedBookmakers={selectedBookmakers}
-                                setSelectedBookmakers={setSelectedBookmakers}
-                                bookmakerMapping={bookmakerMapping}
-                                bookmakerOptions={bookmakerOptions}
-                            />
-                        </div>
-                        <div className="mt-4">
-                            <SearchFilter />
-                        </div>
-                    </div>
-
-                    {/* Error Message */}
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
-                            {error}
-                        </div>
-                    )}
-                    {/* Odds Table */}
-                    {filteredOdds.length > 0 ? (
-                        <div className="bg-slate-800 rounded-lg overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-slate-700">
-                                        <tr>
-                                            <th className="p-4 text-left text-sm text-slate-400">Date</th>
-                                            <th className="p-4 text-left text-sm text-slate-400">Match</th>
-                                            <th className="p-4 text-left text-sm text-slate-400">Bookmakers</th>
-                                            <th className="p-4 text-left text-sm text-slate-400">Odds</th>
-                                            <th className="p-4 text-left text-sm text-slate-400">Actions</th>
-                                            <th className="p-4 text-left text-sm text-slate-400">Rating</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-700">
-                                        {getCurrentPageOdds().map((game, index) => (
-                                            <tr key={index} className="hover:bg-slate-700/50">
-                                                <td className="p-4 text-sm text-slate-300">
-                                                    {formatDate(game.commence_time)}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm text-slate-400">{getLeagueName(game.league)}</span>
-                                                        <span className="font-medium">{game.home_team} vs {game.away_team}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs text-slate-400">Best Combination:</span>
-                                                        <div className="flex flex-wrap gap-1">
-                                                            {game.bestCombination.bookmakers.map((bookmaker, bIndex) => (
-                                                                <span
-                                                                    key={bIndex}
-                                                                    className="bg-slate-700 text-xs px-2 py-1 rounded"
-                                                                >
-                                                                    {bookmaker}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex space-x-2">
-                                                        <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
-                                                            1: {game.bestCombination.bestOdds1.toFixed(2)}
-                                                        </span>
-                                                        <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
-                                                            X: {game.bestCombination.bestOddsX.toFixed(2)}
-                                                        </span>
-                                                        <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
-                                                            2: {game.bestCombination.bestOdds2.toFixed(2)}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <button
-                                                        className="bg-purple-500 hover:bg-purple-600 text-white text-sm px-3 py-2 rounded-md"
-                                                        onClick={() => openModal({
-                                                            ...game,
-                                                            bestCombination: game.bestCombination
-                                                        })}
-                                                    >
-                                                        Calculate
-                                                    </button>
-                                                </td>
-                                                <td className="p-4 text-sm text-slate-300">
-                                                    {game.bestCombination.rating.toFixed(2)}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {modalData && (
-                                <ReactModal
-                                    isOpen={modalIsOpen}
-                                    onRequestClose={closeModal}
-                                    className="modal bg-slate-800 text-white rounded-lg p-6 max-w-md mx-auto mt-20"
-                                    overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-                                >
-                                    <h2 className="text-2xl font-bold mb-4">{modalData.home_team} vs {modalData.away_team}</h2>
-
-                                    <div className="mb-4">
-                                        <label className="block text-sm mb-2">Bet Amount</label>
-                                        <input
-                                            type="number"
-                                            value={betAmount}
-                                            onChange={handleAmountChange}
-                                            className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4 mb-4">
-                                        <div>
-                                            <label className="block text-sm mb-2">{modalData.home_team} Odds</label>
-                                            <input
-                                                type="number"
-                                                value={modalData.odds1}
-                                                onChange={(e) => handleOddsChange(e, 'odds1')}
-                                                className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm mb-2">Draw Odds</label>
-                                            <input
-                                                type="number"
-                                                value={modalData.oddsX}
-                                                onChange={(e) => handleOddsChange(e, 'oddsX')}
-                                                className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm mb-2">{modalData.away_team} Odds</label>
-                                            <input
-                                                type="number"
-                                                value={modalData.odds2}
-                                                onChange={(e) => handleOddsChange(e, 'odds2')}
-                                                className="w-full bg-slate-700 text-white px-3 py-2 rounded-md"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {modalData.odds1 && modalData.oddsX && modalData.odds2 && (
-                                        <div>
-                                            <h3 className="text-xl font-semibold mb-4">Calculation Results</h3>
-
-                                            {/* Example calculation display */}
-                                            <div className="bg-slate-700 p-4 rounded-md">
-                                                <p>Total Bet: {TotalBetting(
-                                                    betAmount,
-                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2
-                                                )}</p>
-                                                <p>Potential Profit: {calculateProfit(
-                                                    betAmount,
-                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                                                    calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                                                    modalData.odds1
-                                                )}</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="flex justify-end space-x-2 mt-6">
-                                        <button
-                                            onClick={closeModal}
-                                            className="bg-slate-700 text-white px-4 py-2 rounded-md"
-                                        >
-                                            Close
-                                        </button>
-                                    </div>
-                                </ReactModal>
-                            )}
-
-
-                            {/* Pagination */}
-                            <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                                <div className="text-sm text-slate-400">
-                                    Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={currentPage === 1}
-                                        onClick={() => setCurrentPage(1)}
-                                    >
-                                        First
-                                    </button>
-                                    <button
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={currentPage === 1}
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                    >
-                                        Previous
-                                    </button>
-
-                                    <div className="flex items-center gap-2">
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                            .filter(pageNum => {
-                                                return (
-                                                    pageNum === 1 ||
-                                                    pageNum === totalPages ||
-                                                    Math.abs(pageNum - currentPage) <= 1
-                                                );
-                                            })
-                                            .map((pageNum, index, array) => (
-                                                <React.Fragment key={pageNum}>
-                                                    {index > 0 && array[index - 1] !== pageNum - 1 && (
-                                                        <span className="text-slate-400">...</span>
-                                                    )}
-                                                    <button
-                                                        className={`px-4 py-2 rounded-lg ${pageNum === currentPage
-                                                            ? 'bg-purple-500'
-                                                            : 'bg-slate-700 hover:bg-slate-600'
-                                                            }`}
-                                                        onClick={() => setCurrentPage(pageNum)}
-                                                    >
-                                                        {pageNum}
-                                                    </button>
-                                                </React.Fragment>
-                                            ))}
-                                    </div>
-
-                                    <button
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={currentPage === totalPages}
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                    >
-                                        Next
-                                    </button>
-                                    <button
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={currentPage === totalPages}
-                                        onClick={() => setCurrentPage(totalPages)}
-                                    >
-                                        Last
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-slate-800 rounded-lg p-8 text-center text-slate-400">
-                            No odds available.
-                        </div>
-                    )}
-                </div>
-            </div>
+    // Definizione delle colonne per Tripla Puntata
+  const triplaPuntataColumns = [
+    {
+      header: "Date",
+      accessor: "commence_time",
+      render: (game) => (
+        <span className="text-sm text-secondary-300">{formatDate(game.commence_time)}</span>
+      )
+    },
+    {
+      header: "Match",
+      accessor: "home_team",
+      render: (game) => (
+        <div className="flex flex-col">
+          <span className="text-sm text-secondary-400">{getLeagueName(game.league)}</span>
+          <span className="font-medium">{game.home_team} vs {game.away_team}</span>
         </div>
-    );
+      )
+    },
+    {
+      header: "Bookmakers",
+      accessor: "bestCombination.bookmakers",
+      render: (game) => (
+        <div className="flex flex-col">
+          <span className="text-xs text-secondary-400">Best Combination:</span>
+          <div className="flex flex-wrap gap-1">
+            {game.bestCombination.bookmakers.map((bookmaker, bIndex) => (
+              <span
+                key={bIndex}
+                className="bg-secondary-700 text-xs px-2 py-1 rounded"
+              >
+                {bookmaker}
+              </span>
+            ))}
+          </div>
+        </div>
+      )
+    },
+    {
+      header: "Odds",
+      accessor: "bestCombination",
+      render: (game) => (
+        <div className="flex space-x-2">
+          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded">
+            1: {game.bestCombination.bestOdds1.toFixed(2)}
+          </span>
+          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded">
+            X: {game.bestCombination.bestOddsX.toFixed(2)}
+          </span>
+          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded">
+            2: {game.bestCombination.bestOdds2.toFixed(2)}
+          </span>
+        </div>
+      )
+    },
+    {
+      header: "Actions",
+      accessor: "",
+      render: (game) => (
+        <button
+          className="bg-primary-600 hover:bg-primary-700 text-white text-sm px-3 py-2 rounded transition-colors"
+          onClick={() => openModal({
+            ...game,
+            bestCombination: game.bestCombination
+          })}
+        >
+          Calculate
+        </button>
+      )
+    },
+    {
+      header: "Rating",
+      accessor: "bestCombination.rating",
+      render: (game) => (
+        <span className="text-sm text-secondary-300">
+          {game.bestCombination.rating.toFixed(2)}
+        </span>
+      )
+    }
+  ];
+
+    //MAIN PAGE//
+  return (
+    <div className="min-h-screen bg-secondary-950 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-primary-500 mb-4">TRIPLA PUNTATA</h2>
+
+          {/* Filters Section */}
+          <div className="bg-secondary-900 rounded-lg p-4 mb-6 shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <DateRangeFilter
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+              />
+              <RatingRangeFilter
+                ratingRange={ratingRange}
+                setRatingRange={setRatingRange}
+              />
+              <OddsRangeFilter 
+                oddsRange={oddsRange}
+                setOddsRange={setOddsRange}
+              />
+              <BookmakersFilter
+                selectedBookmakers={selectedBookmakers}
+                setSelectedBookmakers={setSelectedBookmakers}
+                bookmakerMapping={bookmakerMapping}
+                bookmakerOptions={bookmakerOptions}
+              />
+            </div>
+            <div className="mt-4">
+              <SearchFilter />
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
+              {error}
+            </div>
+          )}
+
+          {/* Utilizzo del componente Table */}
+          <Table 
+            columns={triplaPuntataColumns}
+            data={getCurrentPageOdds()}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredOdds.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            setCurrentPage={setCurrentPage}
+            emptyMessage="No odds available."
+          />
+        </div>
+        
+        {/* Modal */}
+        {modalData && (
+          <ReactModal
+            isOpen={modalIsOpen}
+            onRequestClose={closeModal}
+            className="modal bg-secondary-900 text-white rounded-lg p-6 max-w-md mx-auto mt-20 shadow-xl"
+            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+          >
+            <h2 className="text-2xl font-bold mb-4 text-primary-300">{modalData.home_team} vs {modalData.away_team}</h2>
+
+            <div className="mb-4">
+              <label className="block text-sm mb-2 text-secondary-300">Bet Amount</label>
+              <input
+                type="number"
+                value={betAmount}
+                onChange={handleAmountChange}
+                className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm mb-2 text-secondary-300">{modalData.home_team} Odds</label>
+                <input
+                  type="number"
+                  value={modalData.odds1}
+                  onChange={(e) => handleOddsChange(e, 'odds1')}
+                  className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2 text-secondary-300">Draw Odds</label>
+                <input
+                  type="number"
+                  value={modalData.oddsX}
+                  onChange={(e) => handleOddsChange(e, 'oddsX')}
+                  className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2 text-secondary-300">{modalData.away_team} Odds</label>
+                <input
+                  type="number"
+                  value={modalData.odds2}
+                  onChange={(e) => handleOddsChange(e, 'odds2')}
+                  className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                />
+              </div>
+            </div>
+
+            {modalData.odds1 && modalData.oddsX && modalData.odds2 && (
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-primary-400">Calculation Results</h3>
+
+                {/* Example calculation display */}
+                <div className="bg-secondary-800 p-4 rounded-md border border-secondary-700">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-secondary-400 text-sm">Total Bet:</p>
+                      <p className="text-lg font-medium">{TotalBetting(
+                        betAmount,
+                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2
+                      )}</p>
+                    </div>
+                    <div>
+                      <p className="text-secondary-400 text-sm">Potential Profit:</p>
+                      <p className="text-lg font-medium text-emerald-400">{calculateProfit(
+                        betAmount,
+                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
+                        modalData.odds1
+                      )}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-secondary-700">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <p className="text-secondary-400 text-sm">Home ({modalData.home_team}):</p>
+                        <p className="text-primary-300">{betAmount}€</p>
+                      </div>
+                      <div>
+                        <p className="text-secondary-400 text-sm">Draw:</p>
+                        <p className="text-primary-300">{calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)}€</p>
+                      </div>
+                      <div>
+                        <p className="text-secondary-400 text-sm">Away ({modalData.away_team}):</p>
+                        <p className="text-primary-300">{calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)}€</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={closeModal}
+                className="bg-secondary-800 hover:bg-secondary-700 text-white px-4 py-2 rounded transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  // Funzione per salvare o copiare i dati
+                  // Implementare qui
+                  closeModal();
+                }}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </ReactModal>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default OddsList;

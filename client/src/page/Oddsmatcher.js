@@ -8,6 +8,7 @@ import DateRangeFilter from '../components/filters/DateRangeFilter';
 import RatingRangeFilter from '../components/filters/RatingRangeFilter';
 import OddsRangeFilter from '../components/filters/OddsRangeFilter';
 import BookmakersFilter from '../components/filters/BookmakersFilter';
+import Table from '../components/Table';
 
 // VARIABILI
 const bookmakerMapping = {
@@ -478,40 +479,119 @@ const OddsList = () => {
     setTotalPages(Math.ceil(filteredOdds.length / ITEMS_PER_PAGE));
   }, [filteredOdds]);
 
+  
+  // Definizione delle colonne per OddsMatcher
+  const oddsMatcherColumns = [
+    {
+      header: "Data e Ora",
+      accessor: "commence_time",
+      render: (game) => formatDate(game.commence_time)
+    },
+    {
+      header: "Partita",
+      accessor: "home_team",
+      render: (game) => (
+        <div className="flex flex-col">
+          <span className="text-sm text-secondary-400">{getLeagueName(game.league)}</span>
+          <span className="font-medium">{game.home_team} vs {game.away_team}</span>
+        </div>
+      )
+    },
+    {
+      header: "Tipo",
+      accessor: "selectedOutcome.type"
+    },
+    {
+      header: "Rating",
+      accessor: "selectedOutcome.rating",
+      render: (game) => (
+        <span className="text-primary-400">{game.selectedOutcome.rating.toFixed(2)}%</span>
+      )
+    },
+    {
+      header: "Calcolatore",
+      accessor: "",
+      render: (game) => (
+        <button
+          onClick={() => {
+            const market = game.bookmakers
+              .find(b => b.title === game.selectedOutcome.bookmaker)
+              ?.markets.find(m => m.key === 'h2h');
+            const outcome = market?.outcomes[
+              game.selectedOutcome.type === '1' ? 0 :
+                game.selectedOutcome.type === '2' ? 1 : 2
+            ];
+            if (market && outcome) {
+              openArbitrageModal(game, market, outcome,
+                game.selectedOutcome.type === '1' ? 0 :
+                  game.selectedOutcome.type === '2' ? 1 : 2
+              );
+            }
+          }}
+          className="bg-primary-600 hover:bg-primary-700 px-4 py-2 rounded text-sm transition-colors"
+        >
+          Calcola
+        </button>
+      )
+    },
+    {
+      header: "Bookmaker",
+      accessor: "selectedOutcome.bookmaker"
+    },
+    {
+      header: "Quota",
+      accessor: "selectedOutcome.odds",
+      render: (game) => (
+        <span className="text-emerald-400">{game.selectedOutcome.odds}</span>
+      )
+    },
+    {
+      header: "Exchange",
+      accessor: "",
+      render: () => "Betfair"
+    },
+    {
+      header: "Quota Exchange",
+      accessor: "selectedOutcome.betfairOdds",
+      render: (game) => (
+        <span className="text-primary-300">{game.selectedOutcome.betfairOdds}</span>
+      )
+    }
+  ];
+
   //MAIN PAGE//
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="min-h-screen bg-secondary-950 text-white p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-purple-400 mb-4">ODDSMATCHER</h2>
+          <h2 className="text-3xl font-bold text-primary-500 mb-4">ODDSMATCHER</h2>
 
           {/* Filters Section */}
-          <div className="bg-slate-800 rounded-lg p-4 mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <DateRangeFilter
-                                dateRange={dateRange}
-                                setDateRange={setDateRange}
-                            />
-                            <RatingRangeFilter
-                                ratingRange={ratingRange}
-                                setRatingRange={setRatingRange}
-                            />
-                            <OddsRangeFilter 
-                               oddsRange={oddsRange}
-                               setOddsRange={setOddsRange}
-                            />
-                            <BookmakersFilter
-                                selectedBookmakers={selectedBookmakers}
-                                setSelectedBookmakers={setSelectedBookmakers}
-                                bookmakerMapping={bookmakerMapping}
-                                bookmakerOptions={bookmakerOptions}
-                            />
-                        </div>
-                        <div className="mt-4">
-                            <SearchFilter />
-                        </div>
-                    </div>
+          <div className="bg-secondary-900 rounded-lg p-4 mb-6 shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <DateRangeFilter
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+              />
+              <RatingRangeFilter
+                ratingRange={ratingRange}
+                setRatingRange={setRatingRange}
+              />
+              <OddsRangeFilter 
+                oddsRange={oddsRange}
+                setOddsRange={setOddsRange}
+              />
+              <BookmakersFilter
+                selectedBookmakers={selectedBookmakers}
+                setSelectedBookmakers={setSelectedBookmakers}
+                bookmakerMapping={bookmakerMapping}
+                bookmakerOptions={bookmakerOptions}
+              />
+            </div>
+            <div className="mt-4">
+              <SearchFilter />
+            </div>
+          </div>
 
           {/* Error Message */}
           {error && (
@@ -520,138 +600,17 @@ const OddsList = () => {
             </div>
           )}
 
-          {/* Odds Table */}
-          {filteredOdds.length > 0 ? (
-            <div className="bg-slate-800 rounded-lg p-4">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-700">
-                    <tr>
-                      <th className="p-4 text-left text-sm text-slate-400">Data e Ora</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Partita</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Tipo</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Rating</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Calcolatore</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Bookmaker</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Quota</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Exchange</th>
-                      <th className="p-4 text-left text-sm text-slate-400">Quota Exchange</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-700">
-                    {getCurrentPageOdds().map((game, index) => (
-                      <tr key={index} className="hover:bg-slate-700/50">
-                        <td className="p-4">{formatDate(game.commence_time)}</td>
-                        <td className="p-4">
-                          <div className="flex flex-col">
-                            <span className="text-sm text-slate-400">{getLeagueName(game.league)}</span>
-                            <span className="font-medium">{game.home_team} vs {game.away_team}</span>
-                          </div>
-                        </td>
-                        <td className="p-4">{game.selectedOutcome.type}</td>
-                        <td className="p-4 text-cyan-400">{game.selectedOutcome.rating.toFixed(2)}%</td>
-                        <td className="p-4">
-                          <button
-                            onClick={() => {
-                              const market = game.bookmakers
-                                .find(b => b.title === game.selectedOutcome.bookmaker)
-                                ?.markets.find(m => m.key === 'h2h');
-                              const outcome = market?.outcomes[
-                                game.selectedOutcome.type === '1' ? 0 :
-                                  game.selectedOutcome.type === '2' ? 1 : 2
-                              ];
-                              if (market && outcome) {
-                                openArbitrageModal(game, market, outcome,
-                                  game.selectedOutcome.type === '1' ? 0 :
-                                    game.selectedOutcome.type === '2' ? 1 : 2
-                                );
-                              }
-                            }}
-                            className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg text-sm"
-                          >
-                            Calcola
-                          </button>
-                        </td>
-                        <td className="p-4">{game.selectedOutcome.bookmaker}</td>
-                        <td className="p-4 text-green-400">{game.selectedOutcome.odds}</td>
-                        <td className="p-4">Betfair</td>
-                        <td className="p-4 text-pink-400">{game.selectedOutcome.betfairOdds}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="text-sm text-slate-400">
-                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOdds.length)} of {filteredOdds.length} matches
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(1)}
-                  >
-                    First
-                  </button>
-                  <button
-                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  >
-                    Previous
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter(pageNum => {
-                        return (
-                          pageNum === 1 ||
-                          pageNum === totalPages ||
-                          Math.abs(pageNum - currentPage) <= 1
-                        );
-                      })
-                      .map((pageNum, index, array) => (
-                        <React.Fragment key={pageNum}>
-                          {index > 0 && array[index - 1] !== pageNum - 1 && (
-                            <span className="text-slate-400">...</span>
-                          )}
-                          <button
-                            className={`px-4 py-2 rounded-lg ${pageNum === currentPage
-                              ? 'bg-purple-500'
-                              : 'bg-slate-700 hover:bg-slate-600'
-                              }`}
-                            onClick={() => setCurrentPage(pageNum)}
-                          >
-                            {pageNum}
-                          </button>
-                        </React.Fragment>
-                      ))}
-                  </div>
-
-                  <button
-                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  >
-                    Next
-                  </button>
-                  <button
-                    className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(totalPages)}
-                  >
-                    Last
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-slate-800 rounded-lg p-8 text-center text-slate-400">
-              No odds available.
-            </div>
-          )}
+          {/* Utilizzo del componente Table */}
+          <Table 
+            columns={oddsMatcherColumns}
+            data={getCurrentPageOdds()}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredOdds.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            setCurrentPage={setCurrentPage}
+            emptyMessage="No odds available."
+          />
         </div>
 
         {/* Arbitrage Modal */}

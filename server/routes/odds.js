@@ -97,10 +97,10 @@ router.get('/sports', async (req, res) => {
 router.get('/major-leagues', async (req, res) => {
   const majorLeagues = [
     'soccer_italy_serie_a',
-    'soccer_germany_bundesliga',
-    'soccer_france_ligue_one',
-    'soccer_epl',
-    'soccer_spain_la_liga'
+    //'soccer_germany_bundesliga',
+    //'soccer_france_ligue_one',
+    //'soccer_epl',
+    //'soccer_spain_la_liga'
   ];
 
   try {

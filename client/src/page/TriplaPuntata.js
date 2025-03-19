@@ -3,12 +3,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactModal from 'react-modal';
 import axios from 'axios';
 import API_BASE_URL from '../config'; // Importa l'URL di base
-import {Search, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import DateRangeFilter from '../components/filters/DateRangeFilter';
 import RatingRangeFilter from '../components/filters/RatingRangeFilter';
 import OddsRangeFilter from '../components/filters/OddsRangeFilter';
-import BookmakersFilter from '../components/filters/BookmakersFilterbase';
+import BookmakersFilter from '../components/filters/BookmakersFilter';
 import Table from '../components/Table';
+import SearchFilter from '../components/filters/SearchFilter';
 
 const bookmakerMapping = {
     'Unibet': 'unibet',
@@ -84,7 +85,7 @@ const OddsList = () => {
                 odds1: game.bestCombination.bestOdds1,
                 oddsX: game.bestCombination.bestOddsX,
                 odds2: game.bestCombination.bestOdds2,
-                bookmakers: game.bestCombination.bookmakers
+                bookmakers: game.bestCombination.bookmakers // Ora è un array di oggetti con type, bookmaker e odds
             });
             setModalIsOpen(true);
         }
@@ -122,16 +123,16 @@ const OddsList = () => {
                 market: bookmaker.markets.find(market => market.key === 'h2h')
             }))
             .filter(item => item.market && item.market.outcomes.length === 3);
-
+    
         let bestCombination = null;
         let maxRating = 0;
-
+    
         // Exact rating calculation you specified
         const calculateRating = (profit, totalbet) => {
             const rating = (100 * 100) + (profit / totalbet) * (100 * 100);
             return (rating / 100);
         };
-
+    
         // Compare all possible combinations of bookmakers
         for (let i = 0; i < h2hMarkets.length; i++) {
             for (let j = i + 1; j < h2hMarkets.length; j++) {
@@ -139,38 +140,79 @@ const OddsList = () => {
                     const market1 = h2hMarkets[i].market.outcomes;
                     const market2 = h2hMarkets[j].market.outcomes;
                     const market3 = h2hMarkets[k].market.outcomes;
-
-                    const odds1 = [
-                        market1[0].price,
-                        market2[0].price,
-                        market3[0].price
+    
+                    // IMPORTANTE: Correggiamo l'ordine degli outcomes
+                    // Poiché sembra che l'API restituisca gli outcomes in un ordine diverso da quello che ci aspettiamo
+                    // Assumiamo che per ogni market outcomes, abbiamo:
+                    // - outcomes che ha "name" = "Home" o contiene il nome della squadra di casa è la quota 1
+                    // - outcomes che ha "name" = "Draw" è la quota X
+                    // - outcomes che ha "name" = "Away" o contiene il nome della squadra ospite è la quota 2
+                    
+                    // Per ogni mercato, troviamo le quote corrette
+                    const findOutcomeByType = (market, type) => {
+                        if (type === 'home' || type === '1') {
+                            return market.find(o => o.name === "Home" || o.name === game.home_team) || market[0];
+                        } else if (type === 'draw' || type === 'X') {
+                            return market.find(o => o.name === "Draw") || market[1];
+                        } else if (type === 'away' || type === '2') {
+                            return market.find(o => o.name === "Away" || o.name === game.away_team) || market[2];
+                        }
+                        return null;
+                    };
+                    
+                    // Mercato 1
+                    const odds1Home = findOutcomeByType(market1, 'home').price;
+                    const odds1Draw = findOutcomeByType(market1, 'draw').price;
+                    const odds1Away = findOutcomeByType(market1, 'away').price;
+                    
+                    // Mercato 2
+                    const odds2Home = findOutcomeByType(market2, 'home').price;
+                    const odds2Draw = findOutcomeByType(market2, 'draw').price;
+                    const odds2Away = findOutcomeByType(market2, 'away').price;
+                    
+                    // Mercato 3
+                    const odds3Home = findOutcomeByType(market3, 'home').price;
+                    const odds3Draw = findOutcomeByType(market3, 'draw').price;
+                    const odds3Away = findOutcomeByType(market3, 'away').price;
+    
+                    // Troviamo il miglior bookmaker per ciascun tipo di scommessa
+                    const homeOdds = [
+                        { bookmaker: h2hMarkets[i].bookmaker, price: odds1Home },
+                        { bookmaker: h2hMarkets[j].bookmaker, price: odds2Home },
+                        { bookmaker: h2hMarkets[k].bookmaker, price: odds3Home }
                     ];
-                    const oddsX = [
-                        market1[1].price,
-                        market2[1].price,
-                        market3[1].price
+                    
+                    const drawOdds = [
+                        { bookmaker: h2hMarkets[i].bookmaker, price: odds1Draw },
+                        { bookmaker: h2hMarkets[j].bookmaker, price: odds2Draw },
+                        { bookmaker: h2hMarkets[k].bookmaker, price: odds3Draw }
                     ];
-                    const odds2 = [
-                        market1[2].price,
-                        market2[2].price,
-                        market3[2].price
+                    
+                    const awayOdds = [
+                        { bookmaker: h2hMarkets[i].bookmaker, price: odds1Away },
+                        { bookmaker: h2hMarkets[j].bookmaker, price: odds2Away },
+                        { bookmaker: h2hMarkets[k].bookmaker, price: odds3Away }
                     ];
-
-                    // Find best odds for each market
-                    const bestOdds1 = Math.max(...odds1);
-                    const bestOddsX = Math.max(...oddsX);
-                    const bestOdds2 = Math.max(...odds2);
-
+    
+                    // Ordiniamo per price in ordine decrescente per trovare il miglior bookmaker per ciascun tipo
+                    const bestHome = homeOdds.sort((a, b) => b.price - a.price)[0];
+                    const bestDraw = drawOdds.sort((a, b) => b.price - a.price)[0];
+                    const bestAway = awayOdds.sort((a, b) => b.price - a.price)[0];
+    
                     // Calculate betting strategy
                     const betAmount = 100;
+                    const bestOdds1 = bestHome.price;
+                    const bestOddsX = bestDraw.price;
+                    const bestOdds2 = bestAway.price;
+                    
                     const puntaX = (betAmount * bestOdds1) / bestOddsX;
                     const punta2 = (betAmount * bestOdds1) / bestOdds2;
                     const totalBet = betAmount + puntaX + punta2;
                     const profit = (bestOdds1 * betAmount) - totalBet;
-
+    
                     // Calculate rating using your specific formula
                     const rating = calculateRating(profit, totalBet);
-
+    
                     if (rating > maxRating) {
                         maxRating = rating;
                         bestCombination = {
@@ -178,9 +220,9 @@ const OddsList = () => {
                             bestOddsX,
                             bestOdds2,
                             bookmakers: [
-                                h2hMarkets[i].bookmaker,
-                                h2hMarkets[j].bookmaker,
-                                h2hMarkets[k].bookmaker
+                                { type: '1', bookmaker: bestHome.bookmaker, odds: bestOdds1 },
+                                { type: 'X', bookmaker: bestDraw.bookmaker, odds: bestOddsX },
+                                { type: '2', bookmaker: bestAway.bookmaker, odds: bestOdds2 }
                             ],
                             rating,
                             totalBet,
@@ -190,7 +232,7 @@ const OddsList = () => {
                 }
             }
         }
-
+    
         return bestCombination;
     };
 
@@ -264,83 +306,15 @@ const OddsList = () => {
 
     const filteredOdds = getFilteredOdds();
 
-
-
     // Funzione per ottenere tutte le partite uniche dal dataset
     const getUniqueMatches = () => {
         return Array.from(new Set(odds.map(game => `${game.home_team} vs ${game.away_team}`)));
-    };
-
-    // Componente SearchFilter
-    const SearchFilter = () => {
-        const handleSearchChange = (e) => {
-            const value = e.target.value;
-            setSearchTerm(value);
-
-            if (value.trim()) {
-                const matchSuggestions = getUniqueMatches().filter(match =>
-                    match.toLowerCase().includes(value.toLowerCase())
-                );
-                setSuggestions(matchSuggestions);
-                setShowSuggestions(true);
-            } else {
-                setSuggestions([]);
-                setShowSuggestions(false);
-            }
-        };
-
-        const handleSuggestionClick = (suggestion) => {
-            setSearchTerm(suggestion);
-            setShowSuggestions(false);
-        };
-
-        const clearSearch = () => {
-            setSearchTerm('');
-            setSuggestions([]);
-            setShowSuggestions(false);
-        };
-
-        return (
-            <div className="search-filter">
-                <h3>Search Matches!</h3>
-                <div className="search-input-container">
-                    <Search className="search-icon" size={20} />
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        placeholder="Search for matches..."
-                        className="search-input"
-                    />
-                    {searchTerm && (
-                        <button className="clear-search-btn" onClick={clearSearch}>
-                            <X size={20} />
-                        </button>
-                    )}
-                </div>
-
-                {showSuggestions && suggestions.length > 0 && (
-                    <div className="suggestions-container">
-                        {suggestions.map((suggestion, index) => (
-                            <div
-                                key={index}
-                                className="suggestion-item"
-                                onClick={() => handleSuggestionClick(suggestion)}
-                            >
-                                {suggestion}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
     };
 
     const getCurrentPageOdds = () => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         return filteredOdds.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     };
-
 
     const formatDate = (isoDate) => {
         const date = new Date(isoDate);
@@ -396,259 +370,279 @@ const OddsList = () => {
     }, [filteredOdds]);
 
     // Definizione delle colonne per Tripla Puntata
-  const triplaPuntataColumns = [
-    {
-      header: "Date",
-      accessor: "commence_time",
-      render: (game) => (
-        <span className="text-sm text-secondary-300">{formatDate(game.commence_time)}</span>
-      )
-    },
-    {
-      header: "Match",
-      accessor: "home_team",
-      render: (game) => (
-        <div className="flex flex-col">
-          <span className="text-sm text-secondary-400">{getLeagueName(game.league)}</span>
-          <span className="font-medium">{game.home_team} vs {game.away_team}</span>
-        </div>
-      )
-    },
-    {
-      header: "Bookmakers",
-      accessor: "bestCombination.bookmakers",
-      render: (game) => (
-        <div className="flex flex-col">
-          <span className="text-xs text-secondary-400">Best Combination:</span>
-          <div className="flex flex-wrap gap-1">
-            {game.bestCombination.bookmakers.map((bookmaker, bIndex) => (
-              <span
-                key={bIndex}
-                className="bg-secondary-700 text-xs px-2 py-1 rounded"
-              >
-                {bookmaker}
-              </span>
-            ))}
-          </div>
-        </div>
-      )
-    },
-    {
-      header: "Odds",
-      accessor: "bestCombination",
-      render: (game) => (
-        <div className="flex space-x-2">
-          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded">
-            1: {game.bestCombination.bestOdds1.toFixed(2)}
-          </span>
-          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded">
-            X: {game.bestCombination.bestOddsX.toFixed(2)}
-          </span>
-          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded">
-            2: {game.bestCombination.bestOdds2.toFixed(2)}
-          </span>
-        </div>
-      )
-    },
-    {
-      header: "Actions",
-      accessor: "",
-      render: (game) => (
-        <button
-          className="bg-primary-600 hover:bg-primary-700 text-white text-sm px-3 py-2 rounded transition-colors"
-          onClick={() => openModal({
-            ...game,
-            bestCombination: game.bestCombination
-          })}
-        >
-          Calculate
-        </button>
-      )
-    },
-    {
-      header: "Rating",
-      accessor: "bestCombination.rating",
-      render: (game) => (
-        <span className="text-sm text-secondary-300">
-          {game.bestCombination.rating.toFixed(2)}
-        </span>
-      )
-    }
-  ];
+    const triplaPuntataColumns = [
+        {
+            header: "Date",
+            accessor: "commence_time",
+            render: (game) => (
+                <span className="text-sm text-secondary-300">{formatDate(game.commence_time)}</span>
+            )
+        },
+        {
+            header: "Match",
+            accessor: "home_team",
+            render: (game) => (
+                <div className="flex flex-col">
+                    <span className="text-sm text-secondary-400">{getLeagueName(game.league)}</span>
+                    <span className="font-medium">{game.home_team} vs {game.away_team}</span>
+                </div>
+            )
+        },
+        {
+            header: "Bookmakers",
+            accessor: "bestCombination.bookmakers",
+            render: (game) => (
+                <div className="flex flex-col">
+                    <span className="text-xs text-secondary-400">Best Combination:</span>
+                    <div className="flex flex-col gap-1">
+                        {game.bestCombination.bookmakers.map((item, bIndex) => (
+                            <div key={bIndex} className="flex items-center gap-2">
+                                <span className="bg-secondary-700 text-xs px-2 py-1 rounded w-6 text-center">
+                                    {item.type}
+                                </span>
+                                <span className="text-xs">
+                                    {item.bookmaker} ({item.odds.toFixed(2)})
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )
+        },
+        {
+            header: "Odds",
+            accessor: "bestCombination",
+            render: (game) => (
+                <div className="flex flex-col space-y-2">
+                    <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded flex justify-between">
+                        <span>1:</span> <span>{game.bestCombination.bestOdds1.toFixed(2)}</span>
+                    </span>
+                    <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded flex justify-between">
+                        <span>X:</span> <span>{game.bestCombination.bestOddsX.toFixed(2)}</span>
+                    </span>
+                    <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded flex justify-between">
+                        <span>2:</span> <span>{game.bestCombination.bestOdds2.toFixed(2)}</span>
+                    </span>
+                </div>
+            )
+        },
+        {
+            header: "Actions",
+            accessor: "",
+            render: (game) => (
+                <button
+                    className="bg-primary-600 hover:bg-primary-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                    onClick={() => openModal({
+                        ...game,
+                        bestCombination: game.bestCombination
+                    })}
+                >
+                    Calculate
+                </button>
+            )
+        },
+        {
+            header: "Rating",
+            accessor: "bestCombination.rating",
+            render: (game) => (
+                <span className="text-sm text-secondary-300">
+                    {game.bestCombination.rating.toFixed(2)}
+                </span>
+            )
+        }
+    ];
 
     //MAIN PAGE//
-  return (
-    <div className="min-h-screen bg-secondary-950 text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-primary-500 mb-4">TRIPLA PUNTATA</h2>
+    return (
+        <div className="min-h-screen bg-secondary-950 text-white p-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="mb-6">
+                    <h2 className="text-3xl font-bold text-primary-500 mb-4">TRIPLA PUNTATA</h2>
 
-          {/* Filters Section */}
-          <div className="bg-secondary-900 rounded-lg p-4 mb-6 shadow-lg">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <DateRangeFilter
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-              />
-              <RatingRangeFilter
-                ratingRange={ratingRange}
-                setRatingRange={setRatingRange}
-              />
-              <OddsRangeFilter 
-                oddsRange={oddsRange}
-                setOddsRange={setOddsRange}
-              />
-              <BookmakersFilter
-                selectedBookmakers={selectedBookmakers}
-                setSelectedBookmakers={setSelectedBookmakers}
-                bookmakerMapping={bookmakerMapping}
-                bookmakerOptions={bookmakerOptions}
-              />
-            </div>
-            <div className="mt-4">
-              <SearchFilter />
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
-              {error}
-            </div>
-          )}
-
-          {/* Utilizzo del componente Table */}
-          <Table 
-            columns={triplaPuntataColumns}
-            data={getCurrentPageOdds()}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredOdds.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-            setCurrentPage={setCurrentPage}
-            emptyMessage="No odds available."
-          />
-        </div>
-        
-        {/* Modal */}
-        {modalData && (
-          <ReactModal
-            isOpen={modalIsOpen}
-            onRequestClose={closeModal}
-            className="modal bg-secondary-900 text-white rounded-lg p-6 max-w-md mx-auto mt-20 shadow-xl"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-          >
-            <h2 className="text-2xl font-bold mb-4 text-primary-300">{modalData.home_team} vs {modalData.away_team}</h2>
-
-            <div className="mb-4">
-              <label className="block text-sm mb-2 text-secondary-300">Bet Amount</label>
-              <input
-                type="number"
-                value={betAmount}
-                onChange={handleAmountChange}
-                className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-sm mb-2 text-secondary-300">{modalData.home_team} Odds</label>
-                <input
-                  type="number"
-                  value={modalData.odds1}
-                  onChange={(e) => handleOddsChange(e, 'odds1')}
-                  className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-2 text-secondary-300">Draw Odds</label>
-                <input
-                  type="number"
-                  value={modalData.oddsX}
-                  onChange={(e) => handleOddsChange(e, 'oddsX')}
-                  className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-2 text-secondary-300">{modalData.away_team} Odds</label>
-                <input
-                  type="number"
-                  value={modalData.odds2}
-                  onChange={(e) => handleOddsChange(e, 'odds2')}
-                  className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
-                />
-              </div>
-            </div>
-
-            {modalData.odds1 && modalData.oddsX && modalData.odds2 && (
-              <div>
-                <h3 className="text-xl font-semibold mb-4 text-primary-400">Calculation Results</h3>
-
-                {/* Example calculation display */}
-                <div className="bg-secondary-800 p-4 rounded-md border border-secondary-700">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-secondary-400 text-sm">Total Bet:</p>
-                      <p className="text-lg font-medium">{TotalBetting(
-                        betAmount,
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2
-                      )}</p>
+                    {/* Filters Section */}
+                    <div className="bg-secondary-900 rounded-lg p-4 mb-6 shadow-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <DateRangeFilter
+                                dateRange={dateRange}
+                                setDateRange={setDateRange}
+                            />
+                            <RatingRangeFilter
+                                ratingRange={ratingRange}
+                                setRatingRange={setRatingRange}
+                            />
+                            <OddsRangeFilter
+                                oddsRange={oddsRange}
+                                setOddsRange={setOddsRange}
+                            />
+                            <BookmakersFilter
+                                selectedBookmakers={selectedBookmakers}
+                                setSelectedBookmakers={setSelectedBookmakers}
+                                bookmakerMapping={bookmakerMapping}
+                                bookmakerOptions={bookmakerOptions}
+                            />
+                        </div>
+                        <div className="mt-4">
+                            <SearchFilter
+                                searchTerm={searchTerm}
+                                setSearchTerm={setSearchTerm}
+                                suggestions={getUniqueMatches()}
+                                setSuggestions={setSuggestions}
+                                showSuggestions={showSuggestions}
+                                setShowSuggestions={setShowSuggestions}
+                            />
+                        </div>
                     </div>
-                    <div>
-                      <p className="text-secondary-400 text-sm">Potential Profit:</p>
-                      <p className="text-lg font-medium text-emerald-400">{calculateProfit(
-                        betAmount,
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
-                        calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
-                        modalData.odds1
-                      )}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-secondary-700">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <p className="text-secondary-400 text-sm">Home ({modalData.home_team}):</p>
-                        <p className="text-primary-300">{betAmount}€</p>
-                      </div>
-                      <div>
-                        <p className="text-secondary-400 text-sm">Draw:</p>
-                        <p className="text-primary-300">{calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)}€</p>
-                      </div>
-                      <div>
-                        <p className="text-secondary-400 text-sm">Away ({modalData.away_team}):</p>
-                        <p className="text-primary-300">{calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)}€</p>
-                      </div>
-                    </div>
-                  </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Utilizzo del componente Table */}
+                    <Table
+                        columns={triplaPuntataColumns}
+                        data={getCurrentPageOdds()}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredOdds.length}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        setCurrentPage={setCurrentPage}
+                        emptyMessage="No odds available."
+                    />
                 </div>
-              </div>
-            )}
 
-            <div className="flex justify-end space-x-2 mt-6">
-              <button
-                onClick={closeModal}
-                className="bg-secondary-800 hover:bg-secondary-700 text-white px-4 py-2 rounded transition-colors"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  // Funzione per salvare o copiare i dati
-                  // Implementare qui
-                  closeModal();
-                }}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded transition-colors"
-              >
-                Save
-              </button>
+                {/* Modal */}
+                {modalData && (
+                    <ReactModal
+                        isOpen={modalIsOpen}
+                        onRequestClose={closeModal}
+                        className="modal bg-secondary-900 text-white rounded-lg p-6 max-w-md mx-auto mt-20 shadow-xl"
+                        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                    >
+                        <h2 className="text-2xl font-bold mb-4 text-primary-300">{modalData.home_team} vs {modalData.away_team}</h2>
+
+                        <div className="mb-4">
+                            <label className="block text-sm mb-2 text-secondary-300">Bet Amount</label>
+                            <input
+                                type="number"
+                                value={betAmount}
+                                onChange={handleAmountChange}
+                                className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label className="block text-sm mb-2 text-secondary-300">{modalData.home_team} Odds</label>
+                                <input
+                                    type="number"
+                                    value={modalData.odds1}
+                                    onChange={(e) => handleOddsChange(e, 'odds1')}
+                                    className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm mb-2 text-secondary-300">Draw Odds</label>
+                                <input
+                                    type="number"
+                                    value={modalData.oddsX}
+                                    onChange={(e) => handleOddsChange(e, 'oddsX')}
+                                    className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm mb-2 text-secondary-300">{modalData.away_team} Odds</label>
+                                <input
+                                    type="number"
+                                    value={modalData.odds2}
+                                    onChange={(e) => handleOddsChange(e, 'odds2')}
+                                    className="w-full bg-secondary-800 text-white px-3 py-2 rounded border border-secondary-700 focus:outline-none focus:border-primary-500"
+                                />
+                            </div>
+                        </div>
+
+                        {modalData.odds1 && modalData.oddsX && modalData.odds2 && (
+                            <div>
+                                <h3 className="text-xl font-semibold mb-4 text-primary-400">Calculation Results</h3>
+
+                                {/* Example calculation display */}
+                                <div className="bg-secondary-800 p-4 rounded-md border border-secondary-700">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-secondary-400 text-sm">Total Bet:</p>
+                                            <p className="text-lg font-medium">{TotalBetting(
+                                                betAmount,
+                                                calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                                                calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2
+                                            )}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-secondary-400 text-sm">Potential Profit:</p>
+                                            <p className="text-lg font-medium text-emerald-400">{calculateProfit(
+                                                betAmount,
+                                                calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX,
+                                                calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2,
+                                                modalData.odds1
+                                            )}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 pt-4 border-t border-secondary-700">
+                                        <h4 className="text-sm font-medium mb-2 text-secondary-300">Bookmaker Details:</h4>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {modalData.bookmakers.map((item, index) => (
+                                                <div key={index}>
+                                                    <p className="text-secondary-400 text-sm">{item.type}: {item.bookmaker}</p>
+                                                    <p className="text-primary-300">{item.odds.toFixed(2)}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="mt-4">
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <p className="text-secondary-400 text-sm">Home ({modalData.home_team}):</p>
+                                                    <p className="text-primary-300">{betAmount}€</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-secondary-400 text-sm">Draw:</p>
+                                                    <p className="text-primary-300">{calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).puntaX.toFixed(2)}€</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-secondary-400 text-sm">Away ({modalData.away_team}):</p>
+                                                    <p className="text-primary-300">{calculatePunta(modalData.odds1, modalData.oddsX, modalData.odds2).punta2.toFixed(2)}€</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end space-x-2 mt-6">
+                            <button
+                                onClick={closeModal}
+                                className="bg-secondary-800 hover:bg-secondary-700 text-white px-4 py-2 rounded transition-colors"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={() => {
+                                    // Funzione per salvare o copiare i dati
+                                    // Implementare qui
+                                    closeModal();
+                                }}
+                                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded transition-colors"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </ReactModal>
+                )}
             </div>
-          </ReactModal>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default OddsList;

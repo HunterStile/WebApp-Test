@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Building2, X, ChevronDown } from 'lucide-react';
 
 const BookmakersFilter = ({
     selectedBookmakers,
@@ -7,187 +7,83 @@ const BookmakersFilter = ({
     bookmakerMapping,
     bookmakerOptions
 }) => {
-    const [isBookmakersOpen, setIsBookmakersOpen] = useState(false);
-    const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
-    // Separa i bookmaker tra normali ed exchange
-    const exchangeOptions = bookmakerOptions.filter(book =>
-        book.toLowerCase().includes('betfair')
-    );
-    const regularBookmakers = bookmakerOptions.filter(book =>
-        !book.toLowerCase().includes('betfair')
-    );
-
-    // Crea mapping separati
-    const exchangeMapping = Object.fromEntries(
-        Object.entries(bookmakerMapping).filter(([key]) =>
-            key.toLowerCase().includes('betfair')
-        )
-    );
-    const regularMapping = Object.fromEntries(
-        Object.entries(bookmakerMapping).filter(([key]) =>
-            !key.toLowerCase().includes('betfair')
-        )
-    );
-
-    // Filtra le selezioni correnti
-    const selectedExchange = selectedBookmakers.filter(book =>
-        Object.values(exchangeMapping).includes(book)
-    );
-    const selectedRegular = selectedBookmakers.filter(book =>
-        Object.values(regularMapping).includes(book)
-    );
-
-    const handleRegularBookmakerChange = (e) => {
-        const { value, checked } = e.target;
-        const bookmakerKey = regularMapping[value];
-        setSelectedBookmakers(prevState => {
-            if (checked) {
-                return [...prevState, bookmakerKey];
-            } else {
-                return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
+    const handleBookmakerChange = (bookmaker) => {
+        setSelectedBookmakers(prev => {
+            if (prev.includes(bookmakerMapping[bookmaker])) {
+                return prev.filter(b => b !== bookmakerMapping[bookmaker]);
             }
+            return [...prev, bookmakerMapping[bookmaker]];
         });
     };
 
-    const handleExchangeChange = (e) => {
-        const { value, checked } = e.target;
-        const bookmakerKey = exchangeMapping[value];
-        setSelectedBookmakers(prevState => {
-            if (checked) {
-                return [...prevState, bookmakerKey];
-            } else {
-                return prevState.filter(bookmaker => bookmaker !== bookmakerKey);
-            }
-        });
+    const clearBookmakers = () => {
+        setSelectedBookmakers([]);
     };
 
-    const handleSelectAllRegular = (e) => {
-        const isChecked = e.target.checked;
-        if (isChecked) {
-            setSelectedBookmakers(prev => [
-                ...prev.filter(book => Object.values(exchangeMapping).includes(book)),
-                ...Object.values(regularMapping)
-            ]);
-        } else {
-            setSelectedBookmakers(prev =>
-                prev.filter(book => Object.values(exchangeMapping).includes(book))
-            );
-        }
-    };
-
-    const handleSelectAllExchange = (e) => {
-        const isChecked = e.target.checked;
-        if (isChecked) {
-            setSelectedBookmakers(prev => [
-                ...prev.filter(book => Object.values(regularMapping).includes(book)),
-                ...Object.values(exchangeMapping)
-            ]);
-        } else {
-            setSelectedBookmakers(prev =>
-                prev.filter(book => Object.values(regularMapping).includes(book))
-            );
-        }
-    };
+    const selectedCount = selectedBookmakers.length;
+    const displayText = selectedCount > 0 
+        ? `${selectedCount} bookmaker${selectedCount !== 1 ? 's' : ''} selected`
+        : 'Select bookmakers';
 
     return (
-        <div className="w-full">
-            <h3 className="text-sm text-slate-400 mb-2">Filter by Bookmakers</h3>
-            <div className="space-y-4">
-                {/* Regular Bookmakers Section */}
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-medium text-slate-300">
-                            Bookmakers ({selectedRegular.length})
-                        </h3>
-                    </div>
-
-                    <div
-                        className="w-full p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors duration-200"
-                        onClick={() => setIsBookmakersOpen(!isBookmakersOpen)}
-                    >
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    onChange={handleSelectAllRegular}
-                                    checked={selectedRegular.length === Object.values(regularMapping).length}
-                                    className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
-                                />
-                                <span className="text-sm text-slate-300">Select/Deselect All</span>
-                            </label>
-                            <ChevronDown
-                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isBookmakersOpen ? 'rotate-180' : ''
-                                    }`}
-                            />
-                        </div>
-                    </div>
-
-                    {isBookmakersOpen && (
-                        <div className="mt-2 space-y-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
-                            {regularBookmakers.map((bookmaker, index) => (
-                                <label key={index} className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        value={bookmaker}
-                                        checked={selectedBookmakers.includes(regularMapping[bookmaker])}
-                                        onChange={handleRegularBookmakerChange}
-                                        className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
-                                    />
-                                    <span className="text-sm text-slate-300">{bookmaker}</span>
-                                </label>
-                            ))}
-                        </div>
-                    )}
+        <div className="w-full bg-secondary-800 rounded-lg p-4 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                    <Building2 className="w-5 h-5 text-primary-500" />
+                    <h3 className="text-sm font-medium text-secondary-200">Bookmakers</h3>
                 </div>
-
-                {/* Exchange Section */}
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-medium text-slate-300">
-                            Exchange ({selectedExchange.length})
-                        </h3>
-                    </div>
-
-                    <div
-                        className="w-full p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors duration-200"
-                        onClick={() => setIsExchangeOpen(!isExchangeOpen)}
+                {selectedBookmakers.length > 0 && (
+                    <button
+                        onClick={clearBookmakers}
+                        className="p-1 hover:bg-secondary-700 rounded-full transition-colors"
+                        title="Clear bookmakers"
                     >
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    onChange={handleSelectAllExchange}
-                                    checked={selectedExchange.length === Object.values(exchangeMapping).length}
-                                    className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
-                                />
-                                <span className="text-sm text-slate-300">Select/Deselect All</span>
-                            </label>
-                            <ChevronDown
-                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isExchangeOpen ? 'rotate-180' : ''
-                                    }`}
-                            />
-                        </div>
-                    </div>
-
-                    {isExchangeOpen && (
-                        <div className="mt-2 space-y-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
-                            {exchangeOptions.map((bookmaker, index) => (
-                                <label key={index} className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        value={bookmaker}
-                                        checked={selectedBookmakers.includes(exchangeMapping[bookmaker])}
-                                        onChange={handleExchangeChange}
-                                        className="w-4 h-4 rounded border-slate-500 text-purple-500 focus:ring-purple-500/50 bg-slate-600"
-                                    />
-                                    <span className="text-sm text-slate-300">{bookmaker}</span>
-                                </label>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                        <X className="w-4 h-4 text-secondary-400" />
+                    </button>
+                )}
             </div>
+
+            <div className="relative">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-full bg-secondary-900 border border-secondary-700 rounded-lg px-4 py-2 text-left 
+                    text-secondary-200 flex items-center justify-between hover:bg-secondary-800 transition-colors"
+                >
+                    <span className="text-sm">{displayText}</span>
+                    <ChevronDown className={`w-4 h-4 text-secondary-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-secondary-900 border border-secondary-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <div className="p-2">
+                            {bookmakerOptions.map((bookmaker) => (
+                                <label
+                                    key={bookmaker}
+                                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-secondary-800 
+                                    transition-colors cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedBookmakers.includes(bookmakerMapping[bookmaker])}
+                                        onChange={() => handleBookmakerChange(bookmaker)}
+                                        className="w-4 h-4 rounded border-secondary-600 text-primary-500 focus:ring-primary-500 
+                                        bg-secondary-900 focus:ring-offset-secondary-900"
+                                    />
+                                    <span className="text-sm text-secondary-200">{bookmaker}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {selectedBookmakers.length === 0 && (
+                <div className="text-secondary-400 text-xs bg-secondary-700/50 border border-secondary-600 rounded-lg p-2 mt-2">
+                    Select at least one bookmaker to filter results
+                </div>
+            )}
         </div>
     );
 };

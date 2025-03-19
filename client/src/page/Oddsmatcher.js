@@ -9,6 +9,7 @@ import RatingRangeFilter from '../components/filters/RatingRangeFilter';
 import OddsRangeFilter from '../components/filters/OddsRangeFilter';
 import BookmakersFilter from '../components/filters/BookmakersFilter';
 import Table from '../components/Table';
+import SearchFilter from '../components/filters/SearchFilter';
 
 // VARIABILI
 const bookmakerMapping = {
@@ -175,17 +176,20 @@ const OddsList = () => {
 
   // APPLICAZIONE DEI FILTRI //
   const getFilteredOdds = () => {
-    if (!selectedBookmakers.length) return [];
+    let filteredGames = odds;
 
-    const allRatedOdds = odds.flatMap(game => {
-      // Applica il filtro di ricerca
-      if (searchTerm) {
-        const matchString = `${game.home_team} vs ${game.away_team}`.toLowerCase();
-        if (!matchString.includes(searchTerm.toLowerCase())) {
-          return [];
-        }
-      }
+    // Apply search filter
+    if (searchTerm) {
+        filteredGames = filteredGames.filter(game =>
+            `${game.home_team} vs ${game.away_team}`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        );
+    }
 
+    if (!selectedBookmakers.length) return filteredGames;
+
+    filteredGames = filteredGames.flatMap(game => {
       if (dateRange.startDate || dateRange.endDate) {
         const eventDate = new Date(game.commence_time);
 
@@ -212,7 +216,7 @@ const OddsList = () => {
       return getOddsWithRatings(filteredGame);
     });
 
-    return allRatedOdds
+    return filteredGames
       .filter(game =>
         game.selectedOutcome.rating >= ratingRange.min &&
         game.selectedOutcome.rating <= ratingRange.max &&
@@ -230,7 +234,7 @@ const OddsList = () => {
   };
 
   // Componente SearchFilter
-  const SearchFilter = () => {
+  const SearchFilterComponent = () => {
     const handleSearchChange = (e) => {
       const value = e.target.value;
       setSearchTerm(value);
@@ -589,7 +593,14 @@ const OddsList = () => {
               />
             </div>
             <div className="mt-4">
-              <SearchFilter />
+              <SearchFilter
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                suggestions={getUniqueMatches()}
+                setSuggestions={setSuggestions}
+                showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
+              />
             </div>
           </div>
 

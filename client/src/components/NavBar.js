@@ -79,6 +79,10 @@ function Navbar() {
                 <Store size={20} />
                 <span>Fornitori</span>
               </Link>
+              <Link to="/external-batches" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
+                <Briefcase size={20} />
+                <span>Lotti Esterni</span>
+              </Link>
             </>
           )}
 

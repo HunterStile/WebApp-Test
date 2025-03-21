@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import SupplierForm from '../components/suppliers/SupplierForm';
-import SuppliersTable from '../components/suppliers/SuppliersTable';
+import GenericTable from '../components/common/GenericTable';
+import GenericForm from '../components/common/GenericForm';
 
 const Suppliers = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -10,6 +10,56 @@ const Suppliers = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Table columns configuration
+  const columns = [
+    { field: 'name', header: 'Nome' },
+    { field: 'vatId', header: 'Partita IVA' },
+    { field: 'address', header: 'Indirizzo' },
+    { field: 'phone', header: 'Telefono' }
+  ];
+
+  // Form fields configuration
+  const formFields = [
+    {
+      name: 'vatId',
+      type: 'text',
+      label: 'Partita IVA',
+      placeholder: 'Inserisci la partita IVA',
+      required: true,
+      fullWidth: false,
+      validate: (value) => {
+        if (!/^[0-9]{11}$/.test(value)) {
+          return 'La Partita IVA deve essere di 11 cifre';
+        }
+        return null;
+      }
+    },
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Nome',
+      placeholder: 'Inserisci il nome del fornitore',
+      required: true,
+      fullWidth: false
+    },
+    {
+      name: 'address',
+      type: 'text',
+      label: 'Indirizzo',
+      placeholder: "Inserisci l'indirizzo",
+      required: true,
+      fullWidth: true
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      label: 'Telefono',
+      placeholder: 'Inserisci il numero di telefono',
+      required: true,
+      fullWidth: false
+    }
+  ];
   
   const fetchSuppliers = async () => {
     try {
@@ -124,19 +174,24 @@ const Suppliers = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
-          <SuppliersTable 
-            suppliers={filteredSuppliers}
+          <GenericTable 
+            data={filteredSuppliers}
+            columns={columns}
             onEdit={handleEditSupplier}
             onDelete={handleDeleteSupplier}
+            emptyMessage="Nessun fornitore trovato. Aggiungi un nuovo fornitore per iniziare."
           />
         )}
       </div>
       
       {isFormOpen && (
-        <SupplierForm
-          supplier={editingSupplier}
+        <GenericForm
+          title={editingSupplier ? 'Modifica Fornitore' : 'Nuovo Fornitore'}
+          fields={formFields}
+          initialData={editingSupplier}
           onSubmit={handleFormSubmit}
           onClose={handleCloseForm}
+          submitButtonLabel={editingSupplier ? 'Aggiorna' : 'Salva'}
         />
       )}
     </div>

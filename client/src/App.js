@@ -9,6 +9,8 @@ import AdminLogin from './page/private/AdminLogin';
 import Admin from './page/private/Admin';
 import Dashboard from './page/Dashboard';
 import Suppliers from './page/Suppliers';
+import ExternalBatches from './page/ExternalBatches';
+import ExternalBatchDetail from './page/ExternalBatchDetail';
 import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import './App.css';
@@ -41,6 +43,9 @@ function App() {
                 <Route path="/login2" element={<Login />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/suppliers" element={<Suppliers />} />
+                <Route path="/external-batches" element={<ExternalBatches />} />
+                <Route path="/external-batches/:id" element={<ExternalBatchDetail />} />
+                <Route path="/external-batches/edit/:id" element={<ExternalBatches />} />
 
                 {/* Protected routes per utenti normali */}
                 <Route element={<PrivateRoute />}>

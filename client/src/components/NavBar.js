@@ -4,7 +4,6 @@ import { AdminAuthContext } from '../context/AdminAuthContext';
 import { Link } from 'react-router-dom';
 import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, Briefcase, Calendar, Store, User, Settings } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
-import API_BASE_URL from '../config';
 import axios from 'axios';
 
 function Navbar() {
@@ -25,35 +24,6 @@ function Navbar() {
     }
   };
 
-   // Add function to update unread count
-   const updateUnreadCount = async () => {
-    if (user) {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/threads/unread-count/${user}`);
-        setUnreadCount(response.data.unreadCount);
-      } catch (error) {
-        console.error('Error fetching unread count:', error);
-      }
-    }
-  };
-
-   // Export the update function to window object to make it accessible
-   useEffect(() => {
-    if (window) {
-      window.updateNavbarUnreadCount = updateUnreadCount;
-    }
-    return () => {
-      if (window) {
-        delete window.updateNavbarUnreadCount;
-      }
-    };
-  }, [user]);
-
-  useEffect(() => {
-    updateUnreadCount();
-    const interval = setInterval(updateUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [user]);
   
   return (
     <>

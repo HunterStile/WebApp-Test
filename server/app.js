@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/admin-auth');
+const supplierRoutes = require('./routes/suppliers');
 
 require('dotenv').config();
 const app = express();
@@ -33,6 +34,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/suppliers', supplierRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

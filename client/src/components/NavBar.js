@@ -105,6 +105,10 @@ function Navbar() {
                 <PieChart size={20} />
                 <span>Dashboard</span>
               </Link>
+              <Link to="/suppliers" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg mb-1">
+                <Store size={20} />
+                <span>Fornitori</span>
+              </Link>
             </>
           )}
 

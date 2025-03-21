@@ -8,6 +8,7 @@ import AdminPrivateRoute from './components/redirect/AdminPrivateRoute';
 import AdminLogin from './page/private/AdminLogin';
 import Admin from './page/private/Admin';
 import Dashboard from './page/Dashboard';
+import Suppliers from './page/Suppliers';
 import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import './App.css';
@@ -19,7 +20,6 @@ function Layout({ children }) {
   const showNavbar = !['/login2'].includes(location.pathname);
 
   
-
   return (
     <div className="App min-h-screen bg-white">
       {showNavbar && <Navbar />}
@@ -40,12 +40,12 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login2" element={<Login />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/suppliers" element={<Suppliers />} />
 
                 {/* Protected routes per utenti normali */}
                 <Route element={<PrivateRoute />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                 </Route>
-
                 {/* Protected routes per Admin */}
                 <Route element={<AdminPrivateRoute />}>
                   <Route path="/admin" element={<Admin />} />

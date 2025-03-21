@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       // Chiamata all'API per il login
-      await axios.post(`${API_BASE_URL}/auth/login`, { username, password });
+      await axios.post(`/api/auth/login`, { username, password });
       // Imposta l'utente nel contesto e nel localStorage
       setUser(username);
       localStorage.setItem('user', username);
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   // Funzione per effettuare la registrazione
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+      const response = await axios.post(`/api/auth/register`, {
         username: userData.username,
         password: userData.password,
         firstName: userData.firstName,

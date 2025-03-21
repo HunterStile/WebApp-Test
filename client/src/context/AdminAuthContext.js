@@ -10,7 +10,7 @@ export const AdminAuthProvider = ({ children }) => {
   // Funzione per il login
   const login = async (username, password) => {
     try {
-      await axios.post(`${API_BASE_URL}/admin/auth/login`, { username, password });
+      await axios.post(`/api/admin/auth/login`, { username, password });
       setAdmin(username);
       localStorage.setItem('admin', username);
     } catch (error) {
@@ -21,7 +21,7 @@ export const AdminAuthProvider = ({ children }) => {
   // Funzione per la registrazione
   const register = async (username, password, secretKey) => {
     try {
-      await axios.post(`${API_BASE_URL}/admin/auth/register`, { username, password, secretKey });
+      await axios.post(`/api/admin/auth/register`, { username, password, secretKey });
       alert('Registrazione admin riuscita!');
     } catch (error) {
       console.error('Registrazione admin fallita:', error);

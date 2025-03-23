@@ -18,14 +18,13 @@ import './App.css';
 function Layout({ children }) {
   const location = useLocation();
 
-  // Mostra la navbar solo se il percorso non è "/" o "/login2"
+  // Mostra la navbar solo se il percorso non è "/login2"
   const showNavbar = !['/login2'].includes(location.pathname);
 
-  
   return (
-    <div className="App min-h-screen bg-white">
+    <div className="App min-h-screen bg-gray-50">
       {showNavbar && <Navbar />}
-      <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen`}>
+      <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen transition-all duration-300`}>
         <div className="mx-auto p-4">{children}</div>
       </div>
     </div>

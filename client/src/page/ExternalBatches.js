@@ -258,7 +258,7 @@ const ExternalBatches = () => {
     <div className="flex space-x-2">
       <button
         onClick={() => handleViewDetails(batch)}
-        className="text-blue-600 hover:text-blue-900"
+        className="text-primary-600 hover:text-primary-800 transition-colors"
         title="Visualizza dettagli"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -268,7 +268,7 @@ const ExternalBatches = () => {
       </button>
       <button
         onClick={() => handleEditBatch(batch)}
-        className="text-blue-600 hover:text-blue-900"
+        className="text-primary-600 hover:text-primary-800 transition-colors"
         title="Modifica"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -277,7 +277,7 @@ const ExternalBatches = () => {
       </button>
       <button
         onClick={() => handleDeleteBatch(batch._id)}
-        className="text-red-600 hover:text-red-900"
+        className="text-red-600 hover:text-red-900 transition-colors"
         title="Elimina"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -291,10 +291,10 @@ const ExternalBatches = () => {
     <div className="container mx-auto p-4">
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Gestione Lotti Esterni</h1>
+          <h1 className="text-2xl font-bold text-primary-800">Gestione Lotti Esterni</h1>
           <button
             onClick={handleAddBatch}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center"
+            className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -318,7 +318,7 @@ const ExternalBatches = () => {
             </div>
             <input
               type="text"
-              className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500"
               placeholder="Cerca per numero lotto, numero DDT, origine, alimento o fornitore..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -328,7 +328,7 @@ const ExternalBatches = () => {
 
         {loading ? (
           <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
           </div>
         ) : (
           <GenericTable 

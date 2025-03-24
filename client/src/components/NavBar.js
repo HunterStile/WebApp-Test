@@ -106,6 +106,15 @@ function Navbar() {
                 <Briefcase size={20} />
                 <span>Lotti Esterni</span>
               </Link>
+              <Link to="/quality-controls" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${
+                  isActive('/quality-controls') 
+                    ? 'bg-primary-50 text-primary-700' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}>
+                <FileText size={20} />
+                <span>Controlli Qualità</span>
+              </Link>
             </>
           )}
 

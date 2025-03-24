@@ -11,6 +11,7 @@ import Dashboard from './page/Dashboard';
 import Suppliers from './page/Suppliers';
 import ExternalBatches from './page/ExternalBatches';
 import ExternalBatchDetail from './page/ExternalBatchDetail';
+import QualityControls from './page/QualityControls';
 import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import './App.css';
@@ -45,6 +46,8 @@ function App() {
                 <Route path="/external-batches" element={<ExternalBatches />} />
                 <Route path="/external-batches/:id" element={<ExternalBatchDetail />} />
                 <Route path="/external-batches/edit/:id" element={<ExternalBatches />} />
+                <Route path="/quality-controls" element={<QualityControls />} />
+                <Route path="/quality-controls/:id" element={<QualityControls />} />
 
                 {/* Protected routes per utenti normali */}
                 <Route element={<PrivateRoute />}>

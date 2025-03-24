@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/admin-auth');
 const supplierRoutes = require('./routes/suppliers');
 const externalBatchRoutes = require('./routes/externalBatches');
+const qualityControlRoutes = require('./routes/qualityControls');
 
 require('dotenv').config();
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/external-batches', externalBatchRoutes);
+app.use('/api/quality-controls', qualityControlRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 
 const ExternalBatchDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { userId } = useContext(AuthContext);
   const [batch, setBatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +15,9 @@ const ExternalBatchDetail = () => {
     const fetchBatchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/external-batches/${id}`);
+        const response = await axios.get(`/api/external-batches/${id}`, {
+          params: { userId }
+        });
         setBatch(response.data);
         setError(null);
       } catch (err) {
@@ -24,10 +28,10 @@ const ExternalBatchDetail = () => {
       }
     };
 
-    if (id) {
+    if (id && userId) {
       fetchBatchData();
     }
-  }, [id]);
+  }, [id, userId]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -154,7 +158,9 @@ const ExternalBatchDetail = () => {
               <button
                 onClick={() => {
                   if (window.confirm('Sei sicuro di voler eliminare questo lotto?')) {
-                    axios.delete(`/api/external-batches/${batch._id}`)
+                    axios.delete(`/api/external-batches/${batch._id}`, {
+                      params: { userId }
+                    })
                       .then(() => navigate('/external-batches'))
                       .catch(err => {
                         console.error('Error deleting batch:', err);

@@ -2,11 +2,19 @@ const express = require('express');
 const router = express.Router();
 const ExternalBatch = require('../models/ExternalBatch');
 const Supplier = require('../models/Supplier');
+const mongoose = require('mongoose');
 
-// Get all external batches with populated supplier info
+// Get all external batches with populated supplier info for a specific user
 router.get('/', async (req, res) => {
   try {
-    const externalBatches = await ExternalBatch.find()
+    const { userId } = req.query;
+    
+    // Verifica che l'userId sia valido
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'ID utente non valido o mancante' });
+    }
+    
+    const externalBatches = await ExternalBatch.find({ userId })
       .populate('foodDetails.supplier')
       .sort({ acceptanceDate: -1 });
     res.json(externalBatches);
@@ -15,11 +23,20 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a single external batch
+// Get a single external batch (with user verification)
 router.get('/:id', async (req, res) => {
   try {
-    const externalBatch = await ExternalBatch.findById(req.params.id)
-      .populate('foodDetails.supplier');
+    const { userId } = req.query;
+    
+    // Verifica che l'userId sia valido
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'ID utente non valido o mancante' });
+    }
+    
+    const externalBatch = await ExternalBatch.findOne({
+      _id: req.params.id,
+      userId
+    }).populate('foodDetails.supplier');
     
     if (!externalBatch) {
       return res.status(404).json({ message: 'Lotto esterno non trovato' });
@@ -33,13 +50,35 @@ router.get('/:id', async (req, res) => {
 // Create a new external batch
 router.post('/', async (req, res) => {
   try {
-    // Validate supplier exists
-    const supplier = await Supplier.findById(req.body.foodDetails.supplier);
+    const { userId } = req.body;
+    
+    // Verifica che l'userId sia valido
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'ID utente non valido o mancante' });
+    }
+    
+    // Validate supplier exists and belongs to the user
+    const supplier = await Supplier.findOne({ 
+      _id: req.body.foodDetails.supplier,
+      userId
+    });
+    
     if (!supplier) {
-      return res.status(400).json({ message: 'Fornitore non trovato' });
+      return res.status(400).json({ message: 'Fornitore non trovato o non appartiene a questo utente' });
+    }
+    
+    // Verifica se esiste già un lotto con lo stesso numero per questo utente
+    const existingBatch = await ExternalBatch.findOne({ 
+      userId,
+      batchNumber: req.body.batchNumber
+    });
+    
+    if (existingBatch) {
+      return res.status(400).json({ message: 'Esiste già un lotto con questo numero' });
     }
 
     const externalBatch = new ExternalBatch({
+      userId,
       acceptanceDate: new Date(req.body.acceptanceDate),
       batchNumber: req.body.batchNumber,
       ddtDate: new Date(req.body.ddtDate),
@@ -66,19 +105,48 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update an external batch
+// Update an external batch (with user verification)
 router.put('/:id', async (req, res) => {
   try {
-    const externalBatch = await ExternalBatch.findById(req.params.id);
+    const { userId } = req.body;
+    
+    // Verifica che l'userId sia valido
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'ID utente non valido o mancante' });
+    }
+    
+    // Trova il lotto assicurandosi che appartenga all'utente
+    const externalBatch = await ExternalBatch.findOne({
+      _id: req.params.id,
+      userId
+    });
+    
     if (!externalBatch) {
       return res.status(404).json({ message: 'Lotto esterno non trovato' });
     }
 
-    // Validate supplier exists if it's being updated
+    // Validate supplier exists and belongs to the user if it's being updated
     if (req.body.foodDetails && req.body.foodDetails.supplier) {
-      const supplier = await Supplier.findById(req.body.foodDetails.supplier);
+      const supplier = await Supplier.findOne({ 
+        _id: req.body.foodDetails.supplier,
+        userId
+      });
+      
       if (!supplier) {
-        return res.status(400).json({ message: 'Fornitore non trovato' });
+        return res.status(400).json({ message: 'Fornitore non trovato o non appartiene a questo utente' });
+      }
+    }
+    
+    // Se viene modificato il numero del lotto, verifica che non sia già utilizzato
+    if (req.body.batchNumber && req.body.batchNumber !== externalBatch.batchNumber) {
+      const existingWithBatchNumber = await ExternalBatch.findOne({ 
+        userId,
+        batchNumber: req.body.batchNumber,
+        _id: { $ne: externalBatch._id } // Escludi il lotto corrente
+      });
+      
+      if (existingWithBatchNumber) {
+        return res.status(400).json({ message: 'Esiste già un lotto con questo numero' });
       }
     }
 
@@ -110,10 +178,22 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete an external batch
+// Delete an external batch (with user verification)
 router.delete('/:id', async (req, res) => {
   try {
-    const externalBatch = await ExternalBatch.findById(req.params.id);
+    const { userId } = req.query;
+    
+    // Verifica che l'userId sia valido
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'ID utente non valido o mancante' });
+    }
+    
+    // Trova il lotto assicurandosi che appartenga all'utente
+    const externalBatch = await ExternalBatch.findOne({
+      _id: req.params.id,
+      userId
+    });
+    
     if (!externalBatch) {
       return res.status(404).json({ message: 'Lotto esterno non trovato' });
     }

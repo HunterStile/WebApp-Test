@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 import GenericTable from '../components/common/GenericTable';
 import GenericForm from '../components/common/GenericForm';
 
 const Suppliers = () => {
+  const { userId } = useContext(AuthContext);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,7 +66,9 @@ const Suppliers = () => {
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/suppliers`);
+      const response = await axios.get(`/api/suppliers`, {
+        params: { userId }
+      });
       setSuppliers(response.data);
       setError(null);
     } catch (err) {
@@ -76,8 +80,10 @@ const Suppliers = () => {
   };
 
   useEffect(() => {
-    fetchSuppliers();
-  }, []);
+    if (userId) {
+      fetchSuppliers();
+    }
+  }, [userId]);
 
   const handleAddSupplier = () => {
     setEditingSupplier(null);
@@ -92,7 +98,9 @@ const Suppliers = () => {
   const handleDeleteSupplier = async (id) => {
     if (window.confirm('Sei sicuro di voler eliminare questo fornitore?')) {
       try {
-        await axios.delete(`/api/suppliers/${id}`);
+        await axios.delete(`/api/suppliers/${id}`, {
+          params: { userId }
+        });
         setSuppliers(suppliers.filter(supplier => supplier._id !== id));
       } catch (err) {
         setError('Errore nell\'eliminazione del fornitore. Riprova più tardi.');
@@ -103,13 +111,19 @@ const Suppliers = () => {
 
   const handleFormSubmit = async (formData) => {
     try {
+      // Aggiungi l'userId al formData
+      const supplierData = {
+        ...formData,
+        userId
+      };
+
       if (editingSupplier) {
         // Update existing supplier
-        const response = await axios.put(`/api/suppliers/${editingSupplier._id}`, formData);
+        const response = await axios.put(`/api/suppliers/${editingSupplier._id}`, supplierData);
         setSuppliers(suppliers.map(s => s._id === editingSupplier._id ? response.data : s));
       } else {
         // Add new supplier
-        const response = await axios.post(`/api/suppliers`, formData);
+        const response = await axios.post(`/api/suppliers`, supplierData);
         setSuppliers([...suppliers, response.data]);
       }
       setIsFormOpen(false);

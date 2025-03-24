@@ -34,8 +34,8 @@ function Navbar() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm p-4 flex items-center justify-between z-50">
         <Link to="/" className="flex items-center gap-2">
-          <img src={flogo} alt="DEGI MARMI" className="h-8" />
-          <span className="font-bold text-primary-800">DEGI MARMI</span>
+          <img src={flogo} alt="HACCP" className="h-8" />
+          <span className="font-bold text-primary-800">HACCP</span>
         </Link>
         <button
           onClick={toggleMobileMenu}
@@ -55,7 +55,7 @@ function Navbar() {
             <div className="bg-primary-600 h-8 w-8 rounded-md flex items-center justify-center">
               <Leaf size={20} className="text-white" />
             </div>
-            <span className="font-bold text-primary-800">DEGI MARMI</span>
+            <span className="font-bold text-primary-800">HACCP APP</span>
           </Link>
         </div>
 

@@ -5,15 +5,22 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(localStorage.getItem('user') || null);
+  const [userId, setUserId] = useState(localStorage.getItem('userId') || null);
 
   // Funzione per effettuare il login
   const login = async (username, password) => {
     try {
       // Chiamata all'API per il login
-      await axios.post(`/api/auth/login`, { username, password });
+      const response = await axios.post(`/api/auth/login`, { username, password });
+      
+      // Memorizza sia l'username che l'ID dell'utente
+      const { userId } = response.data;
+      
       // Imposta l'utente nel contesto e nel localStorage
       setUser(username);
+      setUserId(userId);
       localStorage.setItem('user', username);
+      localStorage.setItem('userId', userId);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         throw error; // Passa l'errore al componente per la gestione
@@ -25,7 +32,9 @@ export const AuthProvider = ({ children }) => {
   // Funzione per effettuare il logout
   const logout = () => {
     setUser(null);
+    setUserId(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
   };
 
   // Funzione per effettuare la registrazione
@@ -55,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{ user, userId, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

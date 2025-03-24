@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import GenericTable from '../components/common/GenericTable';
 import GenericForm from '../components/common/GenericForm';
 
 const ExternalBatches = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // Get id from URL if editing
+  const { userId } = useContext(AuthContext);
   const [externalBatches, setExternalBatches] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +141,9 @@ const ExternalBatches = () => {
   const fetchExternalBatches = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/external-batches`);
+      const response = await axios.get(`/api/external-batches`, {
+        params: { userId }
+      });
       setExternalBatches(response.data);
       setError(null);
     } catch (err) {
@@ -152,7 +156,9 @@ const ExternalBatches = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get(`/api/suppliers`);
+      const response = await axios.get(`/api/suppliers`, {
+        params: { userId }
+      });
       setSuppliers(response.data);
     } catch (err) {
       console.error('Error fetching suppliers:', err);
@@ -162,7 +168,9 @@ const ExternalBatches = () => {
   // Fetch a specific batch for editing if ID is provided
   const fetchBatchForEdit = async (batchId) => {
     try {
-      const response = await axios.get(`/api/external-batches/${batchId}`);
+      const response = await axios.get(`/api/external-batches/${batchId}`, {
+        params: { userId }
+      });
       setEditingBatch(response.data);
       setIsFormOpen(true);
     } catch (err) {
@@ -172,14 +180,16 @@ const ExternalBatches = () => {
   };
 
   useEffect(() => {
-    fetchSuppliers();
-    fetchExternalBatches();
-    
-    // If id is provided in the URL, fetch that batch for editing
-    if (id) {
-      fetchBatchForEdit(id);
+    if (userId) {
+      fetchSuppliers();
+      fetchExternalBatches();
+      
+      // If id is provided in the URL, fetch that batch for editing
+      if (id) {
+        fetchBatchForEdit(id);
+      }
     }
-  }, [id]);
+  }, [userId, id]);
 
   const handleAddBatch = () => {
     setEditingBatch(null);
@@ -198,7 +208,9 @@ const ExternalBatches = () => {
   const handleDeleteBatch = async (id) => {
     if (window.confirm('Sei sicuro di voler eliminare questo lotto esterno?')) {
       try {
-        await axios.delete(`/api/external-batches/${id}`);
+        await axios.delete(`/api/external-batches/${id}`, {
+          params: { userId }
+        });
         setExternalBatches(externalBatches.filter(batch => batch._id !== id));
       } catch (err) {
         setError('Errore nell\'eliminazione del lotto esterno. Riprova più tardi.');
@@ -209,9 +221,15 @@ const ExternalBatches = () => {
 
   const handleFormSubmit = async (formData) => {
     try {
+      // Aggiungi l'userId al formData
+      const batchData = {
+        ...formData,
+        userId
+      };
+
       if (editingBatch) {
         // Update existing batch
-        const response = await axios.put(`/api/external-batches/${editingBatch._id}`, formData);
+        const response = await axios.put(`/api/external-batches/${editingBatch._id}`, batchData);
         setExternalBatches(externalBatches.map(batch => 
           batch._id === editingBatch._id ? response.data : batch
         ));
@@ -221,7 +239,7 @@ const ExternalBatches = () => {
         }
       } else {
         // Add new batch
-        const response = await axios.post(`/api/external-batches`, formData);
+        const response = await axios.post(`/api/external-batches`, batchData);
         setExternalBatches([response.data, ...externalBatches]);
       }
       setIsFormOpen(false);

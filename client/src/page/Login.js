@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import homeimage from "../assets/images/home1.png"
+import { ClipboardCheck, ChefHat, BarChart2, Droplet, CheckCircle, AlertCircle } from 'lucide-react';
 
 function Auth() {
   const [isRegister, setIsRegister] = useState(false);
@@ -23,6 +23,8 @@ function Auth() {
 
   const countryOptions = [
     { value: 'AF', label: 'Afghanistan' },
+    // ... other countries
+    { value: 'IT', label: 'Italia' },
     // ... rest of the country options remain the same
   ].sort((a, b) => a.label.localeCompare(b.label));
 
@@ -88,7 +90,7 @@ function Auth() {
           acceptedTerms: formData.acceptedTerms,
           newsletterSubscription: formData.newsletterSubscription,
         });
-        setSuccess('Account created successfully! Redirecting to login...');
+        setSuccess('Account creato con successo! Reindirizzamento al login...');
         setTimeout(() => {
           setIsRegister(false);
           setSuccess('');
@@ -116,24 +118,26 @@ function Auth() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       {/* Form Section */}
-      <div className="w-full md:w-full lg:w-1/2 flex items-center justify-center bg-white order-2 md:order-1">
+      <div className="w-full md:w-full lg:w-1/2 flex items-center justify-center order-2 md:order-1">
         <div className="w-full max-w-2xl mx-auto px-4 py-8 md:px-8">
-          <div className="flex flex-col items-center gap-1.5 rounded-[18px] bg-gray-100 p-6 md:p-8 shadow-xs">
+          <div className="flex flex-col items-center gap-1.5 rounded-lg bg-white p-6 md:p-8 shadow-md">
             <div className="flex flex-col items-center w-full">
-              <h1 className="text-3xl md:text-6xl font-semibold mb-4 mt-4 md:mb-8 md:mt-6 text-[#1e1e1e] text-center">
-                {isRegister ? 'Sign up' : 'Log in'}
+              <h1 className="text-3xl md:text-4xl font-bold mb-4 mt-4 md:mb-8 md:mt-6 text-primary-800 text-center">
+                {isRegister ? 'Registrazione' : 'Accesso'}
               </h1>
 
               {error && (
-                <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 w-full">
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4 w-full flex items-center">
+                  <AlertCircle className="h-5 w-5 mr-2" />
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 w-full">
+                <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded mb-4 w-full flex items-center">
+                  <CheckCircle className="h-5 w-5 mr-2" />
                   {success}
                 </div>
               )}
@@ -148,10 +152,10 @@ function Auth() {
                           type="text"
                           name="firstName"
                           required
-                          placeholder="First Name"
+                          placeholder="Nome"
                           value={formData.firstName}
                           onChange={handleInputChange}
-                          className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                          className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-500"
                         />
                       </div>
                       <div>
@@ -159,10 +163,10 @@ function Auth() {
                           type="text"
                           name="lastName"
                           required
-                          placeholder="Last Name"
+                          placeholder="Cognome"
                           value={formData.lastName}
                           onChange={handleInputChange}
-                          className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                          className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-500"
                         />
                       </div>
                     </div>
@@ -172,10 +176,10 @@ function Auth() {
                     type="text"
                     name="username"
                     required
-                    placeholder="Username"
+                    placeholder="Nome utente"
                     value={formData.username}
                     onChange={handleInputChange}
-                    className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                    className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-500"
                   />
 
                   <input
@@ -185,7 +189,7 @@ function Auth() {
                     placeholder="Password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                    className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-500"
                   />
 
                   {isRegister && (
@@ -194,10 +198,10 @@ function Auth() {
                         type="password"
                         name="passwordConfirmation"
                         required
-                        placeholder="Confirm Password"
+                        placeholder="Conferma Password"
                         value={formData.passwordConfirmation}
                         onChange={handleInputChange}
-                        className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                        className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-500"
                       />
 
                       <input
@@ -207,7 +211,7 @@ function Auth() {
                         placeholder="Email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 placeholder-gray-500"
+                        className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-500"
                       />
 
                       <select
@@ -215,9 +219,9 @@ function Auth() {
                         required
                         value={formData.country}
                         onChange={handleInputChange}
-                        className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
+                        className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 text-gray-500"
                       >
-                        <option value="">Select Country</option>
+                        <option value="">Seleziona Paese</option>
                         {countryOptions.map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
@@ -230,9 +234,9 @@ function Auth() {
                         required
                         value={formData.language}
                         onChange={handleInputChange}
-                        className="w-full h-[50px] p-3 rounded-lg bg-[#CDE1DE] border-0 text-gray-500"
+                        className="w-full h-[50px] p-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-primary-500 focus:ring-primary-500 text-gray-500"
                       >
-                        <option value="">Select Language</option>
+                        <option value="">Seleziona Lingua</option>
                         {languageOptions.map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
@@ -247,9 +251,9 @@ function Auth() {
                             name="acceptedTerms"
                             checked={formData.acceptedTerms}
                             onChange={handleInputChange}
-                            className="w-4 h-4 rounded border-gray-300"
+                            className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <span>I accept the terms and conditions</span>
+                          <span>Accetto i termini e le condizioni</span>
                         </label>
 
                         <label className="flex items-center space-x-2 text-sm text-gray-600">
@@ -258,9 +262,9 @@ function Auth() {
                             name="newsletterSubscription"
                             checked={formData.newsletterSubscription}
                             onChange={handleInputChange}
-                            className="w-4 h-4 rounded border-gray-300"
+                            className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <span>Subscribe to newsletter</span>
+                          <span>Iscriviti alla newsletter</span>
                         </label>
                       </div>
                     </>
@@ -271,7 +275,7 @@ function Auth() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="md:w-1/2 mt-5 py-3 px-4 bg-[#1F2421] text-white rounded-lg hover:bg-gray-800 font-medium transition-colors shadow-[0_0_10px_rgba(28,75,67,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="md:w-1/2 mt-5 py-3 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     {isLoading ? (
                       <>
@@ -296,13 +300,13 @@ function Auth() {
                           ></path>
                         </svg>
                         {isRegister
-                          ? 'Creating Account...'
-                          : 'Logging in...'}
+                          ? 'Creazione account...'
+                          : 'Accesso in corso...'}
                       </>
                     ) : isRegister ? (
-                      'Create Account'
+                      'Crea Account'
                     ) : (
-                      'Login'
+                      'Accedi'
                     )}
                   </button>
                 </div>
@@ -311,13 +315,13 @@ function Auth() {
 
               <p className="mt-6 text-center text-gray-600">
                 {isRegister
-                  ? 'Already have an account?'
-                  : "Don't have an account?"}{' '}
+                  ? 'Hai già un account?'
+                  : "Non hai un account?"}{' '}
                 <button
                   onClick={() => setIsRegister(!isRegister)}
-                  className="text-[#1C4B43] hover:underline"
+                  className="text-primary-600 hover:underline font-medium"
                 >
-                  {isRegister ? 'Log in' : 'Sign up'}
+                  {isRegister ? 'Accedi' : 'Registrati'}
                 </button>
               </p>
             </div>
@@ -325,13 +329,78 @@ function Auth() {
         </div>
       </div>
 
-      {/* Image Section */}
-      <div className="hidden lg:w-1/2 lg:p-8 lg:flex lg:items-center lg:justify-center order-1 lg:order-3">
-        <img
-          src={homeimage}
-          alt="Welcome illustration"
-          className="min-w-[110%] lg:max-w-md w-full object-contain"
-        />
+      {/* SVG Illustration Section */}
+      <div className="hidden lg:w-1/2 p-8 lg:flex lg:items-center lg:justify-center bg-primary-50 order-1 lg:order-3">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-primary-800 mb-4">Sistema HACCP</h2>
+            <p className="text-gray-600">Gestione sicura della qualità alimentare</p>
+          </div>
+          
+          <svg 
+            viewBox="0 0 800 600" 
+            className="mx-auto w-full max-w-md"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Background Circle */}
+            <circle cx="400" cy="300" r="250" fill="#f0f9ff" />
+            
+            {/* Document Icon - Represents Documentation */}
+            <g transform="translate(300, 180) scale(1.2)">
+              <rect x="0" y="0" width="160" height="200" rx="10" fill="#ffffff" stroke="#3b82f6" strokeWidth="4" />
+              <rect x="20" y="30" width="120" height="10" rx="2" fill="#dbeafe" />
+              <rect x="20" y="50" width="120" height="10" rx="2" fill="#dbeafe" />
+              <rect x="20" y="70" width="80" height="10" rx="2" fill="#dbeafe" />
+              <rect x="20" y="100" width="120" height="10" rx="2" fill="#dbeafe" />
+              <rect x="20" y="120" width="120" height="10" rx="2" fill="#dbeafe" />
+              <rect x="20" y="140" width="60" height="10" rx="2" fill="#dbeafe" />
+              
+              {/* Checkmarks */}
+              <circle cx="35" cy="175" r="15" fill="#16a34a" />
+              <path d="M28 175 L33 180 L42 170" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              
+              <circle cx="85" cy="175" r="15" fill="#16a34a" />
+              <path d="M78 175 L83 180 L92 170" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              
+              <circle cx="135" cy="175" r="15" fill="#16a34a" />
+              <path d="M128 175 L133 180 L142 170" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </g>
+            
+            {/* HACCP Logo Elements */}
+            <g transform="translate(400, 170)">
+              <circle cx="0" cy="0" r="80" fill="#3b82f6" opacity="0.2" />
+              <path d="M-50,0 L50,0 M0,-50 L0,50" stroke="#3b82f6" strokeWidth="8" strokeLinecap="round" />
+              <circle cx="0" cy="0" r="20" fill="#3b82f6" />
+            </g>
+            
+            {/* Chef Hat - Represents Food Industry */}
+            <g transform="translate(560, 240) scale(0.15)">
+              <path d="M300,500 C100,500 0,400 0,300 C0,200 100,150 150,150 C150,50 200,0 300,0 C400,0 450,50 450,150 C500,150 600,200 600,300 C600,400 500,500 300,500 Z" fill="#ffffff" stroke="#475569" strokeWidth="20" />
+              <rect x="200" y="450" width="200" height="100" rx="10" fill="#ffffff" stroke="#475569" strokeWidth="20" />
+            </g>
+            
+            {/* Water Drop - Represents Cleanliness */}
+            <g transform="translate(250, 280) scale(0.8)">
+              <path d="M0,0 C0,0 -50,-100 -50,-150 C-50,-200 0,-200 0,-150 C0,-200 50,-200 50,-150 C50,-100 0,0 0,0 Z" fill="#38bdf8" />
+            </g>
+            
+            {/* Chart - Represents Analysis and Monitoring */}
+            <g transform="translate(450, 440) scale(0.8)">
+              <rect x="-60" y="-80" width="120" height="80" rx="5" fill="#ffffff" stroke="#6366f1" strokeWidth="3" />
+              <rect x="-50" y="-70" width="20" height="60" fill="#a5b4fc" />
+              <rect x="-20" y="-50" width="20" height="40" fill="#818cf8" />
+              <rect x="10" y="-60" width="20" height="50" fill="#6366f1" />
+              <rect x="40" y="-40" width="20" height="30" fill="#4f46e5" />
+            </g>
+            
+            {/* Temperature Icon - Critical Control Points */}
+            <g transform="translate(320, 420) scale(0.6)">
+              <circle cx="0" cy="0" r="40" fill="#ffffff" stroke="#f43f5e" strokeWidth="5" />
+              <rect x="-5" y="-30" width="10" height="45" rx="5" fill="#f43f5e" />
+              <circle cx="0" cy="20" r="15" fill="#f43f5e" />
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
   );

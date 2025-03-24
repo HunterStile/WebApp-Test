@@ -35,12 +35,12 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes - Rimuovi il prefisso /api poiché viene gestito da nginx
-app.use('/api/auth', authRoutes);
-app.use('/api/admin/auth', adminAuthRoutes);
-app.use('/api/suppliers', supplierRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/external-batches', externalBatchRoutes);
-app.use('/api/quality-controls', qualityControlRoutes);
+app.use('/auth', authRoutes);
+app.use('/admin/auth', adminAuthRoutes);
+app.use('/suppliers', supplierRoutes);
+app.use('/customers', customerRoutes);
+app.use('/external-batches', externalBatchRoutes);
+app.use('/quality-controls', qualityControlRoutes);
 
 // Catch-all route
 app.get('*', (req, res) => {

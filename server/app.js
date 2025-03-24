@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/admin-auth');
 const supplierRoutes = require('./routes/suppliers');
+const customerRoutes = require('./routes/customers');
 const externalBatchRoutes = require('./routes/externalBatches');
 const qualityControlRoutes = require('./routes/qualityControls');
 
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/customers', customerRoutes);
 app.use('/api/external-batches', externalBatchRoutes);
 app.use('/api/quality-controls', qualityControlRoutes);
 

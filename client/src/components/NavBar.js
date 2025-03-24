@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { AdminAuthContext } from '../context/AdminAuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, Briefcase, Calendar, Store, User, Settings, LogOut, Leaf } from 'lucide-react';
+import { Menu, X, PieChart, BarChart, FileText, MessageCircle, Bell, Briefcase, Calendar, Store, User, Settings, LogOut, Leaf, Users } from 'lucide-react';
 import flogo from "../assets/images/flogo.png"
 import axios from 'axios';
 
@@ -96,6 +96,15 @@ function Navbar() {
                 }`}>
                 <Store size={20} />
                 <span>Fornitori</span>
+              </Link>
+              <Link to="/customers" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${
+                  isActive('/customers') 
+                    ? 'bg-primary-50 text-primary-700' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}>
+                <Users size={20} />
+                <span>Clienti</span>
               </Link>
               <Link to="/external-batches" 
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${

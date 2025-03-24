@@ -1,0 +1,240 @@
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
+import GenericTable from '../components/common/GenericTable';
+import GenericForm from '../components/common/GenericForm';
+
+const Customers = () => {
+  const { userId } = useContext(AuthContext);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Table columns configuration
+  const columns = [
+    { field: 'name', header: 'Nome' },
+    { field: 'vatId', header: 'Partita IVA' },
+    { field: 'address', header: 'Indirizzo' },
+    { field: 'zipCode', header: 'CAP' },
+    { field: 'city', header: 'Città' },
+    { field: 'phone', header: 'Telefono' }
+  ];
+
+  // Form fields configuration
+  const formFields = [
+    {
+      name: 'vatId',
+      type: 'text',
+      label: 'Partita IVA',
+      placeholder: 'Inserisci la partita IVA',
+      required: true,
+      fullWidth: false,
+      validate: (value) => {
+        if (!/^[0-9]{11}$/.test(value)) {
+          return 'La Partita IVA deve essere di 11 cifre';
+        }
+        return null;
+      }
+    },
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Nome',
+      placeholder: 'Inserisci il nome del cliente',
+      required: true,
+      fullWidth: false
+    },
+    {
+      name: 'address',
+      type: 'text',
+      label: 'Indirizzo',
+      placeholder: "Inserisci l'indirizzo",
+      required: true,
+      fullWidth: true
+    },
+    {
+      name: 'zipCode',
+      type: 'text',
+      label: 'CAP',
+      placeholder: 'Inserisci il CAP',
+      required: true,
+      fullWidth: false,
+      validate: (value) => {
+        if (!/^[0-9]{5}$/.test(value)) {
+          return 'Il CAP deve essere di 5 cifre';
+        }
+        return null;
+      }
+    },
+    {
+      name: 'city',
+      type: 'text',
+      label: 'Città',
+      placeholder: 'Inserisci la città',
+      required: true,
+      fullWidth: false
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      label: 'Telefono',
+      placeholder: 'Inserisci il numero di telefono',
+      required: true,
+      fullWidth: false
+    }
+  ];
+  
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/customers`, {
+        params: { userId }
+      });
+      setCustomers(response.data);
+      setError(null);
+    } catch (err) {
+      setError('Errore nel caricamento dei clienti. Riprova più tardi.');
+      console.error('Error fetching customers:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchCustomers();
+    }
+  }, [userId]);
+
+  const handleAddCustomer = () => {
+    setEditingCustomer(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditCustomer = (customer) => {
+    setEditingCustomer(customer);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteCustomer = async (id) => {
+    if (window.confirm('Sei sicuro di voler eliminare questo cliente?')) {
+      try {
+        await axios.delete(`/api/customers/${id}`, {
+          params: { userId }
+        });
+        setCustomers(customers.filter(customer => customer._id !== id));
+      } catch (err) {
+        setError('Errore nell\'eliminazione del cliente. Riprova più tardi.');
+        console.error('Error deleting customer:', err);
+      }
+    }
+  };
+
+  const handleFormSubmit = async (formData) => {
+    try {
+      // Aggiungi l'userId al formData
+      const customerData = {
+        ...formData,
+        userId
+      };
+
+      if (editingCustomer) {
+        // Update existing customer
+        const response = await axios.put(`/api/customers/${editingCustomer._id}`, customerData);
+        setCustomers(customers.map(c => c._id === editingCustomer._id ? response.data : c));
+      } else {
+        // Add new customer
+        const response = await axios.post(`/api/customers`, customerData);
+        setCustomers([...customers, response.data]);
+      }
+      setIsFormOpen(false);
+      setEditingCustomer(null);
+    } catch (err) {
+      setError('Errore nel salvare il cliente. Riprova più tardi.');
+      console.error('Error saving customer:', err);
+    }
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingCustomer(null);
+  };
+
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.vatId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.city.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="container mx-auto p-4">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-primary-800">Gestione Clienti</h1>
+          <button
+            onClick={handleAddCustomer}
+            className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            Nuovo Cliente
+          </button>
+        </div>
+
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            <p>{error}</p>
+          </div>
+        )}
+
+        <div className="mb-4">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Cerca per nome, partita IVA o città..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+          </div>
+        ) : (
+          <GenericTable 
+            data={filteredCustomers}
+            columns={columns}
+            onEdit={handleEditCustomer}
+            onDelete={handleDeleteCustomer}
+            emptyMessage="Nessun cliente trovato. Aggiungi un nuovo cliente per iniziare."
+          />
+        )}
+      </div>
+      
+      {isFormOpen && (
+        <GenericForm
+          title={editingCustomer ? 'Modifica Cliente' : 'Nuovo Cliente'}
+          fields={formFields}
+          initialData={editingCustomer}
+          onSubmit={handleFormSubmit}
+          onClose={handleCloseForm}
+          submitButtonLabel={editingCustomer ? 'Aggiorna' : 'Salva'}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Customers; 

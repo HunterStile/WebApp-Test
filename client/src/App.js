@@ -9,6 +9,7 @@ import AdminLogin from './page/private/AdminLogin';
 import Admin from './page/private/Admin';
 import Dashboard from './page/Dashboard';
 import Suppliers from './page/Suppliers';
+import Customers from './page/Customers';
 import ExternalBatches from './page/ExternalBatches';
 import ExternalBatchDetail from './page/ExternalBatchDetail';
 import QualityControls from './page/QualityControls';
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/login2" element={<Login />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/suppliers" element={<Suppliers />} />
+                <Route path="/customers" element={<Customers />} />
                 <Route path="/external-batches" element={<ExternalBatches />} />
                 <Route path="/external-batches/:id" element={<ExternalBatchDetail />} />
                 <Route path="/external-batches/edit/:id" element={<ExternalBatches />} />

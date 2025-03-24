@@ -182,7 +182,7 @@ function Navbar() {
             </button>
           ) : (
             <Link
-              to="/login2"
+              to="/login"
               className="w-full mt-4 bg-primary-50 text-primary-600 hover:bg-primary-100 px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors"
             >
               Login

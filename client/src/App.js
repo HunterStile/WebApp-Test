@@ -1,8 +1,9 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation, Outlet, Navigate } from 'react-router-dom';
 import Navbar from './components/NavBar';
 import Home from './page/Home';
 import Login from './page/Login';
+import NotFound from './page/NotFound';
 import PrivateRoute from './components/redirect/PrivateRoute';
 import AdminPrivateRoute from './components/redirect/AdminPrivateRoute';
 import AdminLogin from './page/private/AdminLogin';
@@ -13,36 +14,68 @@ import Customers from './page/Customers';
 import ExternalBatches from './page/ExternalBatches';
 import ExternalBatchDetail from './page/ExternalBatchDetail';
 import QualityControls from './page/QualityControls';
-import { AuthProvider } from './context/AuthContext';
-import { AdminAuthProvider } from './context/AdminAuthContext';
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import { AdminAuthProvider, AdminAuthContext } from './context/AdminAuthContext';
 import './App.css';
 
-function Layout({ children }) {
-  const location = useLocation();
-
-  // Mostra la navbar solo se il percorso non è "/login2"
-  const showNavbar = !['/login2'].includes(location.pathname);
-
+// Layout per utenti non autenticati (senza navbar)
+function PublicLayout() {
   return (
     <div className="App min-h-screen bg-gray-50">
-      {showNavbar && <Navbar />}
-      <div className={`${showNavbar ? 'lg:ml-64 pt-16 lg:pt-0' : ''} min-h-screen transition-all duration-300`}>
-        <div className="mx-auto p-4">{children}</div>
+      <div className="min-h-screen">
+        <Outlet />
       </div>
     </div>
   );
 }
 
+// Layout per utenti autenticati (con navbar)
+function AuthenticatedLayout() {
+  return (
+    <div className="App min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="lg:ml-64 pt-16 lg:pt-0 min-h-screen transition-all duration-300">
+        <div className="mx-auto p-4">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente per reindirizzare gli utenti non autenticati al login
+function RequireAuth() {
+  const { user } = useContext(AuthContext);
+  const { admin } = useContext(AdminAuthContext);
+
+  if (!user && !admin) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+}
+
 function App() {
   return (
     <AuthProvider>
-        <AdminAuthProvider>
-          <Router>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login2" element={<Login />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
+      <AdminAuthProvider>
+        <Router>
+          <Routes>
+            {/* Rotte pubbliche con layout senza navbar */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              
+              {/* Pagina 404 - Deve essere inserita nel layout pubblico */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
+
+            {/* Rotte autenticate con layout con navbar */}
+            <Route element={<RequireAuth />}>
+              <Route element={<AuthenticatedLayout />}>
+                {/* Rotte per utenti normali */}
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/suppliers" element={<Suppliers />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/external-batches" element={<ExternalBatches />} />
@@ -51,19 +84,15 @@ function App() {
                 <Route path="/quality-controls" element={<QualityControls />} />
                 <Route path="/quality-controls/:id" element={<QualityControls />} />
 
-                {/* Protected routes per utenti normali */}
-                <Route element={<PrivateRoute />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                </Route>
-                {/* Protected routes per Admin */}
+                {/* Rotte per admin (protette ulteriormente con AdminPrivateRoute) */}
                 <Route element={<AdminPrivateRoute />}>
                   <Route path="/admin" element={<Admin />} />
                 </Route>
-
-              </Routes>
-            </Layout>
-          </Router>
-        </AdminAuthProvider>
+              </Route>
+            </Route>
+          </Routes>
+        </Router>
+      </AdminAuthProvider>
     </AuthProvider>
   );
 }

@@ -34,6 +34,9 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/odds', oddsRoutes);
 
+app.use('/auth', authRoutes);
+app.use('/odds', oddsRoutes);
+
 // Catch-all route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));

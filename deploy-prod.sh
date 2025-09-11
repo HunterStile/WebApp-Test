@@ -20,4 +20,4 @@ echo "Container status:"
 docker-compose -f docker-compose.prod.yml ps
 
 echo "WebApp production deployment completed!"
-echo "Application available at: http://localhost:8082"
+echo "Application available at: http://localhost:8088"

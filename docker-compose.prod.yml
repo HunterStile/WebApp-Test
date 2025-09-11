@@ -4,7 +4,7 @@ services:
     container_name: webapp_nginx_prod
     image: nginx:alpine
     ports:
-      - "8082:80"  # Porta per talkchain.xyz
+      - "8088:80"  # Porta per talkchain.xyz
     volumes:
       - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - static_files:/var/www/html:ro  # File statici della build

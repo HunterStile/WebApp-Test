@@ -3,15 +3,16 @@
 ## Panoramica delle Porte
 
 ### Porte Utilizzate
-- **8082:80** - Nginx (per talkchain.xyz)
+- **8088:80** - Nginx (per talkchain.xyz)
 - **5007:5000** - Server Node.js (development)
 - **3007:3000** - Client React (development)
 - **27022:27017** - MongoDB
-- **8088:8081** - Mongo Express (gestione DB)
+- **8089:8081** - Mongo Express (gestione DB)
 
 ### Porte Evitate (già in uso)
 - 8080: echoplaylist.it
 - 8081: fastaffiliation.com
+- 8082: SQL Database
 - 8084: degi.talkchain.xyz
 - 8085: haccp.talkchain.xyz
 - 8087: cassaforte.talkchain.xyz
@@ -61,14 +62,14 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ## Accesso ai Servizi
 
 ### Development
-- **Applicazione**: http://localhost:8082
+- **Applicazione**: http://localhost:8088
 - **API diretta**: http://localhost:5007/api
 - **Client React**: http://localhost:3007
-- **Mongo Express**: http://localhost:8088
+- **Mongo Express**: http://localhost:8089
 
 ### Production
-- **Applicazione**: http://localhost:8082
-- **Health Check**: http://localhost:8082/health
+- **Applicazione**: http://localhost:8088
+- **Health Check**: http://localhost:8088/health
 
 ## File di Configurazione
 

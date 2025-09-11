@@ -1,0 +1,41 @@
+# Multi-stage build per React app
+FROM node:18-alpine as builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production --silent
+
+# Copy source code
+COPY . .
+
+# Build the React app for production
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+ENV REACT_APP_API_URL=/api
+
+RUN npm run build
+
+# Production stage - serve static files
+FROM nginx:alpine as production
+
+# Copy built files from builder stage
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copy nginx config if needed (optional)
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
+
+# Stage for copying build files to volume (for docker-compose)
+FROM builder as build-only
+VOLUME ["/app/build"]
+CMD ["cp", "-r", "/app/build/.", "/app/build/"]

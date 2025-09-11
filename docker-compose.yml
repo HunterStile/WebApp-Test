@@ -1,0 +1,98 @@
+services:
+  # Nginx interno per gestire il routing  
+  nginx:
+    container_name: webapp_nginx
+    image: nginx:alpine
+    ports:
+      - "8082:80"  # Porta libera per talkchain.xyz
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - webapp-build:/var/www/html:ro  # Usa volume condiviso
+    depends_on:
+      - webapp_server
+      - webapp_client
+    restart: unless-stopped
+    networks:
+      - webapp-network
+
+  # Server WebApp
+  webapp_server:
+    container_name: webapp_server
+    build:
+      context: ./
+      dockerfile: server/Dockerfile
+    ports:
+      - "5007:5000"  # Porta libera (5000=FA, 5002=DeGi, 5006=HACCP, 5100=Comparatore)
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    working_dir: /app/server
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      NODE_ENV: ${NODE_ENV:-development}
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - webapp-network
+
+  # Client WebApp
+  webapp_client:
+    container_name: webapp_client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3007:3000"  # Porta libera per development
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - webapp-build:/app/build  # Volume condiviso per la build
+    environment:
+      - REACT_APP_API_URL=/api
+      - NODE_ENV=development
+    depends_on:
+      - webapp_server
+    restart: unless-stopped
+    networks:
+      - webapp-network
+
+  # MongoDB per WebApp
+  mongodb:
+    container_name: webapp_mongodb
+    image: mongo:4.4
+    ports:
+      - "27022:27017"  # Porta libera (27018=Echo, 27019=FA, 27020=DeGi, 27021=HACCP)
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: webapp
+    volumes:
+      - webapp_mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - webapp-network
+
+  # Mongo Express per gestione DB (opzionale)
+  mongo-express:
+    container_name: webapp_mongo_express
+    image: mongo-express:latest
+    ports:
+      - "8088:8081"  # Porta libera (8082=Echo, 8083=FA, 8086=HACCP)
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - webapp-network
+
+volumes:
+  webapp_mongodb_data:
+  webapp-build:
+
+networks:
+  webapp-network:
+    driver: bridge

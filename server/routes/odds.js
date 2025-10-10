@@ -133,4 +133,91 @@ router.get('/major-leagues', async (req, res) => {
   }
 });
 
+// Route per ottenere le quote di Fantasy Team e Betfair Exchange
+router.get('/fantasy-betfair', async (req, res) => {
+  const FLASK_API_URL = 'http://localhost:5001';
+
+  try {
+    // Check cache first
+    const cachedData = cache.get('fantasy_betfair_odds');
+    if (cachedData) {
+      console.log('Returning cached Fantasy Team / Betfair data');
+      return res.json(cachedData);
+    }
+
+    console.log('Fetching Fantasy Team / Betfair data from Flask API...');
+    const response = await axios.get(`${FLASK_API_URL}/api/odds/fantasy-betfair`);
+
+    if (response.data.success) {
+      const opportunities = response.data.data.opportunities;
+      
+      // Cache the data
+      cache.set('fantasy_betfair_odds', opportunities);
+      
+      console.log(`Fetched ${opportunities.length} Fantasy Team / Betfair opportunities`);
+      res.json(opportunities);
+    } else {
+      // Scraping in progress
+      res.status(202).json({
+        message: 'Scraping in progress. Please wait...',
+        is_scraping: response.data.is_scraping
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching Fantasy Team / Betfair data:', error.message);
+    
+    // Check if Flask API is running
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({
+        error: 'Flask scraper API is not running. Please start it with: python scraper/api.py'
+      });
+    } else {
+      res.status(500).json({
+        error: 'Failed to fetch Fantasy Team / Betfair data',
+        message: error.message
+      });
+    }
+  }
+});
+
+// Route per forzare il refresh dei dati Fantasy Team / Betfair
+router.post('/fantasy-betfair/refresh', async (req, res) => {
+  const FLASK_API_URL = 'http://localhost:5001';
+
+  try {
+    console.log('Requesting Fantasy Team / Betfair data refresh...');
+    const response = await axios.post(`${FLASK_API_URL}/api/odds/refresh`);
+    
+    // Clear cache
+    cache.del('fantasy_betfair_odds');
+    
+    res.json({
+      message: 'Refresh started',
+      data: response.data
+    });
+  } catch (error) {
+    console.error('Error refreshing Fantasy Team / Betfair data:', error.message);
+    res.status(500).json({
+      error: 'Failed to refresh data',
+      message: error.message
+    });
+  }
+});
+
+// Route per ottenere lo stato dello scraper
+router.get('/fantasy-betfair/status', async (req, res) => {
+  const FLASK_API_URL = 'http://localhost:5001';
+
+  try {
+    const response = await axios.get(`${FLASK_API_URL}/api/odds/status`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching scraper status:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch scraper status',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

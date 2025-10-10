@@ -20,6 +20,7 @@ function Navbar() {
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/oddsmatcher', label: 'Oddsmatcher', icon: LineChart },
+    { path: '/fantasy-betfair', label: 'Fantasy ⚡ Betflag', icon: LineChart },
     { path: '/doppia_puntata', label: 'Doppia Puntata', icon: Calculator },
     { path: '/tripla_puntata', label: 'Tripla Puntata', icon: Calculator },
   ];

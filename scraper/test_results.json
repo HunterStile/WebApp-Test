@@ -1,0 +1,208 @@
+{
+  "fantasy_team": [
+    {
+      "home_team": "Germania",
+      "away_team": "Lussemburgo",
+      "commence_time": "10 ott",
+      "bookmaker": "Fantasy Team",
+      "odds": {
+        "1": 1.04,
+        "X": 12.0,
+        "2": 40.0
+      }
+    },
+    {
+      "home_team": "Belgio",
+      "away_team": "Macedonia Del Nord",
+      "commence_time": "10 ott",
+      "bookmaker": "Fantasy Team",
+      "odds": {
+        "1": 1.14,
+        "X": 7.25,
+        "2": 19.0
+      }
+    },
+    {
+      "home_team": "Spagna",
+      "away_team": "Georgia",
+      "commence_time": "11 ott",
+      "bookmaker": "Fantasy Team",
+      "odds": {
+        "1": 1.12,
+        "X": 8.25,
+        "2": 18.0
+      }
+    },
+    {
+      "home_team": "Portogallo",
+      "away_team": "Irlanda",
+      "commence_time": "11 ott",
+      "bookmaker": "Fantasy Team",
+      "odds": {
+        "1": 1.14,
+        "X": 7.25,
+        "2": 18.0
+      }
+    },
+    {
+      "home_team": "Estonia",
+      "away_team": "Italia",
+      "commence_time": "11 ott",
+      "bookmaker": "Fantasy Team",
+      "odds": {
+        "1": 28.0,
+        "X": 9.5,
+        "2": 1.08
+      }
+    },
+    {
+      "home_team": "Francia",
+      "away_team": "Azerbaigian",
+      "commence_time": "10 ott",
+      "bookmaker": "Fantasy Team",
+      "odds": {
+        "1": 1.01,
+        "X": 16.0,
+        "2": 55.0
+      }
+    }
+  ],
+  "betfair_exchange": [
+    {
+      "home_team": "Kazakistan",
+      "away_team": "Liechtenstein",
+      "commence_time": "16:00",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.95,
+        "X": 97.89,
+        "2": 1.14
+      }
+    },
+    {
+      "home_team": "Belgio",
+      "away_team": "Macedonia Del Nord",
+      "commence_time": "20:45",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.91,
+        "X": 98.19,
+        "2": 1.18
+      }
+    },
+    {
+      "home_team": "Germania",
+      "away_team": "Lussemburgo",
+      "commence_time": "20:45",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 100.41,
+        "X": 98.67,
+        "2": 1.06
+      }
+    },
+    {
+      "home_team": "Irlanda Del Nord",
+      "away_team": "Slovacchia",
+      "commence_time": "20:45",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.72,
+        "X": 98.3,
+        "2": 2.64
+      }
+    },
+    {
+      "home_team": "Kosovo",
+      "away_team": "Slovenia",
+      "commence_time": "20:45",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.13,
+        "X": 97.97,
+        "2": 2.5
+      }
+    },
+    {
+      "home_team": "J3 LEAGUE",
+      "away_team": "FC OSAKA",
+      "commence_time": "12:00",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 102.01,
+        "X": 97.53,
+        "2": 1.79
+      }
+    },
+    {
+      "home_team": "AMICHEVOLI (POSSIBILE CAMBIO FORMAT)",
+      "away_team": "Ruzomberok",
+      "commence_time": "12:00",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 104.23,
+        "X": 95.16,
+        "2": 1.78
+      }
+    },
+    {
+      "home_team": "AMICHEVOLI NAZIONALI",
+      "away_team": "Giappone",
+      "commence_time": "12:20",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 103.02,
+        "X": 96.02,
+        "2": 1.75
+      }
+    },
+    {
+      "home_team": "AMICHEVOLI (POSSIBILE CAMBIO FORMAT)",
+      "away_team": "Borussia Mönchengladbach",
+      "commence_time": "13:00",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.78,
+        "X": 97.02,
+        "2": 2.22
+      }
+    },
+    {
+      "home_team": "AMICHEVOLI NAZIONALI",
+      "away_team": "Repubblica Di Corea",
+      "commence_time": "13:00",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.86,
+        "X": 97.91,
+        "2": 7.8
+      }
+    },
+    {
+      "home_team": "LIGA 2",
+      "away_team": "Persiku Kudus",
+      "commence_time": "Unknown",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 101.34,
+        "X": 97.24,
+        "2": 19.5
+      }
+    },
+    {
+      "home_team": "LIGA 2",
+      "away_team": "Riau",
+      "commence_time": "Unknown",
+      "bookmaker": "Betflag Exchange",
+      "odds": {
+        "1": 103.23,
+        "X": 96.77,
+        "2": 1.77
+      }
+    }
+  ],
+  "summary": {
+    "fantasy_team_matches": 6,
+    "betfair_matches": 12
+  }
+}

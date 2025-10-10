@@ -8,7 +8,9 @@ import PrivateRoute from './components/PrivateRoute';
 import Oddsmatcher from './page/Oddsmatcher';
 import DoppiaPuntata from './page/TriplaPuntata';
 import TriplaPuntata from './page/TriplaPuntata';
+import FantasyBetfair from './page/FantasyBetfair';
 import { AuthProvider } from './context/AuthContext';
+import Test from './extra/testog';
 import './App.css';
 
 function App() {
@@ -25,7 +27,9 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login2" element={<Login />} />
                   <Route path="/oddsmatcher" element={<Oddsmatcher />} />
+                  <Route path="/fantasy-betfair" element={<FantasyBetfair />} />
                   <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
+                  <Route path="/test" element={<Test />} />
                   
                   {/* Protected routes */}
                   <Route element={<PrivateRoute />}>

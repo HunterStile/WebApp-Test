@@ -1,0 +1,134 @@
+[
+  {
+    "home_team": "Kazakistan",
+    "away_team": "Liechtenstein",
+    "commence_time": "16:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.13,
+      "X": 13.0,
+      "2": 46.0
+    }
+  },
+  {
+    "home_team": "Belgio",
+    "away_team": "Macedonia Del Nord",
+    "commence_time": "20:45",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.18,
+      "X": 10.0,
+      "2": 29.0
+    }
+  },
+  {
+    "home_team": "Germania",
+    "away_team": "Lussemburgo",
+    "commence_time": "20:45",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.05,
+      "X": 30.0,
+      "2": 100.0
+    }
+  },
+  {
+    "home_team": "Irlanda Del Nord",
+    "away_team": "Slovacchia",
+    "commence_time": "20:45",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.66,
+      "X": 3.1,
+      "2": 3.55
+    }
+  },
+  {
+    "home_team": "Kosovo",
+    "away_team": "Slovenia",
+    "commence_time": "20:45",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.5,
+      "X": 3.45,
+      "2": 3.45
+    }
+  },
+  {
+    "home_team": "FC OSAKA",
+    "away_team": "Ryukyu",
+    "commence_time": "12:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.79,
+      "X": 4.2,
+      "2": 5.4
+    }
+  },
+  {
+    "home_team": "Ruzomberok",
+    "away_team": "Bielsko Biala",
+    "commence_time": "12:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.77,
+      "X": 4.6,
+      "2": 5.8
+    }
+  },
+  {
+    "home_team": "Giappone",
+    "away_team": "Paraguay",
+    "commence_time": "12:20",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.72,
+      "X": 4.3,
+      "2": 6.6
+    }
+  },
+  {
+    "home_team": "Borussia Mönchengladbach",
+    "away_team": "Munster",
+    "commence_time": "13:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.24,
+      "X": 4.3,
+      "2": 3.55
+    }
+  },
+  {
+    "home_team": "Repubblica Di Corea",
+    "away_team": "Brasile",
+    "commence_time": "13:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 8.0,
+      "X": 5.2,
+      "2": 1.51
+    }
+  },
+  {
+    "home_team": "Persiku Kudus",
+    "away_team": "Barito Putera",
+    "commence_time": "Unknown",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 26.0,
+      "X": 2.74,
+      "2": 1.72
+    }
+  },
+  {
+    "home_team": "Riau",
+    "away_team": "Sriwijaya FC",
+    "commence_time": "Unknown",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.06,
+      "X": 2.7,
+      "2": 8.6
+    }
+  }
+]

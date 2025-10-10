@@ -124,6 +124,12 @@ def get_status():
     })
 
 
+@app.route('/api/odds/fantasy-betfair/status', methods=['GET'])
+def get_fantasy_betfair_status():
+    """Alias for status endpoint - for frontend compatibility"""
+    return get_status()
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""

@@ -10,7 +10,7 @@ import DoppiaPuntata from './page/TriplaPuntata';
 import TriplaPuntata from './page/TriplaPuntata';
 import FantasyBetfair from './page/FantasyBetfair';
 import { AuthProvider } from './context/AuthContext';
-import Test from './extra/testog';
+// import Test from './extra/testog'; // Commentato temporaneamente - richiede recharts
 import './App.css';
 
 function App() {
@@ -29,7 +29,7 @@ function App() {
                   <Route path="/oddsmatcher" element={<Oddsmatcher />} />
                   <Route path="/fantasy-betfair" element={<FantasyBetfair />} />
                   <Route path="/tripla_puntata" element={<TriplaPuntata/>} />
-                  <Route path="/test" element={<Test />} />
+                  {/* <Route path="/test" element={<Test />} /> */}
                   
                   {/* Protected routes */}
                   <Route element={<PrivateRoute />}>

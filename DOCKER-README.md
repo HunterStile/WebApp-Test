@@ -3,12 +3,12 @@
 ## Panoramica delle Porte
 
 ### Porte Utilizzate
-- **8082:80** - Nginx (per talkchain.xyz)
-- **5001:5001** - **[NEW]** Scraper Flask + Selenium + Chrome
-- **5007:5000** - Server Node.js (development)
-- **3007:3000** - Client React (development)
+- **8089:80** - Nginx (CAMBIATO da 8082 - già occupata)
+- **5010:5001** - **[NEW]** Scraper Flask + Selenium + Chrome (CAMBIATO da 5001 - range 5000-5007 occupato)
+- **5011:5000** - Server Node.js (interno, CAMBIATO da 5007)
+- **3010:3000** - Client React (CAMBIATO da 3007 - range 3000-3009 occupato)
 - **27022:27017** - MongoDB
-- **8088:8081** - Mongo Express (gestione DB)
+- **8090:8081** - Mongo Express (CAMBIATO da 8088 - già occupata)
 
 ### Porte Evitate (già in uso)
 - 8080: echoplaylist.it

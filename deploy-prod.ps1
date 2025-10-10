@@ -34,11 +34,12 @@ PORT=5000
 
 Write-Host ""
 Write-Host "📋 Configurazione:" -ForegroundColor Yellow
-Write-Host "  - Nginx:         porta 8082"
-Write-Host "  - Scraper API:   porta 5001 (Flask + Selenium + Chrome)"
-Write-Host "  - Server API:    porta 5000 (Node.js)"
+Write-Host "  - Nginx:         porta 8089 (8088 già occupata)"
+Write-Host "  - Scraper API:   porta 5010 (5000-5007 occupate)"
+Write-Host "  - Server API:    porta 5011 (interno)"
+Write-Host "  - Client React:  porta 3010 (3000-3009 occupate)"
 Write-Host "  - MongoDB:       porta 27022"
-Write-Host "  - Mongo Express: porta 8088"
+Write-Host "  - Mongo Express: porta 8090 (8088 già occupata)"
 Write-Host ""
 
 # Ferma e rimuove i container esistenti
@@ -74,14 +75,14 @@ Write-Host ""
 Write-Host "🏥 Health checks:" -ForegroundColor Yellow
 
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:8082/health" -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
+    $response = Invoke-WebRequest -Uri "http://localhost:8089/health" -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
     Write-Host "✓ Nginx: OK" -ForegroundColor Green
 } catch {
     Write-Host "✗ Nginx: FAIL" -ForegroundColor Red
 }
 
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:5001/api/odds/status" -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
+    $response = Invoke-WebRequest -Uri "http://localhost:5010/api/odds/status" -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
     Write-Host "✓ Scraper API: OK" -ForegroundColor Green
 } catch {
     Write-Host "⚠️  Scraper API: Not responding (potrebbe essere in avvio)" -ForegroundColor Yellow
@@ -99,10 +100,11 @@ Write-Host "✅ WebApp Production Deployment Completed!" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "🌐 URLs:" -ForegroundColor Yellow
-Write-Host "  - Frontend:      http://localhost:8082"
-Write-Host "  - API Node.js:   http://localhost:8082/api"
-Write-Host "  - API Scraper:   http://localhost:8082/api/odds"
-Write-Host "  - Mongo Express: http://localhost:8088"
+Write-Host "  - Frontend:      http://localhost:8089"
+Write-Host "  - API Node.js:   http://localhost:8089/api"
+Write-Host "  - API Scraper:   http://localhost:8089/api/odds"
+Write-Host "  - Scraper diretto: http://localhost:5010"
+Write-Host "  - Mongo Express: http://localhost:8090"
 Write-Host ""
 Write-Host "📊 Useful commands:" -ForegroundColor Yellow
 Write-Host "  - Logs:          docker-compose -f docker-compose.prod.yml logs -f"
@@ -111,5 +113,5 @@ Write-Host "  - Scraper logs:  docker logs webapp_scraper -f"
 Write-Host "  - Stop:          docker-compose -f docker-compose.prod.yml down"
 Write-Host ""
 Write-Host "🧪 Test scraper:" -ForegroundColor Yellow
-Write-Host "  Invoke-WebRequest -Uri http://localhost:8082/api/odds/fantasy-betfair"
+Write-Host "  Invoke-WebRequest -Uri http://localhost:8089/api/odds/fantasy-betfair"
 Write-Host ""

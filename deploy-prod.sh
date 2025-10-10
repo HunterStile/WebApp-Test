@@ -61,11 +61,12 @@ fi
 
 echo ""
 echo "📋 Configurazione:"
-echo "  - Nginx:        porta 8082"
-echo "  - Scraper API:  porta 5001 (Flask + Selenium + Chrome)"
-echo "  - Server API:   porta 5000 (Node.js)"
-echo "  - MongoDB:      porta 27022"
-echo "  - Mongo Express: porta 8088"
+echo "  - Nginx:         porta 8089 (8088 già occupata)"
+echo "  - Scraper API:   porta 5010 (5000-5007 occupate)"
+echo "  - Server API:    porta 5011 (interno)"
+echo "  - Client React:  porta 3010 (3000-3009 occupate)"
+echo "  - MongoDB:       porta 27022"
+echo "  - Mongo Express: porta 8090 (8088 già occupata)"
 echo ""
 
 # Ferma e rimuove i container esistenti
@@ -101,14 +102,14 @@ echo ""
 echo -e "${YELLOW}🏥 Health checks:${NC}"
 
 # Check Nginx
-if curl -sf http://localhost:8082/health > /dev/null 2>&1; then
+if curl -sf http://localhost:8089/health > /dev/null 2>&1; then
     echo -e "${GREEN}✓ Nginx: OK${NC}"
 else
     echo -e "${RED}✗ Nginx: FAIL${NC}"
 fi
 
 # Check Scraper
-if curl -sf http://localhost:5001/api/odds/status > /dev/null 2>&1; then
+if curl -sf http://localhost:5010/api/odds/status > /dev/null 2>&1; then
     echo -e "${GREEN}✓ Scraper API: OK${NC}"
 else
     echo -e "${YELLOW}⚠️  Scraper API: Not responding (potrebbe essere in avvio)${NC}"
@@ -126,10 +127,11 @@ echo -e "${GREEN}✅ WebApp Production Deployment Completed!${NC}"
 echo "=========================================="
 echo ""
 echo "🌐 URLs:"
-echo "  - Frontend:     http://localhost:8082"
-echo "  - API Node.js:  http://localhost:8082/api"
-echo "  - API Scraper:  http://localhost:8082/api/odds"
-echo "  - Mongo Express: http://localhost:8088"
+echo "  - Frontend:      http://localhost:8089"
+echo "  - API Node.js:   http://localhost:8089/api"
+echo "  - API Scraper:   http://localhost:8089/api/odds"
+echo "  - Scraper diretto: http://localhost:5010"
+echo "  - Mongo Express: http://localhost:8090"
 echo ""
 echo "📊 Useful commands:"
 echo "  - Logs:         docker-compose -f docker-compose.prod.yml logs -f"
@@ -138,5 +140,5 @@ echo "  - Scraper logs: docker logs webapp_scraper -f"
 echo "  - Stop:         docker-compose -f docker-compose.prod.yml down"
 echo ""
 echo "🧪 Test scraper:"
-echo "  curl http://localhost:8082/api/odds/fantasy-betfair"
+echo "  curl http://localhost:8089/api/odds/fantasy-betfair"
 echo ""

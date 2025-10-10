@@ -1,0 +1,35 @@
+# Ignore Windows ChromeDriver
+chromedriver.exe
+
+# Ignore Linux ChromeDriver locale
+chromedriver
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore test files
+test_*.py
+*_test.py
+
+# Ignore logs
+*.log
+
+# Ignore environment files
+.env
+.env.local

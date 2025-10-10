@@ -83,15 +83,10 @@ def get_fantasy_betfair_odds():
         thread.start()
     
     if odds_cache['data']:
-        return jsonify({
-            'success': True,
-            'data': odds_cache['data'],
-            'cached_at': odds_cache['timestamp'].isoformat() if odds_cache['timestamp'] else None,
-            'is_scraping': odds_cache['is_scraping']
-        })
+        # Return only the opportunities array for frontend compatibility
+        return jsonify(odds_cache['data']['opportunities'])
     else:
         return jsonify({
-            'success': False,
             'message': 'Data not available yet. Scraping in progress...',
             'is_scraping': odds_cache['is_scraping']
         }), 202  # 202 Accepted - processing

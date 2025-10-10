@@ -135,7 +135,8 @@ router.get('/major-leagues', async (req, res) => {
 
 // Route per ottenere le quote di Fantasy Team e Betfair Exchange
 router.get('/fantasy-betfair', async (req, res) => {
-  const FLASK_API_URL = 'http://localhost:5001';
+  // In Docker, usa il nome del container invece di localhost
+  const FLASK_API_URL = process.env.FLASK_API_URL || 'http://scraper:5001';
 
   try {
     // Check cache first
@@ -145,8 +146,10 @@ router.get('/fantasy-betfair', async (req, res) => {
       return res.json(cachedData);
     }
 
-    console.log('Fetching Fantasy Team / Betfair data from Flask API...');
-    const response = await axios.get(`${FLASK_API_URL}/api/odds/fantasy-betfair`);
+    console.log(`Fetching Fantasy Team / Betfair data from Flask API at ${FLASK_API_URL}...`);
+    const response = await axios.get(`${FLASK_API_URL}/api/odds/fantasy-betfair`, {
+      timeout: 30000 // 30 second timeout
+    });
 
     if (response.data.success) {
       const opportunities = response.data.data.opportunities;
@@ -182,11 +185,13 @@ router.get('/fantasy-betfair', async (req, res) => {
 
 // Route per forzare il refresh dei dati Fantasy Team / Betfair
 router.post('/fantasy-betfair/refresh', async (req, res) => {
-  const FLASK_API_URL = 'http://localhost:5001';
+  const FLASK_API_URL = process.env.FLASK_API_URL || 'http://scraper:5001';
 
   try {
     console.log('Requesting Fantasy Team / Betfair data refresh...');
-    const response = await axios.post(`${FLASK_API_URL}/api/odds/refresh`);
+    const response = await axios.post(`${FLASK_API_URL}/api/odds/refresh`, {}, {
+      timeout: 5000
+    });
     
     // Clear cache
     cache.del('fantasy_betfair_odds');
@@ -206,10 +211,12 @@ router.post('/fantasy-betfair/refresh', async (req, res) => {
 
 // Route per ottenere lo stato dello scraper
 router.get('/fantasy-betfair/status', async (req, res) => {
-  const FLASK_API_URL = 'http://localhost:5001';
+  const FLASK_API_URL = process.env.FLASK_API_URL || 'http://scraper:5001';
 
   try {
-    const response = await axios.get(`${FLASK_API_URL}/api/odds/status`);
+    const response = await axios.get(`${FLASK_API_URL}/api/odds/status`, {
+      timeout: 5000
+    });
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching scraper status:', error.message);

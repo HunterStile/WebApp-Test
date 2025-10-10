@@ -38,9 +38,11 @@ class OddsScraper:
         chrome_options.add_argument('--disable-software-rasterizer')
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
-        # Use local chromedriver (Windows: chromedriver.exe, Linux: chromedriver)
+        # Use local chromedriver with fallback to system installation
+        # Priorità: 1) Directory locale, 2) /usr/local/bin (Docker), 3) System PATH
         chromedriver_path_win = os.path.join(os.path.dirname(__file__), 'chromedriver.exe')
         chromedriver_path_linux = os.path.join(os.path.dirname(__file__), 'chromedriver')
+        chromedriver_system = '/usr/local/bin/chromedriver'  # Docker installation path
         
         if os.path.exists(chromedriver_path_win):
             print(f"✅ Usando ChromeDriver locale (Windows): {chromedriver_path_win}")
@@ -50,8 +52,12 @@ class OddsScraper:
             print(f"✅ Usando ChromeDriver locale (Linux): {chromedriver_path_linux}")
             service = Service(chromedriver_path_linux)
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        elif os.path.exists(chromedriver_system):
+            print(f"✅ Usando ChromeDriver di sistema (Docker): {chromedriver_system}")
+            service = Service(chromedriver_system)
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
         else:
-            print("⚠️ ChromeDriver locale non trovato, usando driver di sistema...")
+            print("⚠️ ChromeDriver non trovato nei percorsi locali, usando driver di sistema dal PATH...")
             self.driver = webdriver.Chrome(options=chrome_options)
         
         # Nascondi proprietà Selenium/WebDriver

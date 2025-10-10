@@ -1,4 +1,23 @@
 services:
+  # Flask API + Selenium Scraper
+  scraper:
+    container_name: webapp_scraper
+    build:
+      context: ./
+      dockerfile: scraper/Dockerfile
+    ports:
+      - "5001:5001"  # Flask API
+    volumes:
+      - ./scraper:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=development
+    restart: unless-stopped
+    networks:
+      - webapp-network
+    # Aumenta shared memory per Chrome
+    shm_size: 2gb
+
   # Nginx interno per gestire il routing  
   nginx:
     container_name: webapp_nginx
@@ -11,6 +30,7 @@ services:
     depends_on:
       - webapp_server
       - webapp_client
+      - scraper
     restart: unless-stopped
     networks:
       - webapp-network

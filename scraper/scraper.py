@@ -38,15 +38,20 @@ class OddsScraper:
         chrome_options.add_argument('--disable-software-rasterizer')
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
-        # Use local chromedriver.exe
-        chromedriver_path = os.path.join(os.path.dirname(__file__), 'chromedriver.exe')
+        # Use local chromedriver (Windows: chromedriver.exe, Linux: chromedriver)
+        chromedriver_path_win = os.path.join(os.path.dirname(__file__), 'chromedriver.exe')
+        chromedriver_path_linux = os.path.join(os.path.dirname(__file__), 'chromedriver')
         
-        if os.path.exists(chromedriver_path):
-            print(f"✅ Usando ChromeDriver locale: {chromedriver_path}")
-            service = Service(chromedriver_path)
+        if os.path.exists(chromedriver_path_win):
+            print(f"✅ Usando ChromeDriver locale (Windows): {chromedriver_path_win}")
+            service = Service(chromedriver_path_win)
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        elif os.path.exists(chromedriver_path_linux):
+            print(f"✅ Usando ChromeDriver locale (Linux): {chromedriver_path_linux}")
+            service = Service(chromedriver_path_linux)
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
         else:
-            print("⚠️ chromedriver.exe non trovato, usando driver di sistema...")
+            print("⚠️ ChromeDriver locale non trovato, usando driver di sistema...")
             self.driver = webdriver.Chrome(options=chrome_options)
         
         # Nascondi proprietà Selenium/WebDriver

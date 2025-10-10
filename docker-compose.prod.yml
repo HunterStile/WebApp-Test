@@ -1,4 +1,27 @@
 services:
+  # Flask API + Selenium Scraper (Produzione)
+  scraper:
+    container_name: webapp_scraper_prod
+    build:
+      context: ./
+      dockerfile: scraper/Dockerfile
+    expose:
+      - "5001"  # Solo esposto internamente
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+    restart: always
+    networks:
+      - webapp-network
+    # Aumenta shared memory per Chrome
+    shm_size: 2gb
+    # Opzionale: limita risorse
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
   # Nginx per servire file statici e proxy API
   nginx:
     container_name: webapp_nginx_prod
@@ -12,6 +35,7 @@ services:
     depends_on:
       - webapp_server
       - react_builder
+      - scraper
     restart: always
     networks:
       - webapp-network

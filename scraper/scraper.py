@@ -74,21 +74,27 @@ class OddsScraper:
             # STEP 1: Accetta cookies
             print("   🍪 Cerco popup cookies...")
             try:
-                # Cerca il bottone ACCETTA nei cookies (id="ctlOOSButton3")
-                accept_btn = self.driver.find_element(By.ID, "ctlOOSButton3")
+                # Cerca il nuovo ID del bottone ACCETTA (id="ConfirmCookie")
+                accept_btn = self.driver.find_element(By.ID, "ConfirmCookie")
                 accept_btn.click()
                 print("   ✓ Cookies accettati")
                 time.sleep(10)  # Attendi 10 secondi per far apparire il popup promo
             except:
-                # Prova selettori alternativi
+                # Prova selettori alternativi (vecchio ID o altri)
                 try:
-                    accept_btn = self.driver.find_element(By.CSS_SELECTOR, "input[value='ACCETTA']")
+                    accept_btn = self.driver.find_element(By.ID, "ctlOOSButton3")
                     accept_btn.click()
-                    print("   ✓ Cookies accettati (alt)")
-                    time.sleep(10)  # Attendi 10 secondi
+                    print("   ✓ Cookies accettati (vecchio ID)")
+                    time.sleep(10)
                 except:
-                    print("   ⚠️ Popup cookies non trovato o già accettato")
-                    time.sleep(5)  # Attendi comunque un po'
+                    try:
+                        accept_btn = self.driver.find_element(By.CSS_SELECTOR, "input[value='ACCETTA']")
+                        accept_btn.click()
+                        print("   ✓ Cookies accettati (CSS)")
+                        time.sleep(10)
+                    except:
+                        print("   ⚠️ Popup cookies non trovato o già accettato")
+                        time.sleep(5)  # Attendi comunque un po'
             
             # STEP 2: Chiudi popup promozione
             print("   🔔 Cerco popup promozione...")
@@ -475,7 +481,7 @@ class OddsScraper:
                     ('cc-fifa', 'FIFA'),
                     ('cc-eur', 'Europa'),
                     ('cc-it', 'Italia'), 
-                    ('cc-gb', 'Inghilterra'),
+                    ('cc-en', 'Inghilterra'),  # Cambiato da cc-gb a cc-en
                     ('cc-es', 'Spagna'),
                     ('cc-de', 'Germania'),
                     ('cc-fr', 'Francia'),
@@ -486,8 +492,14 @@ class OddsScraper:
                 for flag_class, nation_name in nations_to_click:
                     try:
                         # Cerca il link della nazione con la flag
-                        nation_link = self.driver.find_element(By.XPATH, 
-                            f"//span[contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
+                        # Prova prima con span.flag
+                        try:
+                            nation_link = self.driver.find_element(By.XPATH, 
+                                f"//span[contains(@class, 'flag') and contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
+                        except:
+                            # Fallback: cerca solo la classe flag
+                            nation_link = self.driver.find_element(By.XPATH, 
+                                f"//span[contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
                         
                         print(f"\n[INFO] [{nation_name}] Espando menu...")
                         

@@ -11,13 +11,255 @@
     }
   },
   {
+    "home_team": "SERIE A",
+    "away_team": "Reyer Venezia",
+    "commence_time": "OGGI 20:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.5,
+      "X": 5.3,
+      "2": 5.3
+    }
+  },
+  {
+    "home_team": "Fulham FC",
+    "away_team": "Arsenal",
+    "commence_time": "OGGI 18:30\n16",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 8.6,
+      "X": 4.5,
+      "2": 1.53
+    }
+  },
+  {
+    "home_team": "Tottenham",
+    "away_team": "Aston Villa",
+    "commence_time": "DOMANI 15:00\n16",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.16,
+      "X": 3.8,
+      "2": 3.85
+    }
+  },
+  {
+    "home_team": "Liverpool",
+    "away_team": "Manchester United",
+    "commence_time": "DOMANI 17:30\n16",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.68,
+      "X": 4.7,
+      "2": 5.7
+    }
+  },
+  {
+    "home_team": "West Ham United",
+    "away_team": "Brentford",
+    "commence_time": "20/10/2025 21:00\n14",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.66,
+      "X": 3.6,
+      "2": 3.0
+    }
+  },
+  {
+    "home_team": "Premier League 20",
+    "away_team": "Arsenal",
+    "commence_time": "24/05/2026 17:30",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.06,
+      "X": 4.3,
+      "2": 5.9
+    }
+  },
+  {
+    "home_team": "CHAMPIONSHIP",
+    "away_team": "Coventry City",
+    "commence_time": "0:0\nIntervallo\n10",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.6,
+      "X": 4.9,
+      "2": 7.8
+    }
+  },
+  {
+    "home_team": "CHAMPIONSHIP",
+    "away_team": "Norwich",
+    "commence_time": "0:0\nIntervallo\n10",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.76,
+      "X": 3.8,
+      "2": 2.86
+    }
+  },
+  {
+    "home_team": "CHAMPIONSHIP",
+    "away_team": "Sheffield United",
+    "commence_time": "0:0\nIntervallo\n10",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.28,
+      "X": 3.65,
+      "2": 3.95
+    }
+  },
+  {
+    "home_team": "CHAMPIONSHIP",
+    "away_team": "Leicester City",
+    "commence_time": "OGGI 20:45\n14",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.68,
+      "X": 4.6,
+      "2": 6.8
+    }
+  },
+  {
+    "home_team": "Manresa",
+    "away_team": "Gran Canaria",
+    "commence_time": "OGGI 18:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.94,
+      "X": 2.2,
+      "2": 2.2
+    }
+  },
+  {
+    "home_team": "Andorra",
+    "away_team": "Basquet Girona",
+    "commence_time": "OGGI 19:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.78,
+      "X": 2.56,
+      "2": 2.56
+    }
+  },
+  {
+    "home_team": "Tenerife",
+    "away_team": "UCAM Murcia",
+    "commence_time": "OGGI 20:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.42,
+      "X": 3.9,
+      "2": 3.9
+    }
+  },
+  {
+    "home_team": "Saragozza",
+    "away_team": "Breogan",
+    "commence_time": "OGGI 21:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.78,
+      "X": 6.8,
+      "2": 6.8
+    }
+  },
+  {
+    "home_team": "BBL POKAL",
+    "away_team": "Baskets Oldenburg",
+    "commence_time": "OGGI 18:30",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.38,
+      "X": 1.86,
+      "2": 1.86
+    }
+  },
+  {
+    "home_team": "BBL POKAL",
+    "away_team": "Mitteldeutscher BC",
+    "commence_time": "OGGI 20:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.63,
+      "X": 3.0,
+      "2": 3.0
+    }
+  },
+  {
+    "home_team": "LNB ELITE",
+    "away_team": "SIG Strasbourg",
+    "commence_time": "OGGI 18:00",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.2,
+      "X": 1.99,
+      "2": 1.99
+    }
+  },
+  {
+    "home_team": "LNB ELITE",
+    "away_team": "Le Portel",
+    "commence_time": "OGGI 18:10",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.8,
+      "X": 2.46,
+      "2": 2.46
+    }
+  },
+  {
+    "home_team": "LNB ELITE",
+    "away_team": "Sluc Nancy Basket",
+    "commence_time": "OGGI 18:20",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.24,
+      "X": 2.62,
+      "2": 2.62
+    }
+  },
+  {
+    "home_team": "LNB ELITE",
+    "away_team": "Cholet Basket",
+    "commence_time": "OGGI 18:30",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.57,
+      "X": 3.2,
+      "2": 3.2
+    }
+  },
+  {
+    "home_team": "LNB ELITE",
+    "away_team": "Le Mans Sarthe Basket",
+    "commence_time": "OGGI 20:30",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 1.89,
+      "X": 2.32,
+      "2": 2.32
+    }
+  },
+  {
+    "home_team": "EREDIVISIE",
+    "away_team": "NEC Nimega",
+    "commence_time": "0:0\n06' 1° tempo\n14",
+    "bookmaker": "Betflag Exchange",
+    "odds": {
+      "1": 2.98,
+      "X": 4.1,
+      "2": 2.68
+    }
+  },
+  {
     "home_team": "EREDIVISIE",
     "away_team": "PSV Eindhoven",
     "commence_time": "OGGI 18:45\n14",
     "bookmaker": "Betflag Exchange",
     "odds": {
       "1": 1.29,
-      "X": 8.0,
+      "X": 8.2,
       "2": 12.0
     }
   },
@@ -39,7 +281,7 @@
     "bookmaker": "Betflag Exchange",
     "odds": {
       "1": 2.18,
-      "X": 4.1,
+      "X": 4.2,
       "2": 3.75
     }
   },
@@ -49,7 +291,7 @@
     "commence_time": "OGGI 21:00\n14",
     "bookmaker": "Betflag Exchange",
     "odds": {
-      "1": 2.04,
+      "1": 2.08,
       "X": 3.95,
       "2": 4.5
     }
@@ -62,7 +304,7 @@
     "odds": {
       "1": 3.1,
       "X": 4.0,
-      "2": 2.58
+      "2": 2.6
     }
   },
   {
@@ -71,9 +313,9 @@
     "commence_time": "DOMANI 14:30\n14",
     "bookmaker": "Betflag Exchange",
     "odds": {
-      "1": 2.46,
+      "1": 2.44,
       "X": 3.85,
-      "2": 3.4
+      "2": 3.35
     }
   },
   {
@@ -82,7 +324,7 @@
     "commence_time": "DOMANI 14:30\n14",
     "bookmaker": "Betflag Exchange",
     "odds": {
-      "1": 1.93,
+      "1": 1.91,
       "X": 4.1,
       "2": 4.8
     }
@@ -93,9 +335,9 @@
     "commence_time": "DOMANI 16:45\n14",
     "bookmaker": "Betflag Exchange",
     "odds": {
-      "1": 8.6,
-      "X": 6.2,
-      "2": 1.49
+      "1": 8.4,
+      "X": 6.0,
+      "2": 1.43
     }
   }
 ]

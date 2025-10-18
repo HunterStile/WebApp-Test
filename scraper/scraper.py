@@ -492,14 +492,17 @@ class OddsScraper:
                 for flag_class, nation_name in nations_to_click:
                     try:
                         # Cerca il link della nazione con la flag
-                        # Prova prima con span.flag
+                        # Trova il menu calcio (mhs-1) PRIMA di cercare la nazione
+                        calcio_menu = self.driver.find_element(By.ID, "mhs-1")
+                        
+                        # Cerca il link della nazione SOLO DENTRO il menu calcio
                         try:
-                            nation_link = self.driver.find_element(By.XPATH, 
-                                f"//span[contains(@class, 'flag') and contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
+                            nation_link = calcio_menu.find_element(By.XPATH, 
+                                f".//span[contains(@class, 'flag') and contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
                         except:
                             # Fallback: cerca solo la classe flag
-                            nation_link = self.driver.find_element(By.XPATH, 
-                                f"//span[contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
+                            nation_link = calcio_menu.find_element(By.XPATH, 
+                                f".//span[contains(@class, '{flag_class}')]/ancestor::a[contains(@onclick, 'menuNation')]")
                         
                         print(f"\n[INFO] [{nation_name}] Espando menu...")
                         
@@ -524,16 +527,34 @@ class OddsScraper:
                             
                             # Cerca le competizioni dentro (onclick="setMan")
                             competitions = parent_li.find_elements(By.CSS_SELECTOR, "a[onclick*='setMan']")
-                            print(f"   � Trovate {len(competitions)} competizioni")
+                            print(f"   ✅ Trovate {len(competitions)} competizioni (calcio)")
                             
-                            for comp in competitions[:5]:  # Limite a 5 competizioni per nazione
+                            if len(competitions) == 0:
+                                print(f"   ⚠️ Nessuna competizione trovata per {nation_name}")
+                                continue
+                            
+                            for idx, comp in enumerate(competitions[:5], 1):  # Limite a 5 competizioni per nazione
                                 try:
                                     comp_name = comp.text.strip()
                                     if not comp_name:
+                                        # Prova a ottenere il testo con JavaScript
+                                        comp_name = self.driver.execute_script("return arguments[0].textContent;", comp).strip()
+                                    
+                                    if not comp_name or len(comp_name) < 2:
+                                        print(f"   ⚠️ Competizione {idx} ha nome vuoto, skip")
                                         continue
                                     
-                                    print(f"   🔹 Apertura {comp_name}...")
-                                    comp.click()
+                                    print(f"   🔹 Apertura {comp_name} ({idx}/{len(competitions[:5])})...")
+                                    
+                                    # Scroll e click
+                                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", comp)
+                                    time.sleep(1)
+                                    
+                                    try:
+                                        self.driver.execute_script("arguments[0].click();", comp)
+                                    except:
+                                        comp.click()
+                                    
                                     time.sleep(4)
                                     
                                     # STEP: Loop per caricare TUTTE le pagine di partite
